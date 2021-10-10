@@ -1,0 +1,2000 @@
+════════════════════════════════════════   SCREEN 037
+(                        <12/20/85>317) 
+                                        
+                                        
+VARIABLE TT                             
+CODE T                                  
+\ SEC, TT LDA, # 1 SBC, TT STA,         
+\ CS NOT                                
+\ IF, TT 1+ DEC, THEN,                  
+  TT DEC, 0=                            
+  IF, TT 1+ DEC, THEN,                  
+                                        
+  NEXT JMP, C;                          
+                                        
+: Z T TT @ . ;                          
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 038
+( FORGET OLD METACOMPILER<12/20/85>318) 
+                                        
+                                        
+FORGET METACOMPILER                     
+FORGET !CSP                             
+                                        
+' <ABORT> CFA ' ABORT !                 
+' <ABORT> CFA ' BRK-RETN !              
+                                        
+\ next load ProDOS file writer          
+                                        
+QUIT                                    
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 039
+( NOTES                  <11/13/87> 39) 
+                                        
+                                        
+                                        
+360 LOAD -- Write to ProDOS disks       
+320 LOAD -- Load meta compiler          
+383 LOAD -- Create forth loader         
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 040
+( ASSEMBLER FOR 6502 BY: <12/18/89>320) 
+( WM. F. RAGSDALE, FORTH DIMENSIONS   ) 
+( VOL. III, NO. 5, P. 143             ) 
+HEX                                     
+FORGET METASTART                        
+: METASTART ;                           
+                                        
+VOCABULARY ASSEMBLER IMMEDIATE          
+ASSEMBLER DEFINITIONS                   
+                                        
+: IS CONSTANT ;                         
+                                        
+ 800    IS COLD                         
+ 0F0    IS N       N 0A + IS XSAVE      
+ N 0B + IS IP      N 0E + IS W          
+                                        
+  VARIABLE INDEX  1E ALLOT              
+  VARIABLE MODE                         
+                                        
+DECIMAL -->                             
+                                        
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 041
+( ASSEMBLER CONT         <12/18/89>321) 
+HEX                                     
+: .A  0 MODE ! ;    : #  1 MODE ! ;     
+                                        
+: MEM  2 MODE ! ;                       
+                                        
+: ,X  3 MODE ! ;   : ,Y  4 MODE ! ;     
+                                        
+: X)  5 MODE ! ;   : )Y  6 MODE ! ;     
+                                        
+: )  F MODE ! ;   : BOT  0 ,X ;         
+                                        
+: SEC  2 ,X ;      : TOP  BOT ;         
+                                        
+: RP) 101 ,X ;                          
+                                        
+: UPMODE                                
+   IF MODE C@ 8 AND 0=                  
+    IF 8 MODE +!                        
+   THEN THEN                            
+  1 MODE C@ F AND ?DUP                  
+   IF 0 DO DUP + LOOP THEN              
+   OVER 1+ @ AND 0= ;                   
+DECIMAL -->                    ( bobp ) 
+════════════════════════════════════════   SCREEN 042
+( ASSEMBLER CONT         <12/18/89>322) 
+HEX                                     
+                                        
+: CPU  CREATE C, DOES> C@ C, MEM ;      
+                                        
+00 CPU BRK,        18 CPU CLC,          
+D8 CPU CLD,        58 CPU CLI,          
+B8 CPU CLV,        CA CPU DEX,          
+88 CPU DEY,        E8 CPU INX,          
+C8 CPU INY,        EA CPU NOP,          
+48 CPU PHA,        08 CPU PHP,          
+68 CPU PLA,        28 CPU PLP,          
+40 CPU RTI,        60 CPU RTS,          
+38 CPU SEC,        F8 CPU SED,          
+78 CPU SEI,        AA CPU TAX,          
+A8 CPU TAY,        BA CPU TSX,          
+8A CPU TXA,        9A CPU TXS,          
+98 CPU TYA,                             
+                                        
+DECIMAL -->                             
+                                        
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 043
+( ASSEMBLER CONT         <12/18/89>323) 
+HEX                                     
+                                        
+: M/CPU  CREATE C, , DOES>              
+   DUP 1+ C@ 80 AND                     
+    IF 10 MODE +! THEN                  
+   OVER -100 AND UPMODE UPMODE          
+    ABORT" INCORRECT ADDRESSING MODE"   
+   C@ MODE C@ INDEX + C@ + C,           
+   MODE C@ 7 AND                        
+    IF MODE C@ 0F AND 7 <               
+     IF C, ELSE , THEN                  
+    THEN MEM ;                          
+                                        
+1C6E 60 M/CPU ADC,   1C6E 20 M/CPU AND, 
+1C6E C0 M/CPU CMP,   1C6E 40 M/CPU EOR, 
+1C6E A0 M/CPU LDA,   1C6E 00 M/CPU ORA, 
+1C6E E0 M/CPU SBC,   1C6C 80 M/CPU STA, 
+0D0D 01 M/CPU ASL,   0C0C C1 M/CPU DEC, 
+0C0C E1 M/CPU INC,   0D0D 41 M/CPU LSR, 
+0D0D 21 M/CPU ROL,   0D0D 61 M/CPU ROR, 
+DECIMAL -->                             
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 044
+( ASSEMBLER CONT         <12/18/89>324) 
+HEX                                     
+                                        
+0414 81 M/CPU STX,   0486 E0 M/CPU CPX, 
+0486 C0 M/CPU CPY,   1496 A2 M/CPU LDX, 
+0C8E A0 M/CPU LDY,   048C 80 M/CPU STY, 
+0480 14 M/CPU JSR,   8480 40 M/CPU JMP, 
+0484 20 M/CPU BIT,                      
+                                        
+: NOT  20 + ;   90 IS CS    50 IS OV    
+                                        
+  D0 IS 0=   10 IS 0<   90 IS >=        
+                                        
+DECIMAL -->                             
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 045
+( ASSEMBLER CONT         <12/18/89>325) 
+HEX                                     
+                                        
+0909 INDEX !        1505 INDEX 2+ !     
+0115 INDEX 4 + !    8011 INDEX 6 + !    
+8009 INDEX 8 + !    1D0D INDEX A + !    
+8019 INDEX C + !    8080 INDEX E + !    
+0080 INDEX 10 + !   1404 INDEX 12 + !   
+8014 INDEX 14 + !   8080 INDEX 16 + !   
+8080 INDEX 18 + !   1C0C INDEX 1A + !   
+801C INDEX 1C + !   2C80 INDEX 1E + !   
+                                        
+: !CSP  SP@ CSP ! ;                     
+: #LO   0FF AND # ;                     
+: #HI   0 100 U/MOD SWAP DROP # ;       
+                                        
+FORTH DEFINITIONS  DECIMAL CR CR        
+                                        
+: !CSP  SP@ CSP ! ;                     
+: IS CONSTANT ;                         
+-->                                     
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 046
+(                        <12/18/89>326) 
+                                        
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 047
+( LONG OPERS             <12/18/89>327) 
+-->                                     
+HEX                                     
+                                        
+: <LONG> ( seg addr -- )                
+   DUP D000 U< NOT                      
+   IF SWAP 0= SWAP B000 - THEN ;        
+                                        
+: @L <LONG> @L ;                        
+: !L <LONG> @L ;                        
+                                        
+: RWTSL                                 
+   >R >R >R >R >R >R <LONG>             
+   R> R> R> R> R> R> RWTSL ;            
+                                        
+: CMOVEL                                
+   >R DSWAP <LONG> DSWAP <LONG> R>      
+   CMOVEL ;                             
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 048
+( BOB'S DEFINITIONS      <12/18/89>328) 
+                                        
+                                        
+CREATE GBUFF 300 ALLOT                  
+                                        
+: ? @ . ;                               
+                                        
+: E-B EMPTY-BUFFERS ;                   
+                                        
+-->                                     
+                                        
+                                        
+: MYBREAK SP! RP! R2-W2 <ABORT> ;       
+                                        
+: MYBOOT  MODE40 L40 <ABORT> ;          
+                                        
+                                        
+' MYBREAK CFA ' BRK-RETN !              
+' MYBOOT CFA  ' ABORT !                 
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 049
+( BOB'S DEFINITIONS      <12/18/89>329) 
+                                        
+HEX                                     
+\ Used by graphics package.             
+\ Must be defined here because of       
+\ stupid design of metacompiler         
+\ which doesn't allow code words        
+\ to reference newly-defined constants. 
+                                        
+E4 CONSTANT GBASE     ( >Y address )    
+E6 CONSTANT GPATTERN  ( >pattern   )    
+E8 CONSTANT GFIG      ( >fig data  )    
+                                        
+: /LO 0FF AND ;                         
+: /HI 0 100 U/MOD SWAP DROP ;           
+                                        
+FORTH DEFINITIONS                       
+                                        
+: METACOMPILER ;                        
+                                        
+DECIMAL -->                             
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 050
+( METACMPLR INSTRUCTIONS <12/18/89>330) 
+FORTH DEFINITIONS FORGET-SYS            
+FORGET METACOMPILER                     
+CREATE METACOMPILER                     
+                                        
+VARIABLE HDS?                           
+1 HDS? !                                
+                                        
+?LONG                                   
+                                        
+-->                                     
+                                        
+: COMPILE-NO-HDS 0 HDS? ! 51 LOAD ;     
+                                        
+: COMPILE-HDS 1 HDS? ! 51 LOAD ;        
+                                        
+COMPILE-HDS CR QUIT                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 051
+( METACMPLR PARAMETERS   <12/18/89>331) 
+HEX  1F ' WIDTH !                       
+FORTH DEFINITIONS FORGET-SYS            
+: CMPL-TYP ;                            
+                                        
+ 0800 CONSTANT BASE-ADDR    ?DOSL       
+   01 ' COMP-SEG !                      
+ 0800 ' COMP-ADDR !                     
+                                        
+ COMP-ADDR BASE-ADDR - CONSTANT DELTA   
+     DVARIABLE NEW-SYS                  
+ COMP-SEG BASE-ADDR NEW-SYS D!          
+ 0 IS *TABLE*                           
+ 0 IS *<.">*          0 IS *<ABORT">*   
+ 0 IS *DODOES*        0 IS *DOES>*      
+ 0 IS *COLON*         0 IS *VOCAB*      
+ 0 IS *<;CODE>*       0 IS *CONSTANT*   
+ 0 IS *DCONSTANT*     0 IS *VARIABLE*   
+ 0 IS *DVARIABLE*     0 IS *CREATE*     
+ ' LIT CFA IS *LIT*                     
+ ' LIT CFA IS OF*LIT* 0 IS NF*LIT*      
+DECIMAL -->                             
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 052
+( METACOMPILER VARIABLES <12/18/89>332) 
+                                        
+ VOCABULARY NEWFORTH IMMEDIATE          
+                                        
+: OF/NF                                 
+   [COMPILE] NEWFORTH DEFINITIONS       
+   [COMPILE] FORTH ;                    
+                                        
+( VARIABLE DPNEW )   VARIABLE DPOLD     
+  VARIABLE MOVEFLG   VARIABLE O/N       
+  VARIABLE DPBUILD                      
+  VARIABLE WORDBUILD    2000 ALLOT      
+                                        
+ COMP-ADDR DPNEW !                      
+ WORDBUILD DPBUILD !                    
+                                        
+: !NEW COMP-SEG SWAP !L ;               
+: C!NEW COMP-SEG SWAP C!L ;             
+: @NEW COMP-SEG SWAP @L ;               
+                                        
+-->                                     
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 053
+( META: SETOLD SETNEW    <12/18/89>333) 
+                                        
+: SETOLD  O/N @                         
+   IF 0 O/N !                           
+      HERE DPBUILD !                    
+      DPOLD @ DP !                      
+      OF*LIT* [ ' *LIT* ] LITERAL !     
+   THEN ;                               
+                                        
+: SETNEW  O/N @ 0=                      
+   IF 1 O/N !                           
+      HERE DPOLD !                      
+      DPBUILD @ DP !                    
+      NF*LIT* [ ' *LIT* ] LITERAL !     
+   THEN ;                               
+                                        
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 054
+( META: MOVEWORD? STATUS?<12/18/89>334) 
+                                        
+: MOVEWORD?                             
+   MOVEFLG @                            
+   IF 0 MOVEFLG ! SETOLD GET:CS         
+      WORDBUILD COMP-SEG DPNEW @        
+      DPBUILD @ WORDBUILD - ?DUP        
+      IF DUP DPNEW +! 2000 OVER U<      
+ABORT" WORDBUILD SPACE EXCEEDED - HALT" 
+         CMOVEL WORDBUILD DPBUILD !     
+      ELSE DDROP DDROP                  
+   THEN THEN ;                          
+                                        
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 055
+( APPENDIX variables     <12/18/89>335) 
+HEX                                     
+4010 CONSTANT APP-START   \ app ker st  
+ B80 ' APP-HSTART !       \ app head st 
+1B80 CONSTANT MAIN-HSTART \ mn head st  
+DECIMAL                                 
+                                        
+VARIABLE HLAST ( LFA for next word )    
+( VARIABLE HDP   ( adr of next head )   
+  0 HLAST !                             
+  MAIN-HSTART HDP !                     
+VARIABLE APP-DPNEW                      
+VARIABLE APP-LAST                       
+VARIABLE APP-HDP                        
+  0           APP-LAST !                
+  APP-START   APP-DPNEW !               
+  APP-HSTART  APP-HDP !                 
+VARIABLE OLD-HDP                        
+VARIABLE OLD-DPNEW                      
+VARIABLE OLD-LAST                       
+  0           OLD-DPNEW !               
+                                        
+-->                                     
+                                        
+════════════════════════════════════════   SCREEN 056
+( APPENDIX               <12/18/89>336) 
+                                        
+: STATUS?                               
+ MOVEWORD? SETNEW SETOLD CR CR          
+  ." DPNEW = " DPNEW @ U. CR            
+  ." HDP   = " HDP @ U. CR              
+  ." APP-DPNEW = " APP-DPNEW @ U. CR    
+  ." APP-HDP   = " APP-HDP @ U. CR      
+  ." DPOLD = " DPOLD @ U. CR            
+  ." SIZE  = " DPNEW @ 2048 - U. CR CR  
+;                                       
+                                        
+: APPENDIX                              
+  OLD-DPNEW @ 0= \ don't allow twice    
+  IF MOVEWORD?                          
+     DPNEW @ OLD-DPNEW !                
+     HLAST @ OLD-LAST !                 
+     HDP @ OLD-HDP !                    
+     APP-DPNEW @ DPNEW !                
+     APP-HDP @ HDP !                    
+     APP-LAST @ HLAST !                 
+  THEN                                  
+; IMMEDIATE                             
+-->                                     
+════════════════════════════════════════   SCREEN 057
+( MAIN                   <12/18/89>337) 
+                                        
+: MAIN                                  
+  OLD-DPNEW @    \ don't allow twice    
+  IF MOVEWORD?                          
+     DPNEW @ APP-DPNEW !                
+     HLAST @ APP-LAST !                 
+     HDP   @ APP-HDP !                  
+     OLD-DPNEW @ DPNEW !                
+     OLD-LAST @ HLAST !                 
+     OLD-HDP @ HDP !                    
+     0 OLD-DPNEW ! \ set flag           
+  THEN                                  
+; IMMEDIATE                             
+                                        
+                                        
+                                        
+                                        
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 058
+( FIRST-APP-WORD         <12/18/89>338) 
+ ( lfa of 1st word in appendix )        
+VARIABLE APP-1ST                        
+VARIABLE APP-BLINK ( lfa of APP-LINK1)  
+VARIABLE APP-TLINK ( lfa of APP-LINK2)  
+                                        
+: FIRST-APP-WORD ( -- )                 
+ ( save LFA of last word as 1st in app) 
+  HLAST @ APP-1ST ! ;                   
+                                        
+: APP-BOTTOM-LINK ( -- )                
+ ( save LFA of last word as bot link )  
+  HLAST @ APP-BLINK ! ;                 
+                                        
+: APP-TOP-LINK                          
+ ( save LFA of next word as top link )  
+  HLAST @ APP-TLINK ! ;                 
+                                        
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 059
+( META: NFFIND 'NF       <12/18/89>339) 
+HEX                                     
+                                        
+ VARIABLE <IMMED> 38 ALLOT              
+ <IMMED> 2+ <IMMED> !                   
+                                        
+: /SMUDGE                               
+   <IMMED> @ <IMMED> 2+                 
+   DO I @ 20 TOGGLE 2 +LOOP ;           
+                                        
+: NFFIND                                
+   BL WORD [ ' NEWFORTH ]               
+   LITERAL @ 2+ 1 <<FIND> ;             
+                                        
+: 'NF                                   
+   /SMUDGE NFFIND DUP                   
+   IF SWAP DROP THEN                    
+   /SMUDGE 0=                           
+   IF HERE COUNT TYPE ."   NF?"         
+      QUIT                              
+   THEN ;                               
+                                        
+DECIMAL -->                             
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 060
+( META: BYTE:IN REPL:BY  <12/18/89>340) 
+                                        
+: REPLACED:BY                           
+  'NF CFA @  SWAP !NEW ;                
+                                        
+: BYTE:IN                               
+   MOVEWORD?  'NF CFA @ DELTA + 2+ + ;  
+                                        
+: [FROM:NEWFORTH]                       
+   'NF CFA @ , ;  IMMEDIATE             
+                                        
+-->                                     
+                                        
+: LFA:IN                                
+  'NF DUP CFA @ DELTA + 2+ SWAP         
+   DUP LFA - - ;                        
+                                        
+: NFA:IN                                
+   'NF DUP CFA @ DELTA + 2+ SWAP        
+   DUP NFA - - ;                        
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 061
+( META: CREATE-OLD HERERU<12/18/89>341) 
+HEX                                     
+                                        
+: CREATE-OLD                            
+   SETOLD HERE 0 , BL WORD              
+   DUP C@ WIDTH MIN 1+ ALLOT 80 TOGGLE  
+   HERE 1- 80 TOGGLE                    
+   DP C@ 0FF =                          
+   IF DUP  DUP 1+  1 DP +!              
+      HERE OVER - BMOVE                 
+      1+                                
+   THEN                                 
+   [COMPILE] NEWFORTH DEFINITIONS       
+   CURRENT @ @ OVER !                   
+   CURRENT @ ! ;                        
+                                        
+: HERERUN                               
+   HERE WORDBUILD -                     
+   DPNEW @ + DELTA - ;                  
+                                        
+DECIMAL -->                             
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 062
+( HEAD-ADJ               <12/18/89>342) 
+                                        
+HEX ( meta compile head address)        
+9000 ' HEAD-LOAD !                      
+DECIMAL MAIN                            
+: HEAD>CA ( ra -- ca )                  
+   ( convert head "run" adr )           
+   ( to head "compile" adr )            
+  APP-HSTART - HEAD-LOAD + ;            
+                                        
+: LFA>NFA ( lfa -- nfa ) 4 + ;          
+                                        
+: !HEADS ( v ra --, store to head spc)  
+   HEAD>CA 1 SWAP !L ;                  
+: @HEADS ( ra --, store to head spc)    
+   HEAD>CA 1 SWAP @L ;                  
+                                        
+: RELINK-APPENDIX                       
+ ( APP-LINK2 points to top of appen )   
+  APP-LAST @ APP-TLINK @ !HEADS         
+ ( bot of appen points to APP-LINK1 )   
+   APP-BLINK @ APP-1ST @ !HEADS ;       
+-->                                     
+                                        
+════════════════════════════════════════   SCREEN 063
+( SPLIT-HEAD TOG-LAST-NFA<12/18/89>343) 
+VARIABLE MAIN-PFA                       
+                                        
+: SPLIT-HEAD                            
+   ( this head returns this value )     
+   HERERUN 2+ MAIN-PFA !                
+   >IN @ HERE >R                        
+   HLAST @ , \ this LFA pts to last LFA 
+   HDP @ HLAST ! \ this is now last     
+   MAIN-PFA @ , ( head CFA pts to PFA ) 
+   BL WORD                              
+   DUP C@ WIDTH MIN 1+ ALLOT            
+   128 TOGGLE                           
+   HERE 1- 128 TOGGLE                   
+   0 R@            ( source seg adr)    
+   1 HDP @ HEAD>CA ( dest seg adr )     
+   HERE R@ - DUP HDP +! ( cnt )         
+ ( R@ LFA>NFA + ID. CR )                
+   CMOVEL                               
+                                        
+   R> DP ! >IN ! ;                      
+                                        
+                                        
+-->                                     
+════════════════════════════════════════   SCREEN 064
+( META: CREATE-NEW       <12/18/89>344) 
+                                        
+: CREATE-NEW                            
+   MOVEWORD? 1 MOVEFLG !                
+   WORDBUILD DPBUILD ! SETNEW           
+   ( cfa can't span pages )             
+   HERERUN 255 AND 255 =                
+   IF 0 C, THEN                         
+   HDS? @                               
+   IF SPLIT-HEAD THEN                   
+;                                       
+                                        
+: HEADS-ON 1 HDS? ! ;                   
+: HEADS-OFF 0 HDS? ! ;                  
+                                        
+: TOG-LAST-NFA ( val -- )               
+   1 HLAST @ LFA>NFA HEAD>CA C@L XOR    
+   1 HLAST @ LFA>NFA HEAD>CA C!L ;      
+                                        
+                                        
+-->                                     
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 065
+( lfa of things          <12/18/89>345) 
+                                        
+( LFA or words needed by metacompiler)  
+VARIABLE X-LFA ( null word )            
+                                        
+( lfa of bottom word in ROOT )          
+VARIABLE BOT-ROOT                       
+( lfa of 1st word AFTER ROOT )          
+VARIABLE TOP-ROOT                       
+                                        
+                                        
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 066
+( NVLIST                 <12/18/89>346) 
+                                        
+: NVLIST ( -- )                         
+   HLAST @ ?DUP 0=                      
+   IF EXIT THEN                         
+   CR CR                                
+   BEGIN                                
+    1 OVER HEAD>CA                      
+    0 PAD 40 CMOVEL                     
+    ( this ) 5 U.R ." : "               
+    PAD @ 6 U.R                         
+    PAD 2+ @ 6 U.R SPACE                
+    PAD 4 + ID. CR                      
+    PAD @ DUP 0=                        
+    PAUSE ?TERMINAL OR                  
+   UNTIL                                
+   DROP ;                               
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 067
+( META: assembler stuff  <12/18/89>347) 
+HEX                                     
+ASSEMBLER DEFINITIONS                   
+                                        
+: ?RANGE                                
+   DUP ABS 7F >                         
+   ABORT" BRANCH TOO LARGE" ;           
+                                        
+: ADJUST                                
+   WORDBUILD - DPNEW @ + DELTA - ;      
+                                        
+: BEGIN,  HERE 1 ;                      
+                                        
+: UNTIL,                                
+   >R 1 ?PAIRS R> C, HERE 1+ -          
+    ?RANGE C, ;                         
+                                        
+: IF,  C, HERE 0 C, 2 ;                 
+                                        
+                                        
+DECIMAL -->                             
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 068
+( META: assembler stuff  <12/18/89>348) 
+                                        
+: THEN,                                 
+   2 ?PAIRS HERE OVER C@                
+   IF ADJUST SWAP !                     
+   ELSE OVER 1+ - ?RANGE SWAP C!        
+   THEN ;                               
+                                        
+: ELSE,                                 
+   2 ?PAIRS HERE 1+ 1 JMP, SWAP         
+   HERE OVER 1+ - ?RANGE SWAP C! 2 ;    
+                                        
+: AGAIN,  1 ?PAIRS ADJUST JMP, ;        
+                                        
+: WHILE,  >R DUP 1 ?PAIRS R> IF, 2+ ;   
+                                        
+: REPEAT,                               
+   >R >R 1 ?PAIRS ADJUST                
+   JMP, R> R> 2- THEN, ;                
+                                        
+-->                                     
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 069
+( META: NF: NF; LITERAL  <12/18/89>349) 
+HEX    FORTH DEFINITIONS                
+                                        
+: NF:                                   
+   !CSP CREATE-OLD SMUDGE               
+   [ ' QUIT CFA @ ] LITERAL ,           
+   [COMPILE] FORTH ]                    
+   LATEST 40 TOGGLE ; ( IMMEDIATE )     
+                                        
+: NF;                                   
+   ?CSP COMPILE EXIT SMUDGE             
+   [COMPILE] [ ; IMMEDIATE              
+                                        
+: LITERAL  STATE @                      
+   IF *LIT* , , THEN ; IMMEDIATE        
+                                        
+: DLITERAL  STATE @                     
+   IF SWAP                              
+      [COMPILE] LITERAL                 
+      [COMPILE] LITERAL                 
+   THEN ; IMMEDIATE                     
+                                        
+DECIMAL -->                             
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 070
+( META: INTERPRET QUIT   <12/18/89>350) 
+                                        
+: INTERPRET                             
+   BEGIN  BL WORD                       
+      CONTEXT @ @ 2+ 1 <<FIND>          
+      IF STATE @ <                      
+         IF CFA O/N @ IF @ THEN ,       
+         ELSE CFA EXECUTE THEN          
+      ELSE                              
+         HERE NUMBER DPL @ 1+           
+         IF [COMPILE] DLITERAL          
+         ELSE DROP [COMPILE] LITERAL    
+      THEN THEN ?STACK                  
+   AGAIN  ;                             
+                                        
+: QUIT                                  
+   0 BLK ! [COMPILE] [                  
+   BEGIN  RP! CR QUERY INTERPRET        
+      STATE @ 0= IF ."  NK" THEN        
+   AGAIN ;                              
+                                        
+                                        
+-->                                     
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 071
+( META: LOAD -->         <12/18/89>351) 
+                                        
+VARIABLE ?STAT 1 ?STAT !                
+                                        
+: DP?                                   
+   ?STAT @                              
+   IF CR .                              
+      BASE @ >R HEX                     
+      DPNEW @ U.                        
+      APP-DPNEW @ U.                    
+      DEPTH IF CR ." STACK = " .S THEN  
+      R> BASE !                         
+   ELSE . THEN ;                        
+                                        
+: -->                                   
+   ?LOADING  0 >IN ! 1 BLK +!           
+   BLK @ DP? BLK @ SCR ! ; IMMEDIATE    
+                                        
+: METACOMPILE ( scr -- )                
+   DUP >R DP? R>                        
+   BLK @ >R >IN @ >R 0 >IN ! BLK !      
+   INTERPRET R> >IN ! R> BLK ! ;        
+                                        
+-->                            ( bobp ) 
+════════════════════════════════════════   SCREEN 072
+( META: 'NEW LABEL       <12/18/89>352) 
+HEX                                     
+: IMMEDIATE                             
+   MOVEWORD?                            
+   40 TOG-LAST-NFA                      
+   LATEST <IMMED> @ !                   
+   2 <IMMED> +! SMUDGE ;                
+                                        
+: CFANEW  CFA @ ;                       
+                                        
+: 'NEW                                  
+   'NF CFANEW 2+ [COMPILE] LITERAL ;    
+                                        
+: LABEL                                 
+   SETNEW HERERUN SETOLD  1 MOVEFLG !   
+   CURRENT @ >R                         
+   [COMPILE] ASSEMBLER DEFINITIONS      
+   CONSTANT                             
+   R> CURRENT ! SETNEW ;                
+                                        
+DECIMAL                                 
+-->                                     
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 073
+( META: CODE C; NFALLOT  <12/18/89>353) 
+                                        
+: START-ASM                             
+   [COMPILE] ASSEMBLER                  
+   ASSEMBLER MEM !CSP ; FORTH           
+                                        
+: CODE                                  
+   >IN @ CREATE-NEW >IN !               
+   HERERUN CREATE-OLD , SMUDGE SETNEW   
+   HERERUN 2+ , START-ASM ;             
+                                        
+: C;  ?CSP SMUDGE [COMPILE] FORTH ;     
+                                        
+: END-CODE  C; ;                        
+                                        
+: NFALLOT                               
+   MOVEWORD? 1 MOVEFLG !                
+   WORDBUILD DPBUILD !                  
+   SETNEW [COMPILE] FORTH               
+   HERE OVER 0 FILL DP +!               
+   MOVEWORD? SETNEW ;                   
+-->                                     
+                                        
+                                        
+════════════════════════════════════════   SCREEN 074
+( META: CONSTANT VARIABLE<12/18/89>354) 
+                                        
+: CONSTANT                              
+   >IN @ CREATE-NEW >IN !  HERERUN      
+   *CONSTANT* , SWAP ,                  
+   CREATE-OLD , SETNEW                  
+   [COMPILE] FORTH ;                    
+                                        
+: DCONSTANT                             
+   >IN @ CREATE-NEW >IN !  HERERUN      
+   *DCONSTANT* ,                        
+   ROT ROT , ,                          
+   CREATE-OLD , SETNEW                  
+   [COMPILE] FORTH ;                    
+                                        
+: VARIABLE                              
+   >IN @ CREATE-NEW >IN !  HERERUN      
+   *VARIABLE* , 0 ,                     
+   CREATE-OLD , SETNEW                  
+   [COMPILE] FORTH ;                    
+                                        
+-->                                     
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 075
+( META: CREATE DVAR VOC  <12/18/89>355) 
+HEX                                     
+: CREATE                                
+   >IN @ CREATE-NEW >IN !  HERERUN      
+   *CREATE* ,                           
+   CREATE-OLD , SETNEW                  
+   [COMPILE] FORTH ;                    
+                                        
+: DVARIABLE                             
+   >IN @ CREATE-NEW >IN !  HERERUN      
+   *DVARIABLE* , 0 , 0 ,                
+   CREATE-OLD , SETNEW                  
+   [COMPILE] FORTH ;                    
+                                        
+: VOCABULARY                            
+   >IN @ CREATE-NEW >IN !  HERERUN      
+   *VOCAB* ,                            
+   0 ( LAST @ DELTA - ) ,               
+   A081 , 0 , HLAST @ 4 + ,             
+   CREATE-OLD , SETNEW                  
+   [COMPILE] FORTH ;                    
+                                        
+DECIMAL -->                             
+                                        
+════════════════════════════════════════   SCREEN 076
+( META: :                <12/18/89>356) 
+HEX                                     
+                                        
+: :  >IN @  CREATE-NEW >IN !  HERERUN   
+    *COLON* ,                           
+    CREATE-OLD , SMUDGE SETNEW ] !CSP ; 
+                                        
+NF: OF/NF                               
+    [COMPILE] NEWFORTH DEFINITIONS      
+    [COMPILE] FORTH NF;                 
+                                        
+  ' QUIT 2 - ' 'NF 24 + !               
+   0 'NF OF/NF LFA !                    
+                                        
+OF/NF DECIMAL FORTH DEFINITIONS         
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 080
+( PRODOS-R/W             <11/20/89>360) 
+CREATE PRODOS L40                       
+: L L40 ;                               
+                                        
+\ Sec #s for prodos block from          
+\ "Apple ProDOS: Advanced Features.."   
+\ by Gary B. Little, P. 254             
+                                        
+CREATE PTRAN                            
+   0 C, 14 C, 13 C, 12 C, 11 C, 10 C,   
+   9 C,  8 C,  7 C,  6 C,  5 C,  4 C,   
+   3 C,  2 C,  1 C, 15 C,               
+                                        
+\ vars to avoid stack confusion         
+0 CONSTANT PSLT                         
+0 CONSTANT PDR                          
+0 CONSTANT PTRK                         
+0 CONSTANT PR/W                         
+                                        
+-->                                     
+                                        
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 081
+( PRODOS-R/W             <11/20/89>361) 
+\ This routine given a prodos "blk"     
+\ number will read or write it from the 
+\ disk in slt drv to/from adr           
+                                        
+\ ** ONLY WORKS WITH 5.25" FLOPPIES **  
+: PRODOS-R/W ( ADR BLK SLT DRV R/W -- ) 
+  DEPTH 5 < ABORT" 5 ARGS NEEDED"       
+  ' PR/W ! ' PDR ! ' PSLT !             
+  DUP 280 U< NOT                        
+  ABORT" ProDOS BLK# out of range!"     
+  \ compute real track/sector for blk#  
+  8 /MOD ' PTRK !                       
+  \ adr of table entry for relative sec 
+  2* PTRAN + >R                         
+  \ read/write the first half           
+  DUP PSLT PDR R@ C@ PTRK PR/W 1 RWTS   
+  \ only read 2nd if no error on 1st    
+  DISK-ERROR @ 0=                       
+  IF \ read the second half             
+   256 + PSLT PDR R> 1+ C@              
+   PTRK PR/W 1 RWTS                     
+  ELSE R> DDROP \ Clean stack           
+  THEN ; -->                   ( bobp ) 
+════════════════════════════════════════   SCREEN 082
+( PD-DRV PD-SLT PDOS-R/W <11/20/89>362) 
+                                        
+\ These constants define the slot/drive 
+\ where a PRODOS related functions      
+\ occur                                 
+                                        
+7 CONSTANT PD-SLT                       
+0 CONSTANT PD-DRV                       
+                                        
+\ ProDOS r/w that uses above constants  
+: PDOS-R/W ( ADR BLK R/W -- )           
+  >R PD-SLT PD-DRV R> PRODOS-R/W ;      
+                                        
+                                        
+\ general purpose ProDOS buffer         
+\ used as needed                        
+                                        
+CREATE PD-BUF 512 ALLOT                 
+                                        
+                                        
+-->                                     
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 083
+( @VBITMAP               <11/20/89>363) 
+                                        
+0 CONSTANT VBM-BLK \ location of VBM    
+0 CONSTANT VBM-ADR \ load address       
+0 CONSTANT #BLOCKS \ #blocks in device  
+\ read the volume bit map               
+: @VBITMAP ( ADR -- )                   
+   ' VBM-ADR !                          
+   \ read volume directory              
+   VBM-ADR 2 1 PDOS-R/W                 
+   \ see how many blocks on the device  
+   VBM-ADR 41 + @ DUP ' #BLOCKS !       
+   4095  > \ VBM must be on 1 block     
+   ABORT" Volume has too many blocks"   
+   \ find out where bit map starts      
+   VBM-ADR 39 + @ ' VBM-BLK !           
+   VBM-ADR VBM-BLK 1 PDOS-R/W ;         
+                                        
+\ store the volume bit map              
+: !VBITMAP ( -- )                       
+   VBM-ADR VBM-BLK 0 PDOS-R/W ;         
+                                        
+-->                                     
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 084
+( @BIT !BIT              <11/20/89>364) 
+                                        
+CREATE ^2S                              
+  128 C, 64 C, 32 C, 16 C,              
+  8 C, 4 C, 2 C, 1 C,                   
+                                        
+CODE ^BIT ( BIT ADR -- ADR MSK )        
+\ >R 8 /MOD R> +                        
+\ SWAP ^2S + C@ ;                       
+  SEC LDA, # 7 AND,                     
+  TAY, ( index to mask )                
+  CLC, SEC 1+ ROR, SEC ROR,             
+  CLC, SEC 1+ ROR, SEC ROR,             
+  CLC, SEC 1+ ROR, SEC ROR,             
+  CLC, BOT LDA, SEC ADC, SEC STA,       
+  BOT 1+ LDA, SEC 1+ ADC, SEC 1+ STA,   
+  ^2S ,Y LDA, BOT STA,                  
+  # 0 LDA, BOT 1+ STA,                  
+  NEXT JMP,                             
+C;                                      
+                                        
+-->                                     
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 085
+( @BIT !BIT              <11/20/89>365) 
+                                        
+\ read a bit from an array starting     
+\ at address 7 is bit num 0             
+: @BIT ( BIT ADR -- )                   
+  ^BIT SWAP C@ AND 0= NOT ;             
+                                        
+\ store bit value to array              
+: !BIT ( VAL BIT ADR -- )               
+  ^BIT ROT                              
+  IF OVER C@ OR SWAP C!                 
+  ELSE 255 XOR                          
+    OVER C@ AND SWAP C!                 
+  THEN ;                                
+                                        
+                                        
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 086
+( @FREE-BLK#             <11/20/89>366) 
+                                        
+\ -- SCANS BUFFER READ BY @VBITMAP -- / 
+                                        
+\ Will scan ProDOS Volume bit map       
+\ and obtain the blk number of the      
+\ next open blk                         
+: @FREE-BLK# ( -- N/-1; -1 means none)  
+  -1 #BLOCKS 0                          
+  DO I VBM-ADR @BIT                     
+   IF DROP I LEAVE THEN                 
+  LOOP ;                                
+                                        
+\ return # blocks available on drive    
+: #FREE-BLKS ( -- N )                   
+  0 #BLOCKS 0                           
+  DO I VBM-ADR @BIT +                   
+  LOOP ;                                
+                                        
+\ mark block# as used in buffer         
+: !USED ( BLK# -- )                     
+  0 SWAP VBM-ADR !BIT ;                 
+                                        
+-->                            ( bobp ) 
+════════════════════════════════════════   SCREEN 087
+( .NAME                  <11/20/89>368) 
+                                        
+\ # of bytes per directory entry        
+0 CONSTANT BYTE/DIR                     
+\ # of directory entries per block      
+0 CONSTANT DIR/BLK                      
+                                        
+: .NAME ( ADR -- )                      
+   COUNT 15 AND TYPE ;                  
+                                        
+: .TYPE ( ADR -- )                      
+   DUP 16 + C@ DUP 255 =                
+   IF ."  SYS" ELSE DUP 252 =           
+    IF ."  BAS" ELSE DUP 6 =            
+     IF ."  BIN" ELSE DUP 4 .R          
+   THEN THEN THEN DROP ;                
+                                        
+: .CATNAME ( ADR -- )                   
+   .TYPE BASE @ >R HEX                  
+   DUP 21 + @ 5 .R                      
+   DUP 31 + @ 5 U.R SPACE               
+   R> BASE ! .NAME ;                    
+                                        
+-->                                     
+════════════════════════════════════════   SCREEN 088
+( FCB# ^FCB +FCB         <11/20/89>368) 
+                                        
+VARIABLE FCB# \ index to cur blk        
+VARIABLE LBLK# \ last block # read      
+                                        
+: @PBLK ( N -- ; read into PD-BUF )     
+   DUP LBLK# !                          
+   PD-BUF SWAP 1 PDOS-R/W ;             
+                                        
+: !PBLK ( -- ; store PD-BUF )           
+   PD-BUF LBLK# @ 0 PDOS-R/W ;          
+                                        
+\ return address in RAM of cur FCB      
+: ^FCB ( -- OFS )                       
+   FCB# @ BYTE/DIR * 4 + PD-BUF + ;     
+                                        
+: +FCB ( -- T/F; T=no more left )       
+   1 FCB# +! FCB# @ DIR/BLK >           
+   IF PD-BUF 2+ @ ?DUP \ more dir blks? 
+    IF @PBLK 0 FCB# !                   
+    ELSE 1 THEN                         
+   ELSE 0 THEN ;                        
+                                        
+-->                            ( bobp ) 
+════════════════════════════════════════   SCREEN 089
+( <CAT>                  <11/20/89>369) 
+                                        
+\ assumes PD-BUF contains the first     
+\ direcotory block (could be first      
+\ block of subdir as well)              
+\ it will then list N files/dirs        
+                                        
+: <CAT> ( N -- ; n=# files to list )    
+  1 FCB# ! ( skip over volume header )  
+  BEGIN DUP 0> \ files left?            
+  WHILE \ compute address in buffer     
+   ^FCB DUP C@ \ not deleted?           
+   IF .CATNAME CR 1-                    
+   ELSE DROP THEN                       
+   +FCB ABORT" <CAT> error"             
+  REPEAT                                
+  DROP ;                                
+                                        
+                                        
+-->                                     
+                                        
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 090
+( SET-INFO               <11/20/89>370) 
+                                        
+\ reads the volume directory            
+\ and sets appropriate constants        
+                                        
+: SET-INFO ( -- )                       
+  2 @PBLK \ get vol direc               
+  PD-BUF 35 + C@ ' BYTE/DIR !           
+  PD-BUF 36 + C@ ' DIR/BLK ! ;          
+                                        
+: CAT                                   
+  SET-INFO \ print header               
+  CR CR ." Volume: "                    
+  PD-BUF 4 + .NAME CR CR                
+  \ scan files                          
+  PD-BUF 37 + @ ( # files ) ?DUP        
+  IF ." TYP LEN  AUX  NAME" CR          
+   30 0 DO 45 EMIT LOOP CR              
+   <CAT>                                
+  ELSE ." No files" CR CR THEN          
+  CR CR ;                               
+                                        
+-->                                     
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 091
+( @FREE-FCB              <11/20/89>371) 
+                                        
+\ looks for an empty FCB to store a new 
+\ file name in returns true if one is   
+\ found will not expand directory       
+\ (leaves dir block in PD-BUF and       
+\  FCB# pointing to entry)              
+                                        
+: @FREE-FCB ( - T/F; T=empty FCB found) 
+  SET-INFO 1 FCB# ! \ read 1st dir blk  
+  BEGIN ^FCB C@ 0= NOT                  
+  WHILE +FCB                            
+   IF 0 EXIT THEN                       
+  REPEAT                                
+  \ ^FCB points to valid                
+  1                                     
+;                                       
+                                        
+                                        
+                                        
+-->                                     
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 092
+( PIND @PIND !PIND       <11/20/89>372) 
+                                        
+CREATE PIND 512 ALLOT                   
+VARIABLE PIND-BLK                       
+                                        
+CODE @PIND ( N -- V )                   
+  BOT LDY,                              
+  PIND ,Y LDA, BOT STA,                 
+  PIND 256 + ,Y LDA,                    
+  BOT 1+ STA,                           
+  NEXT JMP, C;                          
+                                        
+CODE !PIND ( V N -- )                   
+  BOT LDY,                              
+  SEC LDA, PIND ,Y STA,                 
+  SEC 1+ LDA,                           
+  PIND 256 + ,Y STA,                    
+  POPTWO JMP, C;                        
+                                        
+: SETPIND ( -- N )                      
+   PIND 512 0 FILL                      
+   @FREE-BLK# DUP PIND-BLK !            
+   DUP !USED ;                          
+-->                            ( bobp ) 
+════════════════════════════════════════   SCREEN 093
+( !FILE                  <11/20/89>373) 
+                                        
+CREATE FCB 50 ALLOT                     
+VARIABLE BSA   \ address                
+VARIABLE BSL   \ length                 
+VARIABLE BSN   \ #blocks used by        
+VARIABLE BSAUX \ Aux field contents     
+VARIABLE BSB#  \ current block #        
+                                        
+\ find empty block, write it, update    
+\ RAM volume bit map, inc pointer       
+: !BLK ( ADR -- ; find and store BLK )  
+   @FREE-BLK# DUP !USED                 
+   DUP BSB# @ !PIND                     
+   0 PDOS-R/W 1 BSB# +! ;               
+                                        
+\ write memory image to disk            
+: !FILE ( -- )                          
+   0 BSB# !                             
+   BEGIN BSL @ 0>                       
+   WHILE BSA @ !BLK                     
+    512 BSA +! -512 BSL +!              
+   REPEAT ;                             
+-->                            ( bobp ) 
+════════════════════════════════════════   SCREEN 094
+( MAKE-FCB               <11/20/89>374) 
+                                        
+\ create a FCB with name at ADR         
+\ and the type code passed              
+: MAKE-FCB ( ADR TYP -- )               
+   >R FCB 50 0 FILL    \ zero fcb       
+   FCB OVER C@ 1+ CMOVE \ move in name  
+   FCB C@ 32 OR FCB C! \ make sapling   
+   R> FCB 16 + C!      \ BIN file type  
+   SETPIND FCB 17 + !  \ KEY_POINTER    
+   BSN @   FCB 19 + !  \ BLOCKS_USED    
+   BSL @   FCB 21 + !  \ EOF            
+   0       FCB 23 + C! \ EOF byte 3     
+   195     FCB 30 + C! \ ACCESS         
+   BSAUX @ FCB 31 + !  \ AUX_TYPE       
+   2       FCB 37 + !  \ HEADER_POINTER 
+;                                       
+                                        
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 095
+( CLOSE-FILE             <11/20/89>375) 
+                                        
+\ finish writing the file               
+\ update directory, write FCB           
+: CLOSE-FILE ( -- )                     
+   @FREE-FCB NOT                        
+   ABORT" CLOSE error"                  
+   \ Copy in new FCB                    
+   FCB ^FCB BYTE/DIR CMOVE              
+   LBLK# @ 2 = \ inc file count         
+   IF 1 PD-BUF 37 + +! THEN             
+   !PBLK \ write out directory block    
+   LBLK# @ 2 = NOT                      
+   IF 2 @PBLK \  get volume dir         
+     1 PD-BUF 37 + +!                   
+     !PBLK THEN                         
+   \ write out index block              
+   PIND PIND-BLK @ 0 PDOS-R/W           
+   \ write volume bit map               
+   !VBITMAP                             
+;                                       
+                                        
+-->                                     
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 096
+( BSAVE                  <11/20/89>376) 
+\ see if room for file BSL bytes        
+: ?CANMAKE ( -- ; checks some things)   
+   @FREE-FCB 0=                         
+   ABORT" No FCB's available"           
+   FIRST 530 - @VBITMAP                 
+   BSL @ 0 512 U/MOD SWAP 0= NOT + 1+   
+   DUP BSN ! #FREE-BLKS >               
+   ABORT" No room on disk" ;            
+                                        
+: <BSAVE> ( ADR LEN AUX -- )            
+   BL WORD >R DEPTH 3 <                 
+   R@ C@ 0= OR R@ C@ 15 > OR            
+   ABORT" use: adr len ladr BSAVE name" 
+   BSAUX ! BSL ! BSA ! ?CANMAKE         
+   R> 6 MAKE-FCB \ set up BIN FCB       
+   !FILE CLOSE-FILE ;                   
+                                        
+: BSAVE ( ADR LEN -- )                  
+   OVER <BSAVE> ;                       
+                                        
+                                        
+-->                                     
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 097
+( NSYS-LEN               <11/20/89>378) 
+HEX                                     
+4000 CONSTANT AFT-HIRES                 
+   0 CONSTANT COMP-ADDR                 
+   1 CONSTANT COMP-SEG                  
+     VARIABLE DPNEW                     
+                                        
+: NSYS-LEN ( -- bytes )                 
+   ( calc num proDOS blocks for kern )  
+   DPNEW @ DUP 2000 U< NOT              
+   IF AFT-HIRES 2000 - - THEN           
+   COMP-ADDR - ;                        
+DECIMAL                                 
+                                        
+\ write kernel image to disk            
+: !KERN ( -- )                          
+   BEGIN BSL @ 0>                       
+   WHILE COMP-SEG BSA @ ( move to PAD ) 
+    GET:CS PAD 512 CMOVEL               
+    PAD !BLK                            
+    512 BSA +! -512 BSL +!              
+   REPEAT ;                             
+-->                                     
+                                        
+════════════════════════════════════════   SCREEN 098
+( PSAVE-NFORTH           <11/20/89>378) 
+HEX                                     
+                                        
+( use: PSAVE-NFORTH filename )          
+: PSAVE-NFORTH ( -- save image to file) 
+   BL WORD >R        ( name of file )   
+   800 BSA !         ( new adress )     
+   AFT-HIRES BSAUX ! ( new aux val )    
+   NSYS-LEN BSL !    ( new file len )   
+   ?CANMAKE                             
+   R> 0F8 MAKE-FCB   ( set up type F8 ) 
+   0 BSB# !                             
+   DPNEW @ 2000 U< NOT ( split? )       
+   IF 2000 COMP-ADDR - BSL !            
+    !KERN                               
+    AFT-HIRES BSA !                     
+    DPNEW @ AFT-HIRES - BSL ! !KERN     
+   ELSE !KERN                           
+   THEN                                 
+   CLOSE-FILE ;                         
+                                        
+DECIMAL -->                             
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 099
+( PSAVE-HEADS            <11/20/89>379) 
+HEX                                     
+0 CONSTANT APP-HSTART ( run start )     
+0 CONSTANT HEAD-LOAD  ( load start )    
+  VARIABLE HDP        ( run end )       
+                                        
+( use: PSAVE-HEADS filename )           
+: PSAVE-HEADS ( -- save heads to file)  
+   BL WORD >R         ( name of file )  
+   APP-HSTART BSA !   ( store address ) 
+   APP-HSTART BSAUX ! ( aux val )       
+   HDP @ APP-HSTART - BSL ! ( len )     
+   ?CANMAKE                             
+   R> 0F6 MAKE-FCB   ( set up type F6 ) 
+   0 BSB# !                             
+   HEAD-LOAD BSA ! ( from comp adr )    
+   !KERN                                
+   CLOSE-FILE ;                         
+                                        
+                                        
+DECIMAL -->                             
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 100
+( >FILE                  <11/20/89>380) 
+                                        
+VARIABLE TFS \ start block number       
+VARIABLE TFE \ end block number         
+                                        
+\ copy screens to the file              
+: >FILE ( -- )                          
+   0 BSB# !                             
+   BEGIN TFS @ TFE @ > NOT              
+   WHILE                                
+    TFS @ BLOCK DUP !BLK 512 + !BLK     
+    1 TFS +!                            
+   REPEAT                               
+;                                       
+                                        
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 101
+( TOFILE                 <11/20/89>381) 
+                                        
+\ use: S E TOFILE name                  
+\ creates a file "name" which           
+\ will contain block S to E             
+                                        
+: TOFILE ( S E -- )                     
+   BL WORD >R DEPTH 2 <                 
+   R@ C@ 0= OR R@ C@ 15 > OR            
+   ABORT" use: s e TOFILE name"         
+   DDUP > ABORT" wrong order"           
+   TFE ! TFS !                          
+   0 BSAUX ! \ aux field unused         
+   TFE @ TFS @ - 1+ 1024 * BSL ! \ len  
+   ?CANMAKE                             
+   R> 241 MAKE-FCB \ set up $F1 FCB     
+   >FILE CLOSE-FILE ;                   
+                                        
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 102
+(                        <11/20/89>382) 
+                                        
+CREATE METASTART                        
+                                        
+                                        
+                                        
+CR CR                                   
+." 320 LOAD to reload metacompiler"     
+CR CR                                   
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 103
+( PRODOS LOADER NOTES    <11/20/89>383) 
+FORGET METASTART                        
+CREATE METASTART                        
+--> --> --> --> --> --> --> --> --> --> 
+                                        
+The ProDOS forth loader consists of     
+a short program that is responsible     
+for loading the forth system from       
+the forth image file named in the       
+header.                                 
+                                        
+The first $1800 bytes in the file are   
+loaded at $800-$1FFF the remaining      
+is loaded to $????-$BEFF                
+                                        
+Loader follows the auto-run protocol    
+described in "Apple ProDOS" by Gary     
+Little on page 141. The auto-run name   
+is the file that is loaded              
+                                        
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 104
+( PRODOS LOADER NOTES    <11/22/89>384) 
+--> --> --> --> --> --> --> --> --> --> 
+                                        
+Since system programs are loaded at     
+$2000 and we need the hires graphics    
+pages the loader does not need to       
+be relocated.                           
+                                        
+The auxillary type code holds the       
+address where the second part of the    
+file will be loaded (if len>$1800)      
+                                        
+When loading is completed the program   
+branches to $800 to start the forth     
+kernel.                                 
+                                        
+                                        
+Loaded file must be type $F8 or this    
+loader will error out                   
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 105
+( LABEL WORDS            <11/20/89>385) 
+DECIMAL                                 
+ 208 CONSTANT PTR    \ zero page ptr    
+   0 CONSTANT LOAD-ADR                  
+8192 CONSTANT RUN-ADR                   
+                                        
+: ADJADR ( ADR -- ADR' )                
+  LOAD-ADR - RUN-ADR + ;                
+                                        
+: LABEL: ( -- )                         
+  [COMPILE] '                           
+  HERE ADJADR SWAP ! ;                  
+                                        
+: L: \ create a label                   
+  CREATE 0 ,                            
+  DOES> @ ?DUP 0=                       
+   ABORT" LABEL NOT SET" ;              
+                                        
+                                        
+: LO# 255 AND ;                         
+: HI# 0 256 U/MOD SWAP DROP ;           
+: " ( -- ) 34 WORD C@ 1+ ALLOT ;        
+                                        
+-->                            ( bobp ) 
+════════════════════════════════════════   SCREEN 106
+( LABELS                 <11/22/89>386) 
+HEX                                     
+                                        
+   0 CONSTANT RUNIT ( forward ref )     
+  L: COUT1        L: FAUX               
+  L: LOAD-ERR     L: MBUF               
+  L: REF#         L: FLEN               
+  L: CRLF         L: CTYPE              
+  L: PRNIB        L: PRHEX              
+  L: DIE          L: READ               
+  L: DIE-LOOP     L: LOADING            
+  L: OPENED                             
+                                        
+                                        
+: ]MBUF ( N -- ) MBUF + ;               
+                                        
+: CALL-MLI ( N -- )                     
+  ?NUM 20 C, 00 C, BF C, \ BF00 JSR,    
+  ( n ) C, MBUF , ;                     
+                                        
+DECIMAL -->                             
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 107
+( PLOADER                <12/20/85>387) 
+                                        
+HEX CREATE PLOADER                      
+  GET-A&E ASSEMBLER MEM !CSP            
+  HERE ' LOAD-ADR !                     
+                                        
+  0000 JMP,   \ patched later           
+  EE C, EE C, \ indentification bytes   
+  21 C,       \ buffer length           
+  HERE                                  
+  " NEW.I"       \ file to be loaded    
+  21 + DP !      \ allocate hole        
+DECIMAL                                 
+\ --- strings ---                       
+  LABEL: LOAD-ERR                       
+    " UNABLE TO LOAD, ERROR# $"         
+  LABEL: LOADING                        
+    " LOADING "                         
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 108
+( PLOADER                <11/22/89>388) 
+                                        
+\ ---- TABLES/VARIABLES ----            
+                                        
+\ This buffer is used to communicate    
+\ with the MLI routine. It is filled    
+\ with the proper parameters            
+                                        
+LABEL: MBUF \ Parameter table for       
+  14 ALLOT  \ MLI calls                 
+                                        
+LABEL: REF# \ file reference #          
+        0 C,                            
+LABEL: FLEN \ byte len of file          
+        0 C, 0 C,                       
+LABEL: FAUX \ auxillary code            
+        0 C, 0 C,                       
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 109
+( PLOADER                <11/22/89>389) 
+                                        
+\ Routines                              
+\ All routines that call the monitor    
+\ switch it in CALL, then back to bank1 
+                                        
+HEX LABEL: COUT1                        
+\ PHA, C082 LDA, PLA, \ Switch in ROM   
+  # 80 ORA,         \ set hi bit        
+  FDF0 JSR,         \ Call COUT1        
+\ C083 LDA,         \ switch to RAM     
+\ C083 LDA,         \ bank 1            
+  RTS,                                  
+DECIMAL                                 
+                                        
+LABEL: CTYPE    \ at pointed by PTR     
+  # 0 LDY, PTR )Y LDA, TAX, INY,        
+  BEGIN, PTR )Y LDA,                    
+   COUT1 JSR,                           
+   INY, DEX, 0=                         
+  UNTIL,                                
+  RTS,                                  
+                                        
+-->                            ( bobp ) 
+════════════════════════════════════════   SCREEN 110
+( PLOADER                <11/20/89>390) 
+                                        
+\ Routines cont.                        
+                                        
+LABEL: CRLF                             
+   # 13 LDA, COUT1 JSR,                 
+   # 10 LDA, COUT1 JMP,                 
+                                        
+LABEL: PRNIB \ print nibble             
+   # 15 AND, # 48 ORA,                  
+   # 58 CMP, 0< NOT                     
+   IF, CLC, # 7 ADC, THEN,              
+   COUT1 JMP,                           
+                                        
+LABEL: PRHEX \ print .A in hex          
+   PHA, CLC, .A ROR, .A ROR,            
+   .A ROR, .A ROR, PRNIB JSR,           
+   PLA, PRNIB JMP,                      
+                                        
+-->                                     
+                                        
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 111
+(                        <11/20/89>391) 
+HEX \ A=ProDOS error, X=Area iden byte  
+LABEL: DIE                              
+   PHA, TXA, PHA,                       
+   CRLF JSR, CRLF JSR,                  
+   # LOAD-ERR LO# LDA, PTR STA,         
+   # LOAD-ERR HI# LDA, PTR 1+ STA,      
+   CTYPE JSR,                           
+   PLA, PRHEX JSR, PLA, PRHEX JSR,      
+   CRLF JSR,                            
+LABEL: DIE-LOOP                         
+   DIE-LOOP JMP, \ infinite loop        
+                                        
+LABEL: READ                             
+   0CA CALL-MLI                         
+   CS IF, DIE JMP, THEN,                
+   \ read/requested len MUST match      
+   4 ]MBUF LDA, 6 ]MBUF CMP, 0=         
+   IF, 5 ]MBUF LDA, 7 ]MBUF CMP, THEN,  
+   0= NOT \ my error code               
+   IF, INX, # FF LDA, DIE JMP,          
+   THEN, RTS,                           
+DECIMAL -->                             
+                                        
+════════════════════════════════════════   SCREEN 112
+(                        <11/20/89>395) 
+HEX                                     
+\ JMP at 2000 branches here             
+    HERE ADJADR PLOADER 1+ !            
+    # 0FF LDX, TXS, \ Initialize STACK  
+    C082 LDA,       \ Switch in ROM     
+    0FC58 JSR,      \ home              
+    # 0 LDA, BFFC STA, \ IBAKVER = 0    
+    # 1 LDA, BFFD STA, \ IVERSION = 1   
+                                        
+\ check file type, auxillary            
+    # 0A LDA, 0 ]MBUF STA,              
+    # 06 LDA, 1 ]MBUF STA,              
+    # 20 LDA, 2 ]MBUF STA,              
+    0C4 CALL-MLI ( get info ) CS        
+    IF, # 90 LDX, DIE JMP, THEN,        
+    4 ]MBUF LDA, # 0F8 CMP, 0= NOT      
+    IF, # 91 LDX, DIE JMP, THEN,        
+    5 ]MBUF LDA, FAUX STA,              
+    6 ]MBUF LDA, FAUX 1+ STA,           
+                                        
+                                        
+DECIMAL -->                             
+                                        
+════════════════════════════════════════   SCREEN 113
+(                        <11/20/89>393) 
+HEX                                     
+\ type loading message                  
+    # LOADING LO# LDA, PTR STA,         
+    # LOADING HI# LDA, PTR 1+ STA,      
+    CTYPE JSR,                          
+    # 06 LDA, PTR STA,                  
+    # 20 LDA, PTR 1+ STA,               
+    CTYPE JSR, # 2E LDA,                
+    COUT1 JSR, COUT1 JSR, COUT1 JSR,    
+\ Now open the file to read             
+    # 3 LDA, 0 ]MBUF STA,               
+     \ Name in autorun buffer           
+    # 06 LDA, 1 ]MBUF STA,              
+    # 20 LDA, 2 ]MBUF STA,              
+     \ use $3000 as file buffer         
+    # 00 LDA, 3 ]MBUF STA,              
+    # 30 LDA, 4 ]MBUF STA,              
+    0C8 CALL-MLI ( OPEN ) CS            
+    IF, # 1 LDX, DIE JMP, THEN,         
+    5 ]MBUF LDA, REF# STA,              
+                                        
+DECIMAL -->                             
+                                        
+════════════════════════════════════════   SCREEN 114
+(                        <11/20/89>394) 
+HEX                                     
+                                        
+\ find file length                      
+    REF# LDA, 1 ]MBUF STA,              
+    # 2 LDA, 0 ]MBUF STA,               
+    0D1 CALL-MLI ( GET_EOF ) CS         
+    IF, # 2 LDX, DIE JMP, THEN,         
+                                        
+    4 ]MBUF LDA, 0= NOT \ hi byte<>0?   
+    IF, # 3 LDX, DIE JMP, THEN,         
+     \ save len in variable             
+    2 ]MBUF LDA, FLEN STA,              
+    3 ]MBUF LDA, FLEN 1+ STA,           
+                                        
+                                        
+DECIMAL -->                             
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 115
+(                        <12/22/85>395) 
+HEX                                     
+\ Now lets read the file part 1         
+  # 4 LDA, 0 ]MBUF STA,                 
+  REF# LDA, 1 ]MBUF STA,                
+   \ Read in starting at $800           
+  # 0 LDA, 2 ]MBUF STA,                 
+  # 8 LDA, 3 ]MBUF STA,                 
+   \ is File less $1800 bytes?          
+  FLEN 1+ LDA, # 18 CMP, 0<             
+  IF, \ yes, read entire file           
+   \ starting at $800                   
+   FLEN LDA, 4 ]MBUF STA,               
+   FLEN 1+ LDA, 5 ]MBUF STA,            
+   # 80 LDX, ( error # )                
+   READ JSR,                            
+   3333 JMP, HERE 2- ' RUNIT !          
+  THEN,                                 
+                                        
+DECIMAL -->                             
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 116
+(                        <12/22/85>396) 
+HEX                                     
+   \ no, read in the first part         
+   \ then read in the second part       
+   \ starting at AFT-HIRES              
+    \ read the first part to $800       
+   # 00 LDA, 4 ]MBUF STA,               
+   # 18 LDA, 5 ]MBUF STA,               
+   # 82 LDX, ( error # )                
+   READ JSR,                            
+    \ set 2nd load address              
+   FAUX LDA, 2 ]MBUF STA,               
+   FAUX 1+ LDA, 3 ]MBUF STA,            
+   FLEN LDA, 4 ]MBUF STA,               
+    \ compute remaining length          
+   FLEN 1+ LDA, SEC, # 18 SBC,          
+   5 ]MBUF STA,                         
+   # 84 LDX, ( error # )                
+   READ JSR,                            
+                                        
+                                        
+DECIMAL -->                             
+                                        
+                                        
+════════════════════════════════════════   SCREEN 117
+(                        <12/22/85>397) 
+                                        
+HEX                                     
+                                        
+  ( set forward jump )                  
+  HERE ADJADR RUNIT !                   
+                                        
+   \ close the file we just loaded      
+  # 1 LDA, 0 ]MBUF STA,                 
+  REF# LDA, 1 ]MBUF STA,                
+  0CC CALL-MLI CS  ( CLOSE )            
+  IF, # 4 LDX, DIE JMP, THEN,           
+                                        
+                                        
+\ *** !FILE IS NOW IN MEMORY! ***       
+  800 JMP, \ start it up!               
+                                        
+?CSP FORTH                              
+                                        
+DECIMAL -->                             
+                                        
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 118
+( SAVE-LOADER            <12/22/85>398) 
+                                        
+\ this command will write out           
+\ the loader to disk under the name     
+\ specified                             
+                                        
+: SAVE-LOADER                           
+   BL WORD DUP C@ DUP 15 > SWAP 0= OR   
+   ABORT" BAD FILE NAME" >R             
+   PLOADER BSA !           \ address    
+   HERE PLOADER - 1+ BSL ! \ len        
+   8192 BSAUX !            \ AUX_TYPE   
+   ?CANMAKE                \ ROOM?      
+   R> 255 MAKE-FCB         \ SYS        
+   !FILE                   \ !FILE      
+   CLOSE-FILE ;                         
+                                        
+CR CR                                   
+." SAVE-LOADER NEW.SYSTEM to save"      
+CR CR                                   
+                                        
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 119
+( LAST SCREEN            <11/20/89>399) 
+( BEFORE VIRTUALS                     ) 
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 

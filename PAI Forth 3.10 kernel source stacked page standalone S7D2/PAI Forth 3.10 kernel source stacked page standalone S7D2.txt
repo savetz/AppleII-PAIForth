@@ -1,0 +1,3475 @@
+════════════════════════════════════════   SCREEN 000
+: --> HDP @ U. APP-HDP @ U.             
+  [COMPILE] --> ; EXIT                  
+ ______________________________________ 
+                                        
+                                        
+       PAI FORTH 3.10 //e ProDOS        
+                                        
+                                        
+       Created November 11, 1989        
+    Last compiled February 20, 1991     
+                                        
+ ______________________________________ 
+                                        
+                                        
+  1. Boot metacompiler                  
+  2. 141 METACOMPILE this disk          
+  3. PSAVE-NFORTH to save kernel to PD  
+  4. PSAVE-HEADS to save heads to PD    
+                                        
+                                        
+                                        
+                                        
+(PD = ProDOS)                           
+                                        
+════════════════════════════════════════   SCREEN 001
+( NF: WORDS AT BEG. SORC <12/17/85>141) 
+HEX                                     
+6800 ' HEAD-LOAD !                      
+                                        
+6 ' WIDTH ! FORGET-SYS                  
+                                        
+NF: X BLK @                             
+   IF STATE @ ?STREAM                   
+   THEN R> DROP NF;                     
+80C0 'NF X NFA !                        
+                                        
+NF: ( [COMPILE] ( NF;                   
+NF: \ [COMPILE] \ NF;                   
+NF: GAP 0 , NF;                         
+NF: LITERAL [COMPILE] LITERAL NF;       
+NF: [COMPILE] [COMPILE] [FROM:NEWFORTH] 
+   NF;                                  
+DECIMAL  -->                            
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 002
+( NF: WORDS              < 2/17/85>142) 
+NF:  ;CODE  *<;CODE>* , HERERUN         
+   [COMPILE] ASSEMBLER ASSEMBLER MEM    
+   -2 CSP +! [COMPILE] [ NF;            
+                                        
+NF: ."  *<.">* , 34 WORD C@ 1+          
+   ALLOT NF;                            
+                                        
+NF: 'NEW 'NF CFANEW 2+ [COMPILE]        
+   LITERAL NF;                          
+                                        
+NF: DOES>  *<;CODE>* , 32 C,            
+           *DODOES* , NF;               
+                                        
+NF: ASSEMBLER [COMPILE] ASSEMBLER       
+   ASSEMBLER MEM NF;                    
+                                        
+NF: ABORT"  *<ABORT">* , 34 WORD        
+   C@ 1+ ALLOT NF;                      
+                                        
+NF: --> ?LOADING 0 >IN ! 1 BLK +!       
+   BLK @ DUP SCR ! . NF;                
+ -->                                    
+                               ( 13:33) 
+════════════════════════════════════════   SCREEN 003
+( START-ADDR <I.C. STACKS<12/16/85>143) 
+HEX                                     
+SETNEW ( INITIALIZE POINTERS )          
+                                        
+ASSEMBLER MEM                           
+( AAAA=altzp BBBB=JMP-TO, CCCC=RP! )    
+LABEL START-ADDR                        
+  CLD, AAAA JSR,                        
+  6C # LDA, W 1 - STA, 01 # LDY,        
+  BEGIN, BBBB ,Y LDA, IP ,Y STA, DEY,   
+  0< UNTIL, CCCC JMP,                   
+                                        
+LABEL JMP-TO 0 , MOVEWORD?              
+ JMP-TO START-ADDR DELTA + 0B + !NEW    
+                                        
+LABEL SETUP .A ASL, N 1 - STA,          
+  BEGIN, BOT LDA, N ,Y STA, INX, INY,   
+   N 1 - CPY, 0=                        
+  UNTIL, 00 # LDY, RTS,                 
+                                        
+DECIMAL  -->                            
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 004
+( LIT EXIT <EXIT>        <12/21/85>144) 
+                                        
+CODE LIT  IP )Y LDA, PHA, IP INC, 0=    
+  IF, IP 1+ INC, THEN, IP )Y LDA,       
+  IP INC, 0= IF, IP 1+ INC, THEN,       
+ LABEL PUSH DEX, DEX,                   
+ LABEL PUT BOT 1+ STA, PLA, BOT STA,    
+ LABEL NEXT                             
+( 2 INC, 0= )                           
+( IF, 3 INC, 0= )                       
+(  IF, 0 INC, 0= )                      
+(   IF, 1 INC, )                        
+( THEN, THEN, THEN, )                   
+  1 # LDY, IP )Y LDA, W 1+              
+  STA, DEY, IP )Y LDA, W STA, CLC,      
+  IP LDA, 2 # ADC, IP STA, CS           
+  IF, IP 1+ INC, THEN, W 1 - JMP, C;    
+CODE EXIT  PLA, IP STA,                 
+  PLA, IP 1+ STA, NEXT JMP, C;          
+CODE <EXIT> C;                          
+ 'NEW EXIT -2 BYTE:IN <EXIT> !NEW       
+ 'NEW LIT 2- ' NF*LIT* !                
+-->                                     
+                                        
+════════════════════════════════════════   SCREEN 005
+( transfer               <10/24/89>145) 
+HEX                                     
+( ** WARNING SELF MODIFYING CODE!! ** ) 
+( set N to source address )             
+( set N+2 to dest address )             
+( set N+4 to word count + 256 )         
+( set code to proper soft switches )    
+( RETURNS to RAMRD/RAMWRT/ALTZP OFF! )  
+CODE transfer                           
+   ( set to aux switches as requested)  
+   C002 STA, C004 STA,                  
+ ( C000 STA, ( 80STORE off )            
+   BEGIN, N )Y LDA, N 2+ )Y STA,        
+    INY, 0= ( next page? )              
+    IF, N 1+ INC, N 3 + INC, THEN,      
+    N 4 + DEC, 0=                       
+    IF, N 5 + DEC, THEN,                
+    0= UNTIL,                           
+   C002 STA, C004 STA, ( r/w main )     
+ ( C001 STA, ( 80STORE on )             
+   RTS, C;                              
+                                        
+DECIMAL -->                             
+                                        
+════════════════════════════════════════   SCREEN 006
+( get-gfig               <11/ 2/89>146) 
+HEX                                     
+( ** WARNING SELF MODIFYING CODE!! ** ) 
+( loads accum with byte at E4 )         
+( set get-gfig 1+ to 3 to read aux or   
+( 2 to read main memory )               
+( RETURNS to RAMRD/ALTZP OFF! )         
+                                        
+CODE get-gfig                           
+   C002 STA, ( set RAMRD )              
+ ( C000 STA, ( 80STORE off )            
+    \ get byte into accumulator         
+   0 # LDX, 0E4 X) LDA,                 
+    \ increment word memory pointer     
+   0E4 INC, 0=                          
+   IF, 0E5 INC, THEN,                   
+   C002 STA, ( RAMRD=MAIN )             
+ ( C001 STA, ( 80STORE on )             
+   RTS,                                 
+                                        
+DECIMAL -->                             
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 007
+( <<FIND> notes          <12/29/89>147) 
+                                        
+( HEAD-LFA is LFA in AUX:SEG of the )   
+( last word found with VOC-SEARCH )     
+                                        
+CODE HEAD-LFA C; ( make header )        
+  0 ,       ( set to CONSTANT later)    
+                                        
+-->                                     
+                                        
+This is based on <<FIND> used in the    
+previous version with the following     
+exceptions:                             
+                                        
+-- Moved to start of kernel so that it  
+   can exist in both banks              
+-- Addr of ROOT is patched in later     
+-- heads layout is: LFA PFA NFA         
+-- PFA is pointer to main memory        
+-- Returns val of PFA which is adr      
+   of body in main memory               
+-- Sets HEAD-LFA to LFA of head in aux  
+-- flag ignored                         
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 008
+( VOC-SEARCH             <12/20/85>148) 
+HEX                                     
+( here lfa -- [pfa n' 1] or [0] )       
+CODE VOC-SEARCH                         
+   ( if lfa is zero exit immediately )  
+  BOT LDA, BOT 1+ ORA, 0=               
+  IF, INX, INX,                         
+   BOT STA, BOT 1+ STA, NEXT JMP,       
+  THEN,                                 
+  XSAVE STX,                            
+   ( move name to $50 )                 
+  SEC LDA,  N STA,                      
+  SEC 1+ LDA, N 1+ STA,                 
+  # 0 LDY, N )Y LDA,                    
+  50 STA, # 1F AND, TAY,                
+  # 0 CPY, 0=                           
+  IF, INY, THEN,                        
+  BEGIN, N )Y LDA, 50 ,Y STA, DEY, 0=   
+  UNTIL,                                
+   ( count byte at $50 )                
+   ( name field starts at $51 )         
+DECIMAL -->                             
+                                        
+                                        
+════════════════════════════════════════   SCREEN 009
+( VOC-SEARCH cont        <12/29/89>149) 
+HEX                                     
+                                        
+( C000 STA, ( *** 80STORE off *** )     
+  C003 STA, ( *** RAMRD=AUX *** )       
+  BOT    LDA, N    STA,                 
+  BOT 1+ LDA, N 1+ STA,                 
+( n holds pointer to LFA of word )      
+( that is currently being tested )      
+( in auxillary seg )                    
+                                        
+DECIMAL -->                             
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 010
+( VOC-SEARCH cont        <12/29/89>150) 
+HEX                                     
+ BEGIN, 04 # LDY, N )Y LDA, 3F # AND,   
+  50 CMP, 0=  ( count equal? )          
+  IF,  ( yes, compare remaining bytes ) 
+   BEGIN, INY, N )Y LDA,                
+    4C ,Y EOR, .A ASL, 0= ( still=?)    
+   WHILE, CS ( end of word? )           
+    IF, XSAVE LDX, DEX, DEX, # 2 LDY,   
+      ( return PFA in main memory )     
+     N )Y LDA, SEC 2+ STA, INY,         
+     N )Y LDA, SEC 3 + STA, INY,        
+      ( copy count/flag, set flag )     
+     N )Y LDA, SEC STA,                 
+     0 # LDY, SEC 1+ STY,               
+     BOT 1+ STY, INY, BOT STY,          
+     C002 STA, ( *** RAMRD=MAIN *** )   
+   ( C001 STA, ( *** 80STORE on *** )   
+     N LDA, 'NEW HEAD-LFA STA,          
+     N 1 + LDA, 'NEW HEAD-LFA 1+ STA,   
+     NEXT JMP, THEN,                    
+   REPEAT,                              
+  THEN,                                 
+DECIMAL -->                             
+════════════════════════════════════════   SCREEN 011
+( VOC-SEARCH cont        <12/29/89>151) 
+HEX                                     
+                                        
+    ( try next word in vocab )          
+  01 # LDY, N )Y LDA, TAX, DEY,         
+  N )Y LDA, N STA, N 1+ STX,            
+                                        
+   ( quit when LFA = 0 .. )             
+  N 1+ ORA, 0=                          
+ UNTIL,                                 
+ ( return false flag )                  
+  C002 STA, ( *** RAMRD=MAIN *** )      
+ ( C001 STA, ( *** 80STORE on *** )     
+  XSAVE LDX,                            
+  INX, INX,                             
+  00 # LDA,                             
+  BOT STA, BOT 1+ STA,                  
+ NEXT JMP, C;                           
+DECIMAL  -->                            
+                                        
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 012
+( {res-start} {res-end}  < 1/19/90>152) 
+                                        
+HEX                                     
+CODE {res-start}                        
+  # 0 LDY,  ( everybody needs Y=0 )     
+  \ aux r /w, 80store off               
+  C003 STA, C005 STA, ( C000 STA, )     
+  RTS, C;                               
+                                        
+CODE {res-end}                          
+  \ main r/w, 80store on                
+  C002 STA, C004 STA, ( C001 STA, )     
+  RTS, C;                               
+                                        
+DECIMAL -->                             
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 013
+( <RES-REL>              < 1/19/90>153) 
+\ N:nhan N+2:nres N+4:lofs N+6:rofs     
+                                        
+\ mark all resource items as released   
+CODE <RES-REL>                          
+   'NEW {res-start} JSR,                
+  N 2+ LDA, 0= NOT IF, N 3 + INC, THEN, 
+  N LDA,    0= NOT IF, N 1 + INC, THEN, 
+\ first mark all resources as not loaed 
+  BEGIN, N 6 + )Y LDA,                  
+   # 32 ORA, N 6 + )Y STA,              
+   \ set segment to zero                
+   0 # LDA, N 4 + )Y STA,               
+   INY, N 4 + )Y STA, DEY,              
+   CLC, N 6 + LDA, # 6 ADC, N 6 + STA,  
+   CS IF, N 7 + INC, THEN, CLC,         
+   N 4 + LDA, # 2 ADC, N 4 + STA, CS    
+   IF, N 5 + INC, THEN,                 
+   N 2 + DEC, 0=                        
+   IF, N 3 + DEC, THEN, 0=              
+  UNTIL,                                
+                                        
+--> \ more...                           
+                                        
+════════════════════════════════════════   SCREEN 014
+( <RES-REL>              < 1/19/90>154) 
+\ N:nhan N+2:nres N+4:lofs N+6:rofs     
+                                        
+\ now mark all handles as empty         
+  BEGIN, \ set only not loaded bit      
+   # 32 LDA, N 6 + )Y STA,              
+   \ set size to 0                      
+   INY, 0 # LDA, N 6 + )Y STA,          
+   INY, N 6 + )Y STA,                   
+   \ set seg to 0                       
+   DEY, N 4 + )Y STA,                   
+   DEY, N 4 + )Y STA,                   
+\ increment pointers, decrement count   
+   CLC, N 6 + LDA, # 6 ADC, N 6 + STA,  
+   CS IF, N 7 + INC, THEN, CLC,         
+   N 4 + LDA, # 2 ADC, N 4 + STA,       
+   CS IF, N 5 + INC, THEN,              
+   N DEC, 0=                            
+   IF, N 1+ DEC, THEN, 0=               
+  UNTIL,                                
+  'NEW {res-end} JMP, C;                
+                                        
+-->                                     
+                                        
+════════════════════════════════════════   SCREEN 015
+( <RES-DDC>              <12/20/85>155) 
+\ N:nres N+2:rofs N+4:mcv               
+                                        
+ \ resource decrment death count        
+CODE <RES-DDC>                          
+  'NEW {res-start} JSR,                 
+  N LDA, 0= NOT IF, N 1+ INC, THEN,     
+  # 15 LDA, N 4 + STA,                  
+  BEGIN, N 2+ )Y LDA, SEC,              
+    \ dec val between 0-14?             
+   # 1 SBC, # 15 CMP, CS NOT            
+   IF, N 2+ )Y STA, N 4 + CMP, CS NOT   
+    IF, N 4 + STA, THEN,                
+   THEN,                                
+\ increment pointers, decrement count   
+   CLC, N 2+ LDA, # 6 ADC, N 2+ STA, CS 
+   IF, N 3 + INC, THEN,                 
+   N DEC, 0=                            
+   IF, N 1+ DEC, THEN, 0=               
+  UNTIL,                                
+  'NEW {res-end} JMP, C;                
+                                        
+-->                                     
+                                        
+════════════════════════════════════════   SCREEN 016
+( <RES-PH>               < 1/19/90>156) 
+\ N:ofs N+2:seg N+4:nres N+6:lofs       
+                                        
+\ resource pack handles                 
+CODE <RES-PH>                           
+  'NEW {res-start} JSR,                 
+ N 4 + LDA, 0= NOT IF, N 5 + INC, THEN, 
+  BEGIN, SEC, N 2 + LDA,                
+   0 # LDY, N 6 + )Y SBC, N 3 + LDA,    
+   INY, N 6 + )Y SBC, CS NOT            
+   ( seg U<= this seg? )                
+   IF, SEC, DEY, N 6 + )Y LDA,          
+    N SBC, N 6 + )Y STA,                
+    INY, N 6 + )Y LDA, N 1+ SBC,        
+    N 6 + )Y STA, THEN,                 
+\ increment pointers, decrement count   
+   CLC, N 6 + LDA, # 2 ADC,             
+   N 6 + STA, CS IF, N 7 + INC, THEN,   
+   N 4 + DEC, 0=                        
+   IF, N 5 + DEC, THEN, 0=              
+  UNTIL,                                
+  'NEW {res-end} JMP, C;                
+                                        
+-->                                     
+════════════════════════════════════════   SCREEN 017
+( <RES-FP>               < 6/22/90>157) 
+\ N:cv N+2:nres N+4:rofs                
+                                        
+\ resource find purge cnt < cv          
+\ If N+2=0, no match found,             
+\ else N+4 points to match              
+CODE <RES-FP>                           
+  'NEW {res-start} JSR,                 
+  BEGIN, N 4 + )Y LDA,                  
+   N CMP, CS NOT   \ this U< cv?        
+   IF, 'NEW {res-end} JMP, THEN,        
+   CLC, \ no, inc ptrs, dec cnt         
+   N 4 + LDA, # 6 ADC, N 4 + STA, CS    
+   IF, N 5 + INC, THEN,                 
+   SEC, N 2+ LDA, # 1 SBC, N 2+ STA,    
+   CS NOT IF, N 3 + DEC, THEN,          
+   N 2+ LDA, N 3 + ORA, 0=              
+  UNTIL,                                
+  'NEW {res-end} JMP, C;                
+                                        
+-->                                     
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 018
+( EXEC-COND exec-act     < 6/22/90>158) 
+                                        
+HEX                                     
+\ get action CFA and execute condition  
+\ which should return a flag            
+CODE EXEC-COND \ -- cfa flag            
+   C003 STA, ( C000 STA, )              
+                                        
+     \ put action cfa on stack          
+   DEX, DEX,                            
+   0 # LDY, D4 )Y LDA, BOT STA,         
+   INY,     D4 )Y LDA, BOT 1+ STA,      
+     \ get condition CFA and jump to it 
+                                        
+   INY,     D4 )Y LDA, W STA,           
+   INY,     D4 )Y LDA, W 1+ STA,        
+   C002 STA, ( C001 STA, )              
+   0 # LDY, W 1- JMP, C;                
+                                        
+DECIMAL -->                             
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 019
+( exec-setup             < 1/24/90>159) 
+                                        
+HEX                                     
+                                        
+\ get byte at ACTPTR to .A              
+CODE exec-setup                         
+   C003 STA, ( C000 STA, )              
+   # 0 LDY, D4 )Y LDA,                  
+   C002 STA, ( C001 STA, )              
+   RTS,                                 
+                                        
+DECIMAL                                 
+-->                                     
+--- NOT USED ANY MORE 6-22-90 ---       
+\ get action for current pair and       
+\ put it in W                           
+CODE exec-act                           
+   C003 STA, C000 STA,                  
+   # 0 LDY, D4 )Y LDA, W STA,           
+   INY,     D4 )Y LDA, W 1+ STA,        
+   C002 STA, C001 STA,                  
+   RTS,                                 
+                                        
+                                        
+════════════════════════════════════════   SCREEN 020
+( get-char scan-to       < 1/24/90>160) 
+                                        
+HEX                                     
+CODE @char \ call:Y=offs ret:A=char     
+   C003 STA, ( C000 STA, ) D7 )Y LDA,   
+   C002 STA, ( C001 STA, ) RTS, C;      
+                                        
+CODE get-char \ .A=char, inc ptr        
+   C003 STA, ( C000 STA, )              
+   0 # LDY, D7 )Y LDA,                  
+LABEL gc-inc \ inc ptr and exit         
+   D7 INC, 0= IF, D8 INC, THEN,         
+   C002 STA, ( C001 STA, )              
+   RTS, C;                              
+CODE scan-to \ scan to .A               
+   \ pt to char after 1st .A            
+   C003 STA, ( C000 STA, ) 0 # LDY,     
+   BEGIN, D7 )Y CMP, 0= NOT             
+   WHILE, D7 INC, 0=                    
+    IF, D8 INC, THEN,                   
+   REPEAT,                              
+   gc-inc JMP, C;                       
+DECIMAL -->                             
+                                        
+════════════════════════════════════════   SCREEN 021
+( scan-past              < 1/24/90>161) 
+                                        
+HEX                                     
+                                        
+CODE scan-past \ scan past .A           
+   \ pt to 1st char not equal to .A     
+   C003 STA, ( C000 STA, )              
+   0 # LDY,                             
+   BEGIN, D7 )Y CMP, 0=                 
+   WHILE, D7 INC, 0=                    
+    IF, D8 INC, THEN,                   
+   REPEAT,                              
+   C002 STA, ( C001 STA, )              
+   RTS, C;                              
+                                        
+                                        
+DECIMAL -->                             
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 022
+( altzp mainzp           < 4/11/91>162) 
+HEX LABEL zpa 0 C,                      
+LABEL goback 4C , 0 C, 0 C,             
+CODE altzp zpa STA,                     
+  PLA, CLC, # 1 ADC, goback 1+ STA,     
+  PLA, # 0 ADC, goback 2+ STA,          
+  C009 STA, zpa LDA, goback JMP, C;     
+CODE mainzp zpa STA,                    
+  PLA, CLC, # 1 ADC, goback 1+ STA,     
+  PLA, # 0 ADC, goback 2+ STA,          
+  C008 STA, zpa LDA, goback JMP, C;     
+                                        
+'NEW altzp  ASSEMBLER START-ADDR        
+FORTH 2+ DELTA + !NEW                   
+                                        
+DECIMAL -->                             
+  Create time system always runs with   
+altzp TRUE, temp flips to mainzp        
+when calling ProDOS or ROM routines     
+  All info must be removed from stack   
+(in aux) before switching to main       
+and put on after switching back         
+FLAGS DESTROYED                         
+                                        
+════════════════════════════════════════   SCREEN 023
+( SP0 R0 SP! RP!         < 1/19/90>163) 
+HEX                                     
+LABEL SP00 00D0 ,                       
+LABEL RP00 01FF , MOVEWORD?             
+                                        
+CODE SP0  DEX, DEX,                     
+  SP00 #LO LDA, BOT STA,                
+  SP00 #HI LDA, BOT 1+ STA,             
+  NEXT JMP, C;                          
+                                        
+CODE R0  DEX, DEX,                      
+  RP00 #LO LDA, BOT STA,                
+  RP00 #HI LDA, BOT 1+ STA,             
+  NEXT JMP, C;                          
+                                        
+CODE SP!  SP00 LDX, NEXT JMP, C;        
+                                        
+CODE RP!  XSAVE STX, RP00 LDX, TXS,     
+  XSAVE LDX, NEXT JMP, C;               
+                                        
+'NEW RP!  ASSEMBLER START-ADDR          
+     FORTH 14 ( HEX) + DELTA +  !NEW    
+                                        
+DECIMAL -->                    ( bobp ) 
+════════════════════════════════════════   SCREEN 024
+( EXECUTE BRANCH 0BRANCH < 1/19/90>164) 
+HEX                                     
+CODE EXECUTE BOT LDA, W STA, BOT 1+     
+  LDA, W 1+ STA, INX, INX, W 1 - JMP,   
+C;                                      
+CODE BRANCH C;                          
+                                        
+CODE 0BRANCH INX, INX, FE ,X LDA, FF    
+  ,X ORA, 0=                            
+  IF,                                   
+LABEL BR: CLC, IP )Y LDA, IP ADC,       
+   PHA, INY, IP )Y LDA, IP 1+ ADC, IP   
+   1+ STA, PLA, IP STA, NEXT JMP,       
+  THEN,                                 
+LABEL BUMP: CLC, IP LDA, 2 # ADC,       
+  IP STA, CS IF, IP 1+ INC, THEN,       
+  NEXT JMP, C;                          
+                                        
+  ASSEMBLER BR:                         
+     FORTH -02 BYTE:IN BRANCH  !NEW     
+DECIMAL -->                             
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 025
+( <LOOP>                 < 1/19/90>165) 
+                                        
+HEX                                     
+CODE <LOOP> XSAVE STX, TSX, RP) INC, 0= 
+  IF, RP) 1+ LDA, CLC, 1 # ADC,         
+   RP) 1+ STA,                          
+  ELSE, CLV,                            
+  THEN, 50 NOT ( OV NOT )               
+  IF,                                   
+LABEL L+:  SEC, RP) LDA, RP) 2+ SBC,    
+   RP) 1+ LDA, RP) 3 + SBC,             
+LABEL L+/-:   50                        
+     IF, 80 # EOR,                      
+     THEN, 0<                           
+     IF,                                
+LABEL LBR:                              
+     0 # LDY, XSAVE LDX, BR: JMP,       
+     THEN,                              
+  THEN,                                 
+LABEL LXT: INX, INX, INX, INX, TXS,     
+   XSAVE LDX, BUMP: JMP, C;             
+                                        
+                                        
+DECIMAL -->                    ( bobp ) 
+════════════════════════════════════════   SCREEN 026
+( <+LOOP> LEAVE          < 1/19/90>166) 
+                                        
+HEX                                     
+CODE <+LOOP>  CLC, BOT 1+ LDY, BOT LDA, 
+   INX, INX, XSAVE STX, TSX, RP) ADC,   
+   RP) STA, TYA, RP) 1+ ADC,            
+   RP) 1+ STA, 50 NOT                   
+  IF, TYA, 0<                           
+     IF, SEC, RP) 2+ LDA, RP) SBC,      
+      RP) 3 + LDA, RP) 1+ SBC,          
+      L+/-: JMP,                        
+     THEN, L+: JMP,                     
+  THEN, LXT: JMP, C;                    
+                                        
+                                        
+CODE LEAVE  XSAVE STX, TSX, RP) LDA,    
+  RP) 2+ STA, RP) 1+ LDA, RP) 3 + STA,  
+  XSAVE LDX, NEXT JMP, C;               
+                                        
+DECIMAL                                 
+-->                                     
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 027
+( </LOOP>                < 1/19/90>167) 
+                                        
+HEX                                     
+CODE </LOOP>  CLC, BOT 1+ LDY, BOT LDA, 
+   INX, INX, XSAVE STX, TSX, RP) ADC,   
+   RP) STA, TYA, RP) 1+ ADC,            
+   RP) 1+ STA, TYA, 0<                  
+   IF, CS                               
+      IF, SEC, RP) 2+ LDA, RP) SBC,     
+       RP) 3 + LDA, RP) 1+ SBC, CS NOT  
+         IF, LBR: JMP,                  
+         THEN,                          
+      THEN,                             
+   ELSE, CS NOT                         
+      IF, SEC, RP) LDA, RP) 2+ SBC,     
+       RP) 1+ LDA, RP) 3 + SBC, CS NOT  
+         IF, LBR: JMP,                  
+         THEN,                          
+      THEN,                             
+   THEN, LXT: JMP, C;                   
+                                        
+DECIMAL -->                             
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 028
+( <DO> I I' J            < 1/19/90>168) 
+                                        
+CODE <DO> SEC 1+ LDA, PHA, SEC LDA,     
+  PHA, BOT 1+ LDA, PHA, BOT LDA, PHA,   
+LABEL POPTWO INX, INX,                  
+LABEL POP INX, INX, NEXT JMP, C;        
+                                        
+CODE I  XSAVE STX, TSX, RP) LDA, PHA,   
+  RP) 1+ LDA, XSAVE LDX, PUSH JMP, C;   
+                                        
+CODE I' XSAVE STX, TSX, RP) 2+ LDA,     
+  PHA, RP) 3 + LDA, XSAVE LDX,          
+  PUSH JMP, C;                          
+                                        
+CODE J  XSAVE STX, TSX, RP) 4 + LDA,    
+  PHA, RP) 5 + LDA, XSAVE LDX,          
+  PUSH JMP, C;                          
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 029
+( R@ R> >R SP@ RP@       < 1/19/90>169) 
+                                        
+CODE R@ C;                              
+  'NEW I  -02 BYTE:IN R@  !NEW          
+                                        
+CODE R>  DEX, DEX, PLA, BOT STA, PLA,   
+  BOT 1+ STA, NEXT JMP, C;              
+                                        
+CODE >R  BOT 1+ LDA, PHA, BOT LDA, PHA, 
+  INX, INX, NEXT JMP, C;                
+                                        
+CODE SP@  TXA,                          
+ LABEL PUSH0A PHA, 0 # LDA, PUSH JMP,   
+C;                                      
+                                        
+CODE RP@  XSAVE STX, TSX, TXA,          
+  XSAVE LDX, DEX, DEX, BOT STA,         
+  BOT INC, RP00 1+ LDA, BOT 1+ STA,     
+  NEXT JMP, C;                          
+                                        
+-->                                     
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 030
+( AND XOR OR OVER DROP   < 1/19/90>170) 
+HEX                                     
+CODE AND                                
+  BOT LDA, SEC AND, PHA,                
+  BOT 1+ LDA, SEC 1+ AND, INX, INX,     
+  PUT JMP, C;                           
+                                        
+CODE XOR                                
+  BOT LDA, SEC EOR, PHA,                
+  BOT 1+ LDA, SEC 1+ EOR, INX, INX,     
+  PUT JMP, C;                           
+                                        
+CODE OR                                 
+  BOT LDA, SEC ORA, PHA,                
+  BOT 1+ LDA, SEC 1+ ORA, INX, INX,     
+  PUT JMP, C;                           
+                                        
+CODE OVER SEC LDA, PHA, SEC 1+ LDA,     
+  PUSH JMP, C;                          
+                                        
+CODE DROP POP HERE 2 - ! C;             
+                                        
+DECIMAL -->                             
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 031
+( DUP ?DUP SWAP DDROP DDU< 1/19/90>171) 
+                                        
+HEX                                     
+CODE DUP BOT LDA, PHA, BOT 1+ LDA,      
+  PUSH JMP, C;                          
+                                        
+CODE ?DUP BOT LDA, BOT FE + STA,        
+  BOT 1+ ORA, 0=                        
+  IF, NEXT JMP, THEN, BOT 1+ LDA,       
+  BOT FF + STA, DEX, DEX, NEXT JMP, C;  
+                                        
+CODE SWAP SEC LDA, PHA, BOT LDA,        
+  SEC STA, SEC 1+ LDA, BOT 1+ LDY,      
+  SEC 1+ STY, PUT JMP, C;               
+                                        
+CODE DDROP POPTWO HERE 2 - ! C;         
+                                        
+CODE DDUP  03 # LDY,                    
+  BEGIN, DEX, BOT 4 + LDA, BOT STA,     
+   DEY, 0<                              
+  UNTIL, NEXT JMP, C;                   
+DECIMAL -->                             
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 032
+( P&R ROLL PICK ROT      < 1/19/90>172) 
+HEX                                     
+                                        
+LABEL P&R XSAVE STX, BOT LDA, .A ASL,   
+  XSAVE ADC, TAX, BOT LDA, RTS,         
+                                        
+CODE ROLL                               
+ LABEL ROLL: P&R JSR, XSAVE CPX, 0< NOT 
+  IF, DROP 0=                           
+   IF, DROP SWAP 2                      
+   THEN, XSAVE LDX, POP JMP,            
+   2 THEN, PHA, BOT 1+ LDA,             
+  BEGIN, BOT FF + LDY, BOT 1+ STY, DEX, 
+   XSAVE CPX, 0=                        
+  UNTIL, INX, INX, PUT JMP, C;          
+                                        
+CODE PICK  P&R JSR, PHA, BOT 1+ LDA,    
+  XSAVE LDX, PUT JMP, C;                
+                                        
+CODE ROT DEX, BOT STY, DEX, 03 # LDA,   
+  BOT STA, ROLL: JMP, C;                
+DECIMAL -->                             
+                                        
+                                        
+════════════════════════════════════════   SCREEN 033
+( C! +! +C! + -          < 7/15/91>173) 
+                                        
+CODE @ BOT X) LDA, PHA, BOT INC, 0=     
+  IF, BOT 1+ INC, THEN, BOT X) LDA,     
+  PUT JMP, C;                           
+                                        
+CODE C@ BOT X) LDA, BOT STA, BOT 1+     
+  STY, NEXT JMP, C;                     
+                                        
+CODE ! SEC LDA, BOT X) STA, BOT INC, 0= 
+  IF, BOT 1+ INC, THEN, SEC 1+ LDA,     
+  BOT X) STA, POPTWO JMP, C;            
+                                        
+CODE C! SEC LDA, BOT X) STA,            
+  POPTWO JMP, C;                        
+                                        
+CODE +! CLC, BOT X) LDA, SEC ADC,       
+  BOT X) STA, BOT INC, 0=               
+  IF, BOT 1+ INC,                       
+  THEN, BOT X) LDA, SEC 1+ ADC,         
+  BOT X) STA, POPTWO JMP, C;            
+                                        
+-->                                     
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 034
+( 0< < > 0>              < 1/19/90>174) 
+HEX                                     
+CODE +C!  CLC, BOT X) LDA, SEC ADC,     
+  BOT X) STA, POPTWO JMP, C;            
+                                        
+CODE + CLC, BOT LDA, SEC ADC, SEC STA,  
+  BOT 1+ LDA, SEC 1+ ADC, SEC 1+ STA,   
+  INX, INX, NEXT JMP, C;                
+                                        
+CODE -  SEC, SEC LDA, BOT SBC, SEC STA, 
+  SEC 1+ LDA, BOT 1+ SBC, SEC 1+ STA,   
+  INX, INX, NEXT JMP, C;                
+                                        
+CODE 0< BOT 1+ ASL, TYA, .A ROL,        
+  BOT 1+ STY, BOT STA, NEXT JMP, C;     
+                                        
+CODE <  SEC, SEC LDA, BOT SBC,          
+  SEC 1+ LDA, BOT 1+ SBC,               
+LABEL <>: SEC 1+ STY, 50                
+  IF, 80 # EOR, THEN, 0<                
+  IF, INY, THEN, SEC STY, POP JMP, C;   
+                                        
+DECIMAL -->                             
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 035
+( NEGATE NOT 0= =        < 1/19/90>175) 
+                                        
+CODE >  SEC, BOT LDA, SEC SBC,          
+  BOT 1+ LDA, SEC 1+ SBC, <>: JMP, C;   
+                                        
+CODE 0>  BOT 1+ LDA, 0<                 
+  IF, BOT STY,                          
+  ELSE, BOT ORA, BOT STY, 0= NOT        
+   IF, BOT INC, THEN,                   
+  THEN, BOT 1+ STY, NEXT JMP, C;        
+                                        
+CODE NEGATE SEC,                        
+                                        
+LABEL NEG: TYA, BOT SBC, BOT STA,       
+  TYA, BOT 1+ SBC, BOT 1+ STA,          
+  NEXT JMP, C;                          
+CODE NOT BOT LDA, BOT 1+ ORA, BOT 1+    
+  STY, 0=                               
+  IF, INY, THEN, BOT STY, NEXT JMP, C;  
+                                        
+                                        
+-->                                     
+                                        
+                                        
+════════════════════════════════════════   SCREEN 036
+( U*                     < 1/19/90>176) 
+                                        
+CODE 0= C;                              
+                                        
+ 'NEW NOT  -02 BYTE:IN 0=  !NEW         
+                                        
+CODE =  SEC, SEC LDA, BOT SBC, BOT STA, 
+  SEC 1+ LDA, SEC 1+ STY, BOT 1+ SBC,   
+  BOT ORA, 0= IF, INY, THEN, SEC STY,   
+  POP JMP, C;                           
+                                        
+CODE U* N STY, BOT 3 + LSR, BOT 2+ ROR, 
+    TYA, 16 # LDY,                      
+   BEGIN, CS                            
+    IF, N 1+ STA, CLC, N LDA, BOT ADC,  
+     N STA, N 1+ LDA, BOT 1+ ADC,       
+    THEN, .A ROR, N ROR, BOT 3 + ROR,   
+    BOT 2+ ROR, DEY, 0=                 
+   UNTIL, BOT 1+ STA, N LDA, BOT STA,   
+   NEXT JMP, C;                         
+-->                                     
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 037
+( U/MOD                  < 1/19/90>177) 
+( THE FFFF BELOW WILL BE REPLACED BY  ) 
+( ' <Z-DIV>, THE DIVIDE OVERFLOW RTN  ) 
+HEX                                     
+CODE U/MOD  SEC, SEC LDA, BOT SBC,      
+ SEC 1+ LDA, BOT 1+ SBC, CS             
+ IF, SP00 LDA, TAX, FFFF JMP,           
+ THEN,  ( JUMP IS AT ' U/MOD 10 + )     
+ SEC 2+ LDA, SEC LDY, SEC 2+            
+ STY, .A ASL, SEC STA, SEC 3 + LDA,     
+ SEC 1+ LDY, SEC 3 + STY, .A ROL,       
+ SEC 1+ STA, 10 # LDA, N STA,           
+ BEGIN, SEC 2+ ROL, SEC 3 + ROL,        
+  PHP,                                  
+  SEC, SEC 2 + LDA, BOT SBC, TAY,       
+  SEC 3 + LDA, BOT 1+ SBC, CS           
+  IF, SEC 2+ STY, SEC 3 + STA, PLP,     
+   SEC,                                 
+  ELSE, PLP, CS                         
+   IF, SEC 2+ STY, SEC 3 + STA, THEN,   
+  THEN, SEC ROL, SEC 1+ ROL, N DEC, 0=  
+ UNTIL, POP JMP, C;                     
+                                        
+DECIMAL -->                    ( bobp ) 
+════════════════════════════════════════   SCREEN 038
+( DIGIT                  < 1/19/90>178) 
+                                        
+HEX                                     
+CODE DIGIT SEC, SEC LDA, 30 # SBC,      
+  0< NOT                                
+  IF, 0A # CMP, 0< NOT                  
+   IF,  SEC, 07 # SBC, 0A # CMP,        
+   0< NOT                               
+    IF,  4 ROLL 4 ROLL                  
+   THEN, BOT CMP, 0<                    
+     IF, SEC STA,                       
+      1 # LDA, PHA, TYA, PUT JMP,       
+     THEN,                              
+    THEN,                               
+  THEN, TYA, PHA, INX, INX,             
+  PUT JMP, C;                           
+                                        
+DECIMAL       -->                       
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 039
+( CMOVE                  < 1/19/90>179) 
+                                        
+LABEL  CMOVE:                           
+  BEGIN,                                
+   BEGIN, N CPY, 0=                     
+    IF, N 1+ DEC, 0<                    
+     IF, NEXT JMP, THEN,                
+    THEN, N 4 + )Y LDA, N 2+ )Y STA,    
+    INY, 0=                             
+   UNTIL, N 5 + INC, N 3 + INC,         
+  AGAIN,                                
+                                        
+( SOURCE DEST COUNT ---, <DOWN MOVE> )  
+CODE CMOVE 03 # LDA, SETUP JSR,         
+  CMOVE: JMP, C;                        
+  -->                                   
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 040
+( BMOVE                  < 1/19/90>180) 
+                                        
+( SOURCE DEST COUNT ---, <UP/DN-MOVE>)  
+CODE  BMOVE 3 # LDA, SETUP JSR,         
+  SEC, N 2+ LDA, N 4 + SBC, N 3 + LDA,  
+  N 5 + SBC, 0< IF, CMOVE: JMP, THEN,   
+  CLC, N 1+ LDA, N 3 + ADC, N 3 + STA,  
+  CLC, N 1+ LDA, N 5 + ADC, N 5 + STA,  
+  N 1+ INC, N LDY,                      
+  BEGIN, TYA, 0=                        
+   IF, N 1+ DEC, 0=                     
+    IF, NEXT JMP, THEN, N 3 + DEC,      
+     N 5 + DEC,                         
+   THEN,                                
+   DEY, N 4 + )Y LDA, N 2+ )Y STA,      
+  AGAIN, C;                             
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 041
+( 1+ 2+ 1- 2- 2*         < 1/19/90>181) 
+                                        
+CODE 1+                                 
+LABEL 1+:                               
+   BOT INC, 0= IF, BOT 1+ INC, THEN,    
+   NEXT JMP, C;                         
+CODE 2+                                 
+   BOT INC, 0= IF, BOT 1+ INC, THEN,    
+   1+: JMP, C;                          
+                                        
+CODE 1-                                 
+LABEL 1-:                               
+   BOT LDA, 0= IF, BOT 1+ DEC, THEN,    
+   BOT DEC, NEXT JMP, C;                
+CODE 2-                                 
+   BOT LDA, 0= IF, BOT 1+ DEC, THEN,    
+   BOT DEC, 1-: JMP, C;                 
+                                        
+CODE 2*  BOT ASL, BOT 1+ ROL,           
+  NEXT JMP, C;                          
+                                        
+-->                                     
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 042
+( 2/ FILL                < 1/19/90>182) 
+                                        
+CODE 2/  CLC, BOT 1+ LDA, 0<            
+  IF, BOT INC, 0=                       
+   IF, BOT 1+ INC, 0=                   
+    IF, NEXT JMP, THEN,                 
+   THEN, SEC,                           
+  THEN, BOT 1+ ROR, BOT ROR,            
+  NEXT JMP, C;                          
+                                        
+CODE FILL  03 # LDA, SETUP JSR,         
+  N 3 + LDA, 0<                         
+  IF, NEXT JMP, THEN, N LDA,            
+  BEGIN,                                
+   BEGIN, N 2 + CPY, 0=                 
+    IF, N 3 + DEC, 0<                   
+     IF, NEXT JMP, THEN,                
+    THEN, N 4 + )Y STA, INY, 0=         
+   UNTIL, N 5 + INC,                    
+  AGAIN, C;                             
+-->                                     
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 043
+( QTERM ?TERMINAL        < 1/19/90>183) 
+HEX                                     
+( will work fine with ALTZP on )        
+                                        
+CODE QTERM                              
+  C000 BIT, 0<                          
+  IF, INY, THEN, TYA, PUSH0A JMP, C;    
+                                        
+CODE ?TERMINAL                          
+  C000 BIT, 0<                          
+  IF,                                   
+   BEGIN, C010 BIT, C000 BIT, 0< NOT    
+   UNTIL, INY,                          
+  THEN, TYA, PUSH0A JMP, C;             
+                                        
+DECIMAL -->                             
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 044
+( NF: WORDS              < 1/19/90>184) 
+                                        
+NF: ;  ?CSP COMPILE [FROM:NEWFORTH]     
+   <EXIT> SMUDGE [COMPILE] FORTH        
+   [COMPILE] [ NF;                      
+                                        
+NF: THEN  HERE OVER - SWAP ! NF;        
+                                        
+NF: BEGIN  HERE NF;                     
+                                        
+NF: DO  COMPILE [FROM:NEWFORTH] <DO>    
+   HERE NF;                             
+                                        
+NF: LOOP COMPILE [FROM:NEWFORTH] <LOOP> 
+   HERE - , NF;                         
+                                        
+NF: +LOOP  COMPILE [FROM:NEWFORTH]      
+   <+LOOP> HERE - , NF;                 
+                                        
+NF: /LOOP  COMPILE [FROM:NEWFORTH]      
+   </LOOP> HERE - , NF;                 
+                                        
+-->                                     
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 045
+( NF: WORDS              < 1/19/90>185) 
+                                        
+NF: UNTIL  COMPILE [FROM:NEWFORTH]      
+   0BRANCH HERE - , NF;                 
+                                        
+NF: AGAIN  COMPILE [FROM:NEWFORTH]      
+   BRANCH HERE - , NF;                  
+                                        
+NF: REPEAT  SWAP                        
+    COMPILE [FROM:NEWFORTH] BRANCH      
+    HERE - , HERE OVER - SWAP ! NF;     
+                                        
+NF: IF COMPILE [FROM:NEWFORTH]          
+    0BRANCH HERE 0 , NF;                
+                                        
+NF: ELSE                                
+    COMPILE [FROM:NEWFORTH] BRANCH      
+    HERE 0 , SWAP HERE OVER -           
+    SWAP ! NF;                          
+                                        
+NF: WHILE                               
+    COMPILE [FROM:NEWFORTH] 0BRANCH     
+    HERE 0 , NF;                        
+-->                            ( bobp ) 
+════════════════════════════════════════   SCREEN 046
+( <:> <CONST>            < 1/19/90>186) 
+                                        
+CODE <:>                                
+   IP 1+ LDA, PHA, IP LDA, PHA, CLC,    
+   W LDA, 02 # ADC, IP STA, TYA,        
+   W 1+ ADC, IP 1+ STA, NEXT JMP, C;    
+                                        
+CODE <CONST>                            
+   02 # LDY, W )Y LDA, PHA, INY,        
+   W )Y LDA, PUSH JMP, C;               
+                                        
+CODE <VAR>                              
+   CLC, W LDA, 02 # ADC, PHA, TYA,      
+   W 1+ ADC, PUSH JMP, C;               
+                                        
+CODE <DCONST>                           
+   04 # LDY,                            
+   BEGIN,  INY, DEX, W )Y LDA,          
+      BOT STA, DEY, DEY, 0=             
+   UNTIL, NEXT JMP, C;                  
+                                        
+                                        
+-->                                     
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 047
+( 0 1 2 3 4 5 6          < 1/19/90>187) 
+                                        
+'NEW <:>     ' *COLON* !                
+'NEW <CONST> ' *CONSTANT* !             
+'NEW <VAR>  ' *VARIABLE* !              
+'NEW <VAR>  ' *DVARIABLE* !             
+'NEW <VAR>  ' *CREATE* !                
+'NEW <DCONST>  ' *DCONSTANT* !          
+                                        
+     0 CONSTANT 0                       
+     1 CONSTANT 1                       
+     2 CONSTANT 2                       
+     3 CONSTANT 3                       
+     4 CONSTANT 4                       
+     5 CONSTANT 5                       
+     6 CONSTANT 6                       
+                                        
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 048
+( system constants & vars< 1/19/90>188) 
+HEX APPENDIX                            
+  BA00 CONSTANT LIMIT                   
+  FIRST-APP-WORD ( mark first word )    
+     0 CONSTANT MEM-LIMIT               
+    28 CONSTANT C/L    ( 40 decimal )   
+                                        
+DECIMAL                                 
+  VARIABLE HDP        ( head DP )       
+  VARIABLE ICEBOX    04 NFALLOT         
+  VARIABLE CURRENT                      
+                  ( see #VOCS scr 212 ) 
+  VARIABLE VOC-LINK                     
+                                        
+  VARIABLE BLK                          
+  VARIABLE SCR                          
+  VARIABLE TIB                          
+  VARIABLE >IN                          
+                                        
+MAIN -->                                
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 049
+( system variables D+    < 4/11/91>189) 
+MAIN                                    
+32 CONSTANT BL                          
+   VARIABLE BASE ( number base  )       
+   VARIABLE DPL  ( decimal point loc)   
+80 CONSTANT SPE  ( end of stack )       
+   VARIABLE HLD  ( number format ptr)   
+ 0 CONSTANT BOOT-SD ( boot slot/drv )   
+   VARIABLE OUT  ( used by EMIT CR )    
+   VARIABLE DP   ( kernel DP )          
+COMP-SEG 'NEW LIMIT @L 1028 -           
+   CONSTANT FIRST ( u.b. <READ-HEADS> ) 
+   VARIABLE CONTEXT   14 NFALLOT        
+                                        
+CODE D+                                 
+ CLC,                                   
+ BOT 2+  LDA, BOT 6 + ADC, BOT 6 + STA, 
+ BOT 3 + LDA, BOT 7 + ADC, BOT 7 + STA, 
+ BOT     LDA, BOT 4 + ADC, BOT 4 + STA, 
+ BOT 1+  LDA, BOT 5 + ADC, BOT 5 + STA, 
+ POPTWO JMP, C;                         
+                                        
+-->                                     
+                                        
+════════════════════════════════════════   SCREEN 050
+( DNEGATE U<             < 4/11/91>190) 
+                                        
+CODE DNEGATE                            
+  SEC, TYA, SEC SBC, SEC STA,           
+  TYA, SEC 1+ SBC, SEC 1+ STA,          
+  NEG: JMP, C;                          
+                                        
+CODE U<                                 
+  SEC, SEC LDA, BOT SBC,                
+  SEC 1+ LDA, BOT 1+ SBC, SEC 1+ STY,   
+  CS NOT IF, INY, THEN, SEC STY,        
+  POP JMP, C;                           
+                                        
+: S->D DUP 0< NEGATE ;                  
+                                        
+: +-   0< IF NEGATE THEN ;              
+: ABS  DUP +- ;                         
+                                        
+: D+-  0< IF DNEGATE THEN ;             
+: DABS DUP D+- ;                        
+                                        
+-->                                     
+                                        
+                                        
+════════════════════════════════════════   SCREEN 051
+( S->D ABS DABS MAX MIN  < 1/19/90>191) 
+                                        
+                                        
+: MAX  DDUP < IF SWAP THEN DROP ;       
+: MIN  DDUP > IF SWAP THEN DROP ;       
+                                        
+: DSWAP 4 ROLL 4 ROLL ;                 
+: DOVER 4 PICK 4 PICK ;                 
+                                        
+HEX                                     
+VARIABLE BSM ( bank-switched mem flag ) 
+                                        
+CODE $BSM ( subroutine )                
+   PHA, TYA, PHA, 'NEW BSM LDY, 0=      
+   IF, C081 LDY, ELSE, DEY, 0=          
+     IF, C08B LDY, C08B LDY,            
+     ELSE, C083 LDY, C083 LDY,          
+   THEN, THEN, PLA, TAY, PLA, RTS, C;   
+                                        
+DECIMAL                                 
+-->                                     
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 052
+( CALL ROMCALL           < 4/11/91>192) 
+HEX                                     
+VARIABLE CALL.A ( A for CALL/ROMCALL)   
+LABEL CALL:  20 C, 0 C, 0 C, 60 C,      
+                                        
+CODE CALL ( addr -- )                   
+ BOT    LDA, CALL: 1+ STA,              
+ BOT 1+ LDA, CALL: 2+ STA, TXA, PHA,    
+ 'NEW CALL.A LDA, CALL: JSR,            
+ 'NEW CALL.A STA, PLA, TAX,             
+ 'NEW $BSM JSR, POP JMP, C;             
+                                        
+CODE ROMCALL ( adr -- )                 
+ BOT    LDA, CALL: 1+ STA,              
+ BOT 1+ LDA, CALL: 2+ STA,              
+ C081 LDA, ( bsm off)                   
+ TXA, PHA, 'NEW mainzp JSR,             
+ 'NEW CALL.A LDA, CALL: JSR,            
+ 'NEW CALL.A STA,                       
+ 'NEW altzp JSR, PLA, TAX,              
+ 'NEW $BSM JSR, POP JMP, C;             
+                                        
+DECIMAL -->                             
+                                        
+════════════════════════════════════════   SCREEN 053
+( MON RM-W2.. <EMIT> PAGE< 1/19/90>193) 
+HEX                                     
+                                        
+: MON ( jump to system monitor )        
+   FF69 ROMCALL ;                       
+: RM-W2 ( rom read & bank 2 write )     
+   0 BSM ! 'NEW $BSM CALL ;             
+: R1-W1 ( bank 1 read & write )         
+   1 BSM ! 'NEW $BSM CALL ;             
+: R2-W2 ( bank 2 read & write )         
+   2 BSM ! 'NEW $BSM CALL ;             
+: <EMIT> ( ch -- )                      
+   80 OR CALL.A ! 0FDED ROMCALL         
+   1 'NEW OUT +! ;                      
+: EMIT  <EMIT> ;                        
+: PAGE  FC58 ROMCALL ;                  
+                                        
+                                        
+DECIMAL -->                             
+                                        
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 054
+( CR <KEY> KEY S0 DEPTH  <12/20/85>194) 
+HDP @ CONSTANT HEXTRA                   
+  MOVEWORD?                             
+  16384 HDP !                           
+                                        
+HEX                                     
+                                        
+: <CR>  0D <EMIT> 0 OUT ! ;             
+: CR  <CR> ;                            
+: ?CR OUT @ IF CR THEN ;                
+: S0     SP0 @ ;                        
+: DEPTH  SP@ S0 SWAP - 2/ ;             
+: <KEY> ( -- ch )                       
+   FD0C ROMCALL                         
+   CALL.A @ 7F AND                      
+ ( DUP 2 = IF DEPTH 240 ! THEN )        
+ ( DUP 1 = IF MON THEN )                
+;                                       
+                                        
+: KEY <KEY> ;                           
+DECIMAL -->                             
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 055
+( <TYPE> TYPE SPACE <."> < 1/19/90>195) 
+                                        
+                                        
+: SPACE  BL EMIT ;                      
+: SPACES  0 MAX ?DUP                    
+   IF 0 DO SPACE LOOP THEN ;            
+: COUNT  DUP 1+ SWAP C@ ;               
+: <TYPE>  0 MAX ?DUP                    
+   IF 0 DO COUNT EMIT LOOP THEN DROP ;  
+: TYPE  <TYPE> ;                        
+: DECIMAL 10 BASE ! ;                   
+: NOOP ;                                
+: CFA   2- ;                            
+: <.">  R@ COUNT DUP 1+ R> + >R TYPE ;  
+                                        
+'NEW <."> 2 -    ' *<.">* !             
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 056
+( CONVERT & misc.        < 1/19/90>196) 
+MAIN                                    
+: HERE  DP @ ;                          
+: PAD   HERE 68 + ;                     
+                                        
+APPENDIX                                
+: -TRAILING ( adr cnt -- adr cnt' )     
+   DUP 0                                
+   DO DDUP + 1- C@ BL =                 
+      IF 1- ELSE LEAVE THEN             
+   LOOP ;                               
+                                        
+: CONVERT                               
+   BEGIN                                
+      1+ DUP >R C@ BASE @ DIGIT         
+   WHILE                                
+      SWAP BASE @ U* DROP ROT           
+      BASE @ U* D+ DPL @ 1+             
+      IF 1 DPL +! THEN R>               
+   REPEAT R> ;                          
+                                        
+MAIN -->                                
+                                        
+                                        
+════════════════════════════════════════   SCREEN 057
+( <."> <ABORT"> <DODOES> < 1/19/90>197) 
+MAIN                                    
+: <ABORT">                              
+   IF NOOP    ( @APPENDIX )             
+      GAP     ( WHERE1 )                
+      SP! NOOP R@ COUNT TYPE            
+      NOOP NOOP ( FORTH DEFINITIONS )   
+      GAP     ( QUIT )                  
+   ELSE R> DUP C@ + 1+ >R THEN ;        
+                                        
+CODE <DODOES>                           
+   DEX, DEX, CLC, W LDA,                
+   2 # ADC, BOT STA, TYA, W 1+ ADC,     
+   BOT 1+ STA, SEC, PLA, 1 # SBC,       
+   W STA, PLA, 0 # SBC, W 1+ STA,       
+   *COLON* JMP, C;                      
+                                        
+'NEW <DODOES>    ' *DODOES* !           
+'NEW <ABORT"> 2- ' *<ABORT">* !         
+-->                                     
+                                        
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 058
+( FORTH ROOT & root words< 1/19/90>198) 
+MAIN                                    
+VOCABULARY ROOT                         
+  ( mark bottom of ROOT)                
+  HLAST @ BOT-ROOT !                    
+VOCABULARY FORTH IMMEDIATE              
+APPENDIX                                
+: X ( null word )                       
+   BLK @                                
+   IF GAP ( STATE )   @                 
+      GAP ( ?STREAM )                   
+   THEN R> DROP ;                       
+  HLAST @ X-LFA ! ( mark null word )    
+: DEFINITIONS  NOOP ( for virtuals )    
+    CONTEXT @ CURRENT ! ;               
+: VOCABULARY NOOP ;                     
+: ORDER  NOOP ;                         
+: FORGET NOOP ;                         
+: WORDS  NOOP ;                         
+: VLIST  NOOP ;                         
+: ONLY   NOOP ;                         
+: ALSO   NOOP ;                         
+: MONITOR MON ;                         
+MAIN -->                                
+════════════════════════════════════════   SCREEN 059
+( <DOVOC>                < 1/19/90>199) 
+APPENDIX                                
+CREATE topr ( head for 1st after ROOT)  
+    ( mark 1st after ROOT )             
+   HLAST @ TOP-ROOT !                   
+                                        
+MAIN                                    
+: <DOVOC> DOES> CONTEXT ! ;             
+                                        
+   ( set metacompiler pointer )         
+'NEW <DOVOC> 2 + ' *VOCAB* !            
+                                        
+   ( set CFA's of FORTH and ROOT )      
+*VOCAB*  -2 BYTE:IN ROOT   !NEW         
+*VOCAB*  -2 BYTE:IN FORTH  !NEW         
+                                        
+  ( set voc-link )                      
+'NEW ROOT 04 +  04 BYTE:IN FORTH !NEW   
+                                        
+  ( set startup vocabulary )            
+'NEW FORTH 04 + 00 BYTE:IN ICEBOX !NEW  
+                                        
+MAIN -->                                
+                                        
+════════════════════════════════════════   SCREEN 060
+( forward references     < 1/19/90>200) 
+MAIN                                    
+                                        
+: QUIT NOOP ;                           
+                                        
+: <ABORT>                               
+   SP! [COMPILE] FORTH DEFINITIONS      
+   QUIT ;                               
+                                        
+: FORGET-SYS NOOP ;                     
+                                        
+APPENDIX                                
+: EXPECT     NOOP ;                     
+                                        
+: INTERPRET  NOOP ;                     
+                                        
+: QUERY  TIB @ 80 EXPECT 0 >IN ! ;      
+                                        
+MAIN -->                                
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 061
+( BRK-RETN RESET ABORT   < 1/19/90>201) 
+HEX MAIN                                
+                                        
+: ABORT     <ABORT> <ABORT> ;           
+: BRK-RETN  <ABORT> <ABORT> ;           
+                                        
+( This version always sets )            
+( bank-switch memory to R2-W2. )        
+( and altzp )                           
+                                        
+CODE RESET  CLD,                        
+  'NEW altzp JSR,                       
+  RP00 LDX, TXS, SP00 LDX,              
+  'NEW BRK-RETN #LO LDA, IP STA,        
+  'NEW BRK-RETN #HI LDA, IP 1+ STA,     
+  # 2 LDA, 'NEW BSM STA,                
+  C083 LDA, C083 LDA,                   
+                 ( restore bank-sw mem) 
+  'NEW RP! JMP, C;                      
+                                        
+DECIMAL -->                             
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 062
+( M*/ ZERO-DIV           < 1/19/90>202) 
+HEX                                     
+: ZERO-DIV                              
+   NOOP ( execution vector )            
+   NOOP ( EXIT )                        
+   1 ABORT" DIVIDE OVERFLOW" ;          
+                                        
+CODE <Z-DIV>                            
+   'NEW ZERO-DIV #LO LDA, IP STA,       
+   'NEW ZERO-DIV #HI LDA, IP 1+ STA,    
+   NEXT JMP, C;                         
+                                        
+: M*/  DDUP XOR SWAP ABS >R SWAP ABS    
+   >R OVER XOR ROT ROT DABS SWAP R@ U*  
+   ROT R> U* ROT 0 D+ R@ U/MOD ROT ROT  
+   R> U/MOD SWAP DROP SWAP ROT D+- ;    
+                                        
+                                        
+'NEW <Z-DIV>  10 BYTE:IN U/MOD  !NEW    
+                                        
+DECIMAL -->                             
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 063
+( M* M+ M/ /MOD M/MOD    < 1/19/90>203) 
+                                        
+: M*     DDUP XOR >R ABS SWAP ABS U*    
+         R> D+- ;                       
+: M+     S->D D+ ;                      
+: M/     OVER >R >R DUP D+- R@ ABS      
+         U/MOD R> R@ XOR +- SWAP        
+         R> +- SWAP ;                   
+: /MOD   >R S->D R> M/ ;                
+: M/MOD  >R 0 R@ U/MOD R> SWAP >R       
+         U/MOD R> ;                     
+: MOD    /MOD DROP ;                    
+: /      /MOD SWAP DROP ;               
+: *      U* DROP ;                      
+: */MOD  >R M* R> M/ ;                  
+: */     */MOD SWAP DROP ;              
+                                        
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 064
+( HOLD <# # #> #S SIGN   < 1/19/90>204) 
+                                        
+: HOLD   -1 HLD +! HLD @ C! ;           
+                                        
+: <#     PAD HLD ! ;                    
+                                        
+: #      BASE @ M/MOD ROT 9 OVER <      
+         IF 7 + THEN                    
+         48 + HOLD ;                    
+                                        
+: #>     DDROP HLD @ PAD OVER - ;       
+                                        
+: #S     BEGIN # DDUP OR NOT UNTIL ;    
+                                        
+: SIGN   0< IF 45 HOLD THEN ;           
+                                        
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 065
+( D.R D. U. U.R . .R     < 1/19/90>205) 
+                                        
+: D.R                                   
+   DEPTH 3 <                            
+   IF CR ." EMPTY STACK" SP!            
+   ELSE                                 
+      >R SWAP OVER DUP D+-              
+         <# #S ROT SIGN #>              
+      R> OVER - SPACES TYPE             
+   THEN ;                               
+                                        
+: D.  0 D.R SPACE ;                     
+                                        
+: U.  0 D. ;                            
+                                        
+: U.R 0 SWAP D.R ;                      
+                                        
+: .   S->D D. ;                         
+                                        
+: .R  >R S->D R> D.R ;                  
+                                        
+-->                                     
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 066
+( PRODOS INTERFACE       < 1/19/90>206) 
+HEX                                     
+    BB00 CONSTANT DOS-BUFFER            
+    400 CONSTANT B/BUF                  
+                                        
+VARIABLE PARAMS  \ ProDOS param table   
+    10 NFALLOT                          
+                                        
+: +PARAM ( n1 -- addr, adr of n'th byt) 
+   PARAMS + ;                           
+                                        
+: P@ ( addr -- d, fetch 3 byte double ) 
+   DUP @ SWAP 2+ C@ ;                   
+                                        
+: P! ( d1 addr -- store 3 byte double ) 
+   SWAP OVER 2+ C! ! ;                  
+                                        
+DECIMAL  -->                            
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 067
+( CALLMLI                < 4/11/91>207) 
+HEX                                     
+VARIABLE MLIRET  ( return value )       
+( call MLI command # cmd with PARAMS )  
+( table set as argument )               
+                                        
+CODE CALLMLI ( cmd -- <err 1> <0> )     
+  BOT LDA, HERERUN 9 + STA,             
+  'NEW mainzp JSR,                      
+  BF00 JSR,                             
+  0 C, ( command )                      
+  'NEW PARAMS , CS NOT \ no error?      
+  IF, 'NEW altzp JSR,                   
+   'NEW MLIRET STA, 'NEW MLIRET 1+ STY, 
+    BOT STA, BOT 1+ STY,                
+    NEXT JMP, THEN,                     
+  'NEW altzp JSR,  \ error              
+  'NEW MLIRET STA, 'NEW MLIRET 1+ STY,  
+  BOT STA, BOT 1+ STY,                  
+  DEX, DEX, BOT 1+ STY,                 
+  INY, BOT STY,                         
+  NEXT JMP, C;                          
+DECIMAL -->                             
+                                        
+════════════════════════════════════════   SCREEN 068
+( ?DOSERR NAME           < 1/19/90>208) 
+HEX APPENDIX                            
+                                        
+: NAME ( -- name )                      
+     BL GAP ( WORD ) ;                  
+                                        
+DECIMAL MAIN ( **** )                   
+                                        
+: <?DOSERR> ( <err 1> <0> -- )          
+   IF  CR ."  DOS error # "             
+    BASE @ >R 16 BASE !                 
+    U. R> BASE ! ABORT                  
+   THEN ;                               
+                                        
+                                        
+: ?DOSERR ( <err 1> <0> -- )            
+  <?DOSERR> ;                           
+                                        
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 069
+( CREATE-FILE OPEN-FILE << 1/19/90>209) 
+MAIN DECIMAL                            
+                                        
+: CREATE-FILE                           
+      ( name type aux -- <err 1> <0> )  
+    7 PARAMS C!                         
+    ( aux )   5 +PARAM  ! ( aux type )  
+    ( type )  4 +PARAM C! ( file type ) 
+    ( name )  1 +PARAM  ! ( name )      
+    227       3 +PARAM C! ( access )    
+    1         7 +PARAM C! ( storage )   
+    0         8 +PARAM  ! ( date )      
+    0        10 +PARAM  ! ( time )      
+    192 CALLMLI ;                       
+                                        
+: OPEN-FILE                             
+     ( name buffer -- <err 1> <han 0> ) 
+    3 PARAMS C!                         
+    ( buffer )  3 +PARAM !              
+    ( name )    1 +PARAM !              
+    200 CALLMLI ?DUP 0=                 
+    IF 5 +PARAM C@ 0 THEN ;             
+ -->                                    
+                                        
+════════════════════════════════════════   SCREEN 070
+( HCLOSE CLOSE           < 1/19/90>210) 
+DECIMAL MAIN                            
+                                        
+: HOPEN ( name -- <err 1> <han 0> )     
+   DOS-BUFFER OPEN-FILE ;               
+                                        
+: <HCREATE>                             
+   ( name type aux -- <err 1> <han 0> ) 
+   3 PICK >R CREATE-FILE ( err? )       
+   IF R> DROP 1                         
+   ELSE R> HOPEN THEN ;                 
+                                        
+: HCREATE ( name -- <err 1> <han 0> )   
+   247 0 <HCREATE> ;                    
+                                        
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 071
+( HCREATE HCLOSE         < 1/19/90>211) 
+DECIMAL MAIN                            
+                                        
+: HCLOSE ( han -- <err 1> <0> )         
+    1 PARAMS C!                         
+    ( han ) 1 +PARAM C!                 
+    204 ( close ) CALLMLI ;             
+                                        
+: HSEEK ( dofs mode hndl - <err 1> <0>) 
+    SWAP 0= NOT ABORT" HSEEK: mode err" 
+    2 PARAMS C!                         
+    ( han )  1 +PARAM C!                
+    ( dofs ) 2 +PARAM P!                
+    206 ( setmark ) CALLMLI ;           
+                                        
+: GET-EOF ( han -- <err 1> <dbl 0> )    
+    2 PARAMS C!                         
+    1 +PARAM C!                         
+    209 CALLMLI ?DUP 0=                 
+    IF 2 +PARAM P@ 0 THEN ;             
+                                        
+-->                                     
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 072
+( OPEN CLOSE OPEN-NEW    < 1/19/90>212) 
+DECIMAL APPENDIX                        
+    VARIABLE SFILE \ "OPEN" file id     
+    VARIABLE RFILE \ read file id       
+    VARIABLE WFILE \ write file id      
+: CLOSE ( -- )                          
+    GAP ( FLUSH )                       
+    WFILE @ HCLOSE ?DOSERR              
+    RFILE @ WFILE @ = NOT               
+    IF RFILE @ HCLOSE ?DOSERR THEN      
+    -1 WFILE ! -1 RFILE ! ;             
+: ?CLOSE ( -- close SFILE if open )     
+    GAP ( FLUSH )                       
+    SFILE @ HCLOSE IF DROP THEN         
+    RFILE @ HCLOSE IF DROP THEN         
+    -1 WFILE ! -1 RFILE ! ;             
+: OPEN ( -- )                           
+    ?CLOSE NAME HOPEN ?DOSERR           
+    DUP SFILE ! DUP RFILE ! WFILE ! ;   
+: OPEN-NEW ( -- )                       
+    ?CLOSE NAME HCREATE ?DOSERR         
+    DUP SFILE ! DUP RFILE ! WFILE ! ;   
+MAIN -->                                
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 073
+( <HREAD> <HWRITE>       < 1/19/90>213) 
+DECIMAL MAIN                            
+                                        
+: <HREAD> ( read bytes from file )      
+( cnt han adr -- <err 1><#read 0> )     
+   ( adr ) 2 +PARAM !                   
+   ( han ) 1 +PARAM C!                  
+   ( cnt ) 4 +PARAM !                   
+   4 PARAMS C!                          
+   202 ( read ) CALLMLI ?DUP 0=         
+   IF 6 +PARAM @ 0 ( get # read )       
+   THEN ;                               
+                                        
+: <HWRITE> ( write bytes to file )      
+( cnt han adr -- <err 1><#written 0> )  
+   ( adr ) 2 +PARAM !                   
+   ( han ) 1 +PARAM C!                  
+   ( cnt ) 4 +PARAM !                   
+   4 PARAMS C!                          
+   203 ( write ) CALLMLI ?DUP 0=        
+   IF 6 +PARAM @ 0 ( get # written )    
+   THEN ;                               
+-->                                     
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 074
+( HREAD HWRITE           < 1/19/90>214) 
+DECIMAL MAIN                            
+( errors if all not read )              
+                                        
+: HREAD ( read bytes from file )        
+    ( cnt han adr -- <err 1><0> )       
+  <HREAD> ?DUP 0=                       
+  IF 4 +PARAM @ = NOT                   
+   IF -1 1 EXIT THEN                    
+   0 ( ok )                             
+  THEN ;                                
+                                        
+                                        
+: HWRITE ( write bytes to file )        
+    ( cnt han adr -- <err 1><0> )       
+  <HWRITE> ?DUP 0=                      
+  IF 4 +PARAM @ = NOT                   
+   IF -2 1 EXIT THEN                    
+   0 ( ok )                             
+  THEN ;                                
+                                        
+-->                                     
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 075
+( LAST-SCR <R/W> R/W     < 7/15/91>215) 
+DECIMAL APPENDIX                        
+: LAST-SCR ( -- n )                     
+   RFILE @ GET-EOF ?DOSERR              
+   B/BUF U/MOD SWAP DROP 1- ;           
+                                        
+: ?VALID-SCR ( n -- )                   
+   LAST-SCR 1+ U< NOT                   
+   ABORT" Invalid screen #!" ;          
+                                        
+: <R/W> ( adr scr R/W -- )              
+   ( flag ) >R                          
+   B/BUF U* 0 ( fromstart ) R@ ( flag ) 
+   IF RFILE ELSE WFILE THEN             
+   @ HSEEK ?DOSERR                      
+   ( adr ) B/BUF R> ( flag )            
+   IF RFILE @ ROT HREAD                 
+   ELSE WFILE @ ROT HWRITE THEN         
+   ?DOSERR ;                            
+                                        
+: R/W <R/W> ;                           
+                                        
+MAIN -->                                
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 076
+( GETDIR CHDIR           < 7/15/91>216) 
+DECIMAL MAIN                            
+                                        
+: GETDIR ( adr -- <err 1> <0>)          
+    1 PARAMS C!                         
+    ( adr ) 1 +PARAM  !                 
+    199 ( get prefix ) CALLMLI ;        
+                                        
+: CHDIR ( addr -- <err 1> <0> )         
+    1 PARAMS C!                         
+    ( adr ) 1 +PARAM  !                 
+    198 ( set prefix ) CALLMLI ;        
+                                        
+: HDELETE ( addr -- <err 1> <0> )       
+    1 PARAMS C!                         
+    ( adr ) 1 +PARAM !                  
+    193 ( destroy ) CALLMLI ;           
+                                        
+                                        
+-->                                     
+                                        
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 078
+( FLUSH UPDATE           < 7/15/91>218) 
+( simplified single buffer version )    
+DECIMAL APPENDIX                        
+                                        
+: SAVE-BUFFERS                          
+   FIRST @ 0< ( needes updated? )       
+   IF FIRST @ 32767 AND FIRST !         
+    FIRST 2+ FIRST @ 0 R/W              
+   THEN ;                               
+                                        
+: EMPTY-BUFFERS                         
+   FIRST LIMIT OVER - 0 FILL            
+   32767 FIRST ! ;                      
+                                        
+: FLUSH                                 
+   SAVE-BUFFERS EMPTY-BUFFERS ;         
+                                        
+: UPDATE                                
+   FIRST @ -32768 OR FIRST ! ;          
+                                        
+MAIN -->                                
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 079
+( BUFFER BLOCK           < 7/15/91>219) 
+( simplified single buffer version )    
+DECIMAL APPENDIX                        
+                                        
+: BUFFER ( blk -- adr )                 
+   SAVE-BUFFERS                         
+   FIRST ! FIRST 2+ ;                   
+                                        
+: BLOCK ( blk -- adr )                  
+   DUP FIRST @ = ( already loaded? )    
+   IF DROP                              
+   ELSE FLUSH                           
+    FIRST 2+ OVER 1 R/W                 
+    FIRST !                             
+   THEN                                 
+   FIRST 2+ ;                           
+                                        
+                                        
+MAIN -->                                
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 080
+( MODE40 MODE80          < 7/15/91>220) 
+HEX                                     
+ 18 CONSTANT NLINS                      
+  0 CONSTANT +EDY                       
+  0 CONSTANT +EDX                       
+                                        
+CODE <MODE40>                           
+   'NEW mainzp JSR,                     
+   C051 LDA, C00E STA,                  
+   C056 LDA, C00C STA,                  
+   C054 LDA, C000 STA,                  
+   # F0 LDA, 36 STA,                    
+   # FD LDA, 37 STA,                    
+   # 1B LDA, 38 STA,                    
+   # FD LDA, 39 STA,                    
+   # 28 LDA, 21 STA,                    
+   # FF LDA, 32 STA,                    
+   'NEW altzp JSR,                      
+   NEXT JMP, C;                         
+: MODE40                                
+   <MODE40> PAGE 0 'NEW +EDX ! ;        
+                                        
+DECIMAL                                 
+-->                            ( bobp ) 
+════════════════════════════════════════   SCREEN 081
+( MODE80 PR#             < 7/15/91>221) 
+HEX MAIN                                
+                                        
+CODE <MODE80>                           
+   'NEW mainzp JSR,                     
+   # FF LDA, 32 STA,                    
+   # 00 LDA, 36 STA,                    
+   # C3 LDA, 37 STA,                    
+   'NEW altzp JSR, NEXT JMP, C;         
+                                        
+: MODE80                                
+   C051 C@ C056 C! ( text )             
+   <MODE80> 0 EMIT 8 'NEW +EDX !        
+   C/L 64 = 'NEW +EDY ! ;               
+                                        
+CODE <PR#> \ hibyte --,                 
+   BOT LDY, 'NEW mainzp JSR,            
+   # 00 LDA, 36 STA, 37 STY,            
+   'NEW altzp JSR, POP JMP, C;          
+: PR# ( n -- )                          
+   ?DUP IF C0 + <PR#> THEN ;            
+DECIMAL -->                             
+                                        
+                                        
+════════════════════════════════════════   SCREEN 082
+( XY@ XYTAB              < 1/19/90>223) 
+HEX                                     
+CODE XY@ ( -- x y )                     
+   DEX, BOT STY, DEX,                   
+   'NEW mainzp JSR,                     
+   C01F LDA, # 80 AND, 0= NOT           
+   IF, 57B LDY, ELSE, 24 LDY, THEN,     
+   25 LDA,                              
+   'NEW altzp JSR,                      
+   BOT STY, PUSH0A JMP, C;              
+CODE XYTAB ( x y -- )                   
+   SEC LDY, 'NEW mainzp JSR,            
+   C01F LDA, # 80 AND, 0= NOT           
+   IF, 57B STY, ELSE, 24 STY, THEN,     
+   'NEW altzp JSR, BOT LDA,             
+   'NEW mainzp JSR, 25 STA,             
+   C081 LDA, FC22 JSR, ( rom on )       
+   'NEW altzp JSR,                      
+   'NEW $BSM JSR, ( bsm on )            
+   POPTWO JMP, C;                       
+                                        
+DECIMAL  -->                            
+                                        
+                                        
+════════════════════════════════════════   SCREEN 083
+( GET:CS AUX:SEG         < 7/15/91>223) 
+                                        
+HEX MAIN                                
+: BEEP 7 EMIT ;                         
+: 2BEEP BEEP BEEP ;                     
+                                        
+   0 CONSTANT GET:CS                    
+8000 CONSTANT AUX:SEG                   
+                                        
+( first avail seg in aux bank )         
+( change later to protect heads )       
+APP-HSTART                              
+     CONSTANT AUX:START                 
+                                        
+( last avail seg in aux bank + 1 )      
+E000 CONSTANT AUX:END                   
+                                        
+DECIMAL                                 
+                                        
+                                        
+                                        
+                                        
+                                        
+-->                            ( bobp ) 
+════════════════════════════════════════   SCREEN 084
+( from_mem to_mem        < 7/15/91>224) 
+MAIN                                    
+                                        
+CREATE from_mem START-ASM SMUDGE        
+  SEC LDA, .A ASL, N STA,               
+  SEC 1+ LDA, .A ROL, N 1+ STA,         
+  # 1 LDA, .A ROL,                      
+  'NEW transfer 4 + STA,                
+  CLC, BOT LDA, N ADC, N STA,           
+  BOT 1+ LDA, N 1+ ADC, N 1+ STA,       
+  RTS, C;                               
+                                        
+CREATE to_mem START-ASM SMUDGE          
+  SEC LDA, .A ASL, N 2+ STA,            
+  SEC 1+ LDA, .A ROL, N 3 + STA,        
+  # 2 LDA, .A ROL,                      
+  'NEW transfer 1+ STA,                 
+  CLC, BOT LDA, N 2+ ADC, N 2+ STA,     
+  BOT 1+ LDA, N 3 + ADC, N 3 + STA,     
+  RTS, C;                               
+                                        
+DECIMAL -->                             
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 085
+( from_stack to_stack    < 7/15/91>225) 
+MAIN                                    
+                                        
+CREATE from_stack START-ASM SMUDGE      
+  ( turn off RAMRD, main memory )       
+  # 2 LDA, 'NEW transfer 4 + STA,       
+  N STX, N 1+ STY,       \ src adr      
+  RTS, C;                               
+                                        
+CREATE to_stack START-ASM SMUDGE        
+  ( turn off RAMWRT, main memory )      
+  # 4 LDA, 'NEW transfer 1+ STA,        
+  N 2+ STX, N 3 + STY,   \ adr          
+  RTS, C;                               
+                                        
+                                        
+                                        
+                                        
+                                        
+-->                                     
+                                        
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 086
+( C@L C!L                < 7/15/91>226) 
+MAIN                                    
+                                        
+CODE C@L ( seg adr -- val )             
+  'NEW from_mem JSR, INX, INX,          
+  BOT 1+ STY,                           
+  'NEW to_stack JSR,                    
+  # 1 LDA, N 4 + STA, N 5 + STA,        
+  'NEW transfer JSR,                    
+  NEXT JMP, C;                          
+                                        
+CODE C!L ( val seg adr -- )             
+  'NEW to_mem JSR, INX, INX, INX, INX,  
+  'NEW from_stack JSR,                  
+  # 1 LDA, N 4 + STA, N 5 + STA,        
+  'NEW transfer JSR,                    
+  POP JMP, C;                           
+                                        
+                                        
+                                        
+-->                                     
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 087
+( @L !L                  < 7/15/91>227) 
+MAIN                                    
+                                        
+CODE @L ( seg adr -- val )              
+  'NEW from_mem JSR, INX, INX,          
+  'NEW to_stack JSR,                    
+  # 2 LDA, N 4 + STA,                   
+  # 1 LDA, N 5 + STA,                   
+  'NEW transfer JSR,                    
+  NEXT JMP, C;                          
+                                        
+CODE !L ( val seg adr -- )              
+  'NEW to_mem JSR, INX, INX, INX, INX,  
+  'NEW from_stack JSR,                  
+  # 2 LDA, N 4 + STA,                   
+  # 1 LDA, N 5 + STA,                   
+  'NEW transfer JSR,                    
+  POP JMP, C;                           
+                                        
+                                        
+-->                                     
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 088
+( CMOVEL SETUP-LONG      < 7/15/91>228) 
+  APP-HSTART CONSTANT HEAD-START        
+                                        
+CODE CMOVEL ( seg adr seg adr cnt --)   
+  \ *** MOVES FROM BOTTOM TO TOP ***    
+  BOT 1+ LDA, N 5 + STA,                
+  BOT LDA, N 4 + STA, 0= NOT            
+  IF, N 5 + INC, THEN,                  
+  INX, INX,                             
+  'NEW to_mem JSR,                      
+  INX, INX, INX, INX,                   
+  'NEW from_mem JSR,                    
+  INX, INX, INX, INX,                   
+  'NEW transfer JSR,                    
+  NEXT JMP, C;                          
+                                        
+: SETUP-LONG ( -- copy to aux )         
+   49048 C@ 48 AND 48 = NOT             
+   ABORT" 128K REQUIRED"                
+   GET:CS 2048 AUX:SEG 2048             
+   HEAD-START 2048 - CMOVEL ;           
+                                        
+-->                                     
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 089
+( READ-HEADS             < 1/19/90>230) 
+MAIN                                    
+: <READ-HEADS> ( ofs len han -- )       
+  >R ( ** 512 bytes at FIRST ** )       
+  BEGIN DUP 512 MIN                     
+   DUP R@ FIRST HREAD ?DOSERR           
+   >R GET:CS FIRST AUX:SEG 5 PICK       
+   R@ CMOVEL                            
+   SWAP R@ +                            
+   SWAP R> - ?DUP 0=                    
+  UNTIL                                 
+  R> DDROP ;                            
+                                        
+APPENDIX                                
+: READ-HEADS ( ofs len han -- )         
+  FLUSH ( empty anything in buffer )    
+  <READ-HEADS>                          
+  EMPTY-BUFFERS ( restore buffer )      
+;                                       
+MAIN -->                                
+                                        
+READ-HEADS used by virtual loader       
+to read in virtual heads (surprise!)    
+                                        
+════════════════════════════════════════   SCREEN 090
+( <LOAD-HEADS>           < 7/15/91>230) 
+DECIMAL APPENDIX                        
+                                        
+: <<LOAD-HEADS>> ( load filename.H )    
+   72 8198 COUNT + 1- C!                
+   ." Loading heads from '"             
+   8198 COUNT TYPE ." '..." CR          
+   8198 HOPEN ?DOSERR ( han ) >R        
+   HEAD-START ( load ofs in aux)        
+   R@ GET-EOF ?DOSERR DROP ( len )      
+   R@ <READ-HEADS>                      
+   R> HCLOSE ?DOSERR CR ;               
+                                        
+: <ACOLD> ( init stuff in appendix )    
+   ICEBOX     @ VOC-LINK !              
+   ICEBOX 2+  @ DP !                    
+   ICEBOX 4 + @ 'NEW FORTH !            
+   LIMIT 1028 - DUP 'NEW FIRST !        
+     'NEW MEM-LIMIT !                   
+   EMPTY-BUFFERS 512 TIB ! ;            
+                                        
+MAIN -->                                
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 091
+( <LOAD-APPEN>           < 1/19/90>231) 
+DECIMAL MAIN                            
+ APP-START CONSTANT APP-START           
+                                        
+: <LOAD-APPEN> ( load filename.H )      
+   R2-W2                                
+   65 8198 COUNT + 1- C!                
+   CR ." Loading appendix from '"       
+   8198 COUNT TYPE ." '..." CR          
+   8198 HOPEN ?DOSERR ( han ) >R        
+   APP-START   ( load ofs in aux)       
+   R@ GET-EOF ?DOSERR DROP ( len )      
+   R@ <READ-HEADS>                      
+   R> HCLOSE ?DOSERR ;                  
+                                        
+: <LOAD-HEADS> \ get appendix/heads     
+   <LOAD-APPEN>                         
+   <<LOAD-HEADS>> ;                     
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 092
+( LOGO START-SYS         < 1/19/90>232) 
+                                        
+BASE-ADDR CONSTANT COLDSTART            
+VARIABLE S32-ADR 0 C,                   
+                                        
+HEX                                     
+: RMV/RAM ( -- unhook /RAM device )     
+  0 BF40 BF32 ( scan DEVLST )           
+  DO I C@ 0F3 AND 0B3 = ( /RAM? )       
+   IF DROP I LEAVE THEN                 
+  1 /LOOP                               
+  ?DUP ( /RAM found? )                  
+  IF CR ." /RAM disabled"               
+   DUP C@ S32-ADR 2+ C! ( save id )     
+   BEGIN DUP BF40 U<                    
+   WHILE DUP 1+ C@ OVER C! 1+           
+   REPEAT 0 SWAP C!                     
+   ( make "no device" )                 
+   BF26 @ S32-ADR ! ( save adr )        
+   BF10 @ BF26 !                        
+   -1 BF31 +C! ( dec DEVCNT )           
+  THEN ;                                
+                                        
+DECIMAL -->                    ( bobp ) 
+════════════════════════════════════════   SCREEN 093
+( COLD                   < 1/19/90>233) 
+HEX                                     
+: ACOLD <ACOLD> ;                       
+: LOAD-HEADS <LOAD-HEADS> ;             
+: LOGO NOOP ;                           
+: START-SYS NOOP ;                      
+: COLD                                  
+   SP! RM-W2                            
+   'NEW RESET DUP 3F2 ! 3F9 !           
+   3F3 C@ A5 XOR 3F4 C! 4C 3F8 C!       
+   DECIMAL RMV/RAM SETUP-LONG           
+   BF30 C@ 'NEW BOOT-SD !               
+   LOAD-HEADS                           
+   ACOLD ( init stuff in appendix )     
+   LOGO                                 
+   START-SYS                            
+   ABORT ;                              
+                                        
+ 'NEW COLD                              
+   ASSEMBLER JMP-TO FORTH DELTA +  !NEW 
+                                        
+DECIMAL -->                             
+                                        
+                                        
+════════════════════════════════════════   SCREEN 094
+( DU< D- D0= D= D> D@ D! < 1/19/90>234) 
+                                        
+: D<                                    
+   ROT DDUP =                           
+   IF ROT ROT DNEGATE D+ 0<             
+   ELSE SWAP < SWAP DROP                
+   THEN SWAP DROP ;                     
+                                        
+: D-  DNEGATE D+ ;                      
+                                        
+: D=  D- OR 0= ;                        
+                                        
+: D@  DUP @ SWAP 2+ @ SWAP ;            
+                                        
+: D!  SWAP OVER ! 2+ ! ;                
+                                        
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 095
+( APP-LINK1 APP-LINK2    < 1/19/90>235) 
+                                        
+9 ' WIDTH !                             
+                                        
+ 0 CONSTANT APP-LINK1                   
+APP-BOTTOM-LINK                         
+                                        
+ 0 CONSTANT APP-LINK2                   
+APP-TOP-LINK                            
+                                        
+6 ' WIDTH !                             
+                                        
+-->                                     
+                                        
+appendix is linked between top and      
+bottom links                            
+                                        
+value of the constant is later set      
+to its LFA in aux memory                
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 096
+( system variables       < 1/19/90>236) 
+APPENDIX                                
+ 6 CONSTANT WIDTH                       
+ 8 CONSTANT #VOCS ( see CONTEXT scr174) 
+                                        
+   VARIABLE CSP                         
+   VARIABLE STATE                       
+   VARIABLE FENCE                       
+   VARIABLE >IN-ERR                     
+   VARIABLE >IN-BLK                     
+                                        
+   VARIABLE WARNING  ( warn dup def )   
+   VARIABLE AWARNING ( warn app calls)  
+                                        
+MAIN                                    
+10  00 BYTE:IN >IN-ERR   !NEW           
+01  00 BYTE:IN AWARNING  !NEW           
+01  00 BYTE:IN WARNING   !NEW           
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 097
+( @HEAD C@HEAD C!HEAD    < 1/19/90>237) 
+APPENDIX                                
+                                        
+ VARIABLE OLD-DP                        
+ VARIABLE OLD-HDP                       
+ VARIABLE OLD-LATEST                    
+ VARIABLE APP-DP                        
+ VARIABLE APP-HDP                       
+ VARIABLE APP-LATEST                    
+                                        
+: @HEAD ( adr -- v )                    
+   AUX:SEG SWAP @L ;                    
+: !HEAD ( v adr -- v )                  
+   AUX:SEG SWAP !L ;                    
+: C@HEAD ( adr -- v )                   
+   AUX:SEG SWAP C@L ;                   
+: C!HEAD ( v adr -- )                   
+   AUX:SEG SWAP C!L ;                   
+                                        
+MAIN                                    
+                                        
+-->                                     
+                                        
+                                        
+════════════════════════════════════════   SCREEN 098
+( APPENDIX               < 1/19/90>238) 
+\ saves current state sets to compile   
+\ in appendix (RAM-CARD)                
+APPENDIX                                
+                                        
+: APPENDIX                              
+  OLD-DP @ 0= ( don't allow twice )     
+  IF                                    
+     APP-LINK1 APP-LINK2 !HEAD ( unhk)  
+     CURRENT @ @                        
+     DUP HEAD-START !HEAD               
+     OLD-LATEST !                       
+     APP-LATEST @  CURRENT @ !          
+     DP @ OLD-DP !                      
+     APP-DP @ DP !                      
+     HDP @ OLD-HDP !                    
+     APP-HDP @ HDP !                    
+     65356 'NEW MEM-LIMIT !             
+  THEN ;                                
+                                        
+MAIN -->                                
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 099
+( MAIN                   < 1/19/90>239) 
+\ restore compiling to the              
+\ main dictionary                       
+APPENDIX                                
+                                        
+: MAIN                                  
+  OLD-DP @ 0= NOT ( don't allow word )  
+                  ( to execute twice )  
+  IF                                    
+     APP-LINK1 HEAD-START !HEAD         
+     CURRENT @ @                        
+     DUP APP-LINK2 !HEAD                
+     APP-LATEST !                       
+     OLD-LATEST @  CURRENT @ !          
+     DP @ APP-DP !                      
+     OLD-DP @ DP !                      
+     HDP @ APP-HDP !                    
+     OLD-HDP @ HDP !                    
+     0 OLD-DP ! ( set flag )            
+     FIRST 'NEW MEM-LIMIT !             
+  THEN ;                                
+                                        
+MAIN -->                                
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 100
+( ?COMP ?CSP ?LDNG ETC.  < 1/19/90>240) 
+APPENDIX                                
+                                        
+: ?COMP  STATE @ NOT                    
+   ABORT" Compile only" ;               
+                                        
+: ?CSP  SP@ CSP @ -                     
+   ABORT" Compile error" ;              
+                                        
+: ?LOADING  BLK @ NOT                   
+   ABORT" Loading only" ;               
+                                        
+: ?PAIRS  -                             
+   ABORT" Nesting err" ;                
+                                        
+: ?STACK  SP@ S0 SWAP U<                
+   ABORT" Underflow"                    
+   SP@ SPE U< ABORT" Overflow" ;        
+                                        
+: ?STREAM                               
+   ABORT" End of block!" ;              
+                                        
+MAIN -->                                
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 101
+( [ ] 'STREAM COMPILE    < 1/19/90>241) 
+APPENDIX                                
+                                        
+CODE TOGGLE                             
+  SEC X) LDA, BOT EOR,                  
+  SEC X) STA, POPTWO JMP, C;            
+                                        
+: ALLOT DP +! ;                         
+: ,   HERE !  2 ALLOT ;                 
+: C,  HERE C! 1 ALLOT ;                 
+: HEX  16 BASE ! ;                      
+: [  0 STATE ! ;  IMMEDIATE             
+: ]  192 STATE ! ;                      
+: COMPILE  ?COMP R> DUP 2+ >R @ , ;     
+: 'STREAM                               
+   BLK @ ?DUP                           
+   IF BLOCK ELSE TIB @ THEN             
+   >IN @ + ;                            
+                                        
+                                        
+MAIN -->                                
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 102
+( ENCLOSE                < 1/19/90>242) 
+APPENDIX HEX                            
+CODE ENCLOSE                            
+ BOT LDA, N STA, SEC LDA, N 2+ STA,     
+ SEC 1+ LDA, N 3 + STA, DEX, DEX,       
+ DEX, DEX, SEC 1+ STY, BOT 1+ STY,      
+ BEGIN, N 2+ )Y LDA, N CMP, 0=          
+ WHILE, INY, 0=                         
+   IF, BOT 1+ INC, SEC 1+ INC,          
+     SEC 3 + INC, N 3 + INC, THEN,      
+ REPEAT, SEC 2+ STY, 0 # CMP, 0=        
+   IF, BOT STY, INY, SEC STY, NEXT JMP, 
+   THEN,                                
+ BEGIN, N 2+ )Y LDA, 0=                 
+   IF, BOT STY, SEC STY, NEXT JMP,      
+   THEN, N CMP, 0= NOT                  
+ WHILE, INY, 0=                         
+   IF, BOT 1+ INC, SEC 1+ INC,          
+    N 3 + INC, THEN,                    
+ REPEAT, SEC STY, INY, 0=               
+   IF, BOT 1+ INC, THEN, BOT STY,       
+ NEXT JMP, C;                           
+DECIMAL MAIN -->                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 103
+( WORD1 <code version>   < 1/19/90>243) 
+( adr n1 n2 n3 here --, h a+n1 h1+ c f) 
+APPENDIX                                
+CODE WORD1  CLC, 'NEW >IN LDA, SEC ADC, 
+ 'NEW >IN STA, 'NEW >IN 1+ LDA, ( n3 )  
+ SEC 1+ ADC, 'NEW >IN 1+ STA, ( >in +!) 
+                                        
+ SEC, SEC 2+ LDA, SEC 4 + SBC, SEC STA, 
+ BOT X) STA, SEC 3 + LDA, SEC 5 + SBC,  
+ SEC 1+ STA, ( count = n2 n1 - )        
+                                        
+ CLC, SEC 6 + LDA, SEC 4 + ADC,         
+ SEC 4 + STA, SEC 7 + LDA, SEC 5 + ADC, 
+ SEC 5 + STA, ( addr n1 + )             
+                                        
+ BOT LDA, SEC 6 + STA, 01 # ADC,        
+ SEC 2+ STA, BOT 1+ LDA, SEC 7 + STA,   
+ 00 # ADC, SEC 3 + STA,                 
+                                        
+ BOT 1+ STY, SEC 1+ LDA, BOT STA,       
+ SEC INC, 0= IF, SEC 1+ INC, THEN,      
+ NEXT JMP, C;                           
+                                        
+MAIN -->                       ( bobp ) 
+════════════════════════════════════════   SCREEN 104
+( WORD NUMBER            < 1/19/90>244) 
+APPENDIX                                
+                                        
+: WORD  'STREAM                         
+   SWAP ENCLOSE DDUP >                  
+   IF DDROP DDROP 0 HERE ! HERE         
+   ELSE HERE WORD1                      
+      ABORT" INPUT > 255" CMOVE         
+   THEN ;                               
+                                        
+: ?NR ABORT" ??????" ;                  
+                                        
+: NUMBER                                
+   0 0 ROT DUP 1+ C@ 45 = DUP >R +      
+   -1 DPL ! CONVERT DUP C@ BL >         
+   IF DUP C@ 46 = NOT ?NR               
+    0 DPL ! CONVERT DUP C@ BL > ?NR     
+   THEN DROP R>                         
+   IF DNEGATE THEN ;                    
+                                        
+MAIN -->                                
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 105
+( <FIND>                 < 1/19/90>245) 
+APPENDIX                                
+                                        
+: <FIND> ( wa -- {pfa n 1} or {0})      
+   ( search from appendix down first )  
+ ( DUP APP-LINK2 VOC-SEARCH )           
+ ( ?DUP 0= ( not found? )               
+ ( IF ( yes, try order vocabs )         
+    0 #VOCS 0                           
+    DO ( last answer ) DROP             
+     CONTEXT I 2* + @ DUP               
+     IF OVER SWAP @ VOC-SEARCH DUP      
+      IF LEAVE THEN                     
+     THEN                               
+    LOOP ( <wa pfa n 1> <wa 0> )        
+ ( THEN )                               
+   IF ROT DROP 1                        
+   ELSE DROP 0                          
+   THEN ;                               
+                                        
+MAIN -->                                
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 106
+( LITERAL DLITERAL ?STCK < 1/19/90>246) 
+APPENDIX HEX                            
+                                        
+: LITERAL                               
+   STATE @                              
+   IF COMPILE LIT , THEN ; IMMEDIATE    
+                                        
+: DLITERAL                              
+   STATE @                              
+   IF SWAP                              
+      [COMPILE] LITERAL                 
+      [COMPILE] LITERAL                 
+   THEN ;  IMMEDIATE                    
+                                        
+CODE ?STCK                              
+  BOT FF + STY, BOT FE + STY,           
+  INY, SEC, TXA, 'NEW SPE CMP, CS NOT   
+  IF, BOT FE + STY, THEN, DEX, DEX,     
+  SP00 CMP, CS IF, BOT STY, THEN,       
+  NEXT JMP, C;                          
+                                        
+DECIMAL MAIN -->                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 107
+( -FIND FIND ?FIND ' ['] < 1/19/90>247) 
+HEX APPENDIX                            
+: -FIND                                 
+   BL WORD <FIND> ;                     
+                                        
+: FIND                                  
+   -FIND IF DROP CFA ELSE 0 THEN ;      
+                                        
+: ?FIND                                 
+   -FIND NOT ABORT" NOT FOUND" ;        
+                                        
+: '                                     
+  ?FIND DROP [COMPILE] LITERAL          
+; IMMEDIATE                             
+                                        
+: [']                                   
+  ?COMP [COMPILE] '                     
+; IMMEDIATE                             
+                                        
+                                        
+DECIMAL MAIN -->                        
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 108
+( HIDE-HEAD SHOW-HEAD IMM< 1/19/90>248) 
+APPENDIX                                
+VARIABLE LAST-NFA \ NFA of last defnd   
+VARIABLE LAST-CFA \ run loc of last     
+VARIABLE ^LAST-CFA \ compile loc of     
+                                        
+: LFA>NFA ( lfa -- nfa )                
+   4 + ;                                
+: LFA>PFA ( lfa -- pfa )                
+   2+ @HEAD ;                           
+: HIDE-HEAD                             
+   LAST-NFA @ C@HEAD 32 OR              
+   LAST-NFA @ C!HEAD ;                  
+: SHOW-HEAD                             
+   LAST-NFA @ C@HEAD 223 AND            
+   LAST-NFA @ C!HEAD ;                  
+: IMMEDIATE                             
+   LAST-NFA @ C@HEAD 64 XOR             
+   LAST-NFA @ C!HEAD ;                  
+: <;CODE>                               
+   R> ^LAST-CFA @ ! ;                   
+  'NEW <;CODE> 2- ' *<;CODE>* !         
+MAIN -->                                
+                                        
+════════════════════════════════════════   SCREEN 109
+( ?DUPDEF                < 1/19/90>249) 
+APPENDIX                                
+: ?DUPDEF ( adr --, check if dup def )  
+   DUP <FIND>                           
+   IF DDROP WARNING @                   
+    IF ?CR DUP COUNT TYPE               
+     ."  ISN'T UNIQUE" CR               
+   THEN THEN DROP ;                     
+                                        
+: ?MEM-LIMIT                            
+   MEM-LIMIT 100 - HERE U<              
+   IF CR BEEP ." APPROACHING"           
+      MEM-LIMIT U. CR                   
+   THEN ;                               
+                                        
+( convert compile adr to run-time adr)  
+: >RUN-ADR \ adr -- adr'                
+   NOOP ;  ( vectored if needed )       
+                                        
+: THERE \ -- adr,                       
+   HERE >RUN-ADR ;                      
+                                        
+MAIN -->                                
+                                        
+════════════════════════════════════════   SCREEN 110
+( <HEAD>                 < 1/19/90>250) 
+APPENDIX                                
+                                        
+: <HEAD> ( -- build header pt to main)  
+   ?MEM-LIMIT                           
+   THERE 255 AND 255 = ALLOT            
+   THERE LAST-CFA ! HERE >R             
+   CURRENT @ @ ,   ( set LFA )          
+   LAST-CFA @ 2+ , ( set ptr to PFA )   
+   BL WORD DUP 1+ C@ 0= ABORT" Name???" 
+   DUP ?DUPDEF                          
+   DUP C@ WIDTH MIN 1+ ALLOT            
+   128 TOGGLE HERE 1- 128 TOGGLE        
+     ( move head to head seg )          
+   GET:CS R@           ( src seg adr )  
+   AUX:SEG HDP @       ( dest seg adr ) 
+   HERE R@ - CMOVEL                     
+     ( adjust pointers )                
+   HDP @ LFA>NFA LAST-NFA ! ( pt this ) 
+   HDP @ CURRENT @ !    ( this is top ) 
+   HERE R@ - HDP +!                     
+   R@ DP !                              
+   R> ^LAST-CFA ! ;                     
+MAIN -->                                
+════════════════════════════════════════   SCREEN 111
+( HEAD CREATE : ;        < 1/19/90>251) 
+APPENDIX                                
+                                        
+: HEAD ( -- )                           
+   <HEAD> ;                             
+: CREATE                                
+   HEAD 'NEW <VAR> , ;                  
+: :                                     
+   SP@ CSP !                            
+   CURRENT @ CONTEXT !                  
+   HEAD 'NEW <:> ,                      
+   HIDE-HEAD ] ;                        
+: ;                                     
+   ?CSP COMPILE <EXIT>                  
+   SHOW-HEAD [COMPILE] [                
+; IMMEDIATE                             
+                                        
+MAIN -->                                
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 112
+( CONSTANT VARIABLE      < 1/19/90>252) 
+APPENDIX                                
+                                        
+: CONSTANT                              
+   HEAD 'NEW <CONST> ,                  
+   ( val) , ;                           
+                                        
+: VARIABLE                              
+   CREATE 0 , ;                         
+                                        
+: DCONSTANT                             
+   HEAD 'NEW <DCONST> ,                 
+   ( dval) , ,  ;                       
+                                        
+: DVARIABLE                             
+   CREATE 0 , 0 , ;                     
+                                        
+                                        
+MAIN -->                                
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 113
+( ?APP-CALL [COMPILE]    < 1/19/90>253) 
+APPENDIX                                
+                                        
+: ID. ( nfa --, nfa is adr in headseg)  
+   DUP C@HEAD 31 AND SWAP               
+   BEGIN SWAP 1- SWAP 1+ DUP C@HEAD DUP 
+      127 AND EMIT 128 AND              
+   UNTIL DROP ?DUP                      
+   IF 0 DO 94 EMIT LOOP THEN SPACE ;    
+                                        
+: INAPP? ( add -- T/F, T=in append)     
+   APP-START U< NOT ;                   
+: ?APP-CALL ( pfa -- )                  
+   INAPP? HERE INAPP? NOT AND           
+   IF ?CR ." CALL TO APPENDIX "         
+      HERE COUNT TYPE CR                
+   THEN ;                               
+                                        
+: [COMPILE]                             
+   ?COMP ?FIND DROP                     
+   DUP ?APP-CALL CFA ,  ; IMMEDIATE     
+                                        
+DECIMAL MAIN -->                        
+                                        
+════════════════════════════════════════   SCREEN 114
+( <FORGET>               < 1/19/90>254) 
+APPENDIX                                
+                                        
+: <<FORGET>> ( adr  -- ) >R             
+   VOC-LINK @                           
+   BEGIN R@ OVER U< WHILE @ REPEAT      
+   DUP VOC-LINK !                       
+   BEGIN DUP 4 - @ ( vocab top LFA )    
+    BEGIN R@ OVER LFA>PFA U<            
+     OVER LFA>PFA INAPP?                
+     R@ INAPP? = AND                    
+    WHILE DUP HDP ! @HEAD               
+    REPEAT                              
+    OVER 4 - ! @ ?DUP 0=                
+   UNTIL R>  DP ! ;                     
+                                        
+MAIN -->                                
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 115
+( 'X DOES> ( \           < 1/19/90>255) 
+APPENDIX                                
+                                        
+: <FORGET>                              
+   BL WORD CURRENT @ @ VOC-SEARCH 0=    
+      ABORT" Not in CURRENT vocab!"     
+   DROP CFA DUP FENCE @ U<              
+      ABORT" Fenced!"                   
+   DUP CONTEXT @ U<                     
+      ABORT" Can't forget CONTEXT!"     
+   DUP CURRENT @ U<                     
+      ABORT" Can't forget CURRENT!"     
+    <<FORGET>> ;                        
+MAIN -->                                
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 116
+( <VOCABULARY>           < 1/19/90>256) 
+APPENDIX                                
+'NEW X CONSTANT 'X                      
+                                        
+: DOES>                                 
+   ?CSP COMPILE <;CODE>                 
+   32 C,  'NEW <DODOES> ,               
+; IMMEDIATE                             
+: (  -1 >IN +!                          
+   41 WORD C@ 1+ HERE + C@              
+   41 = NOT ?STREAM ;  IMMEDIATE        
+: \  ?LOADING                           
+   >IN @ C/L / 1+ C/L * >IN !           
+; IMMEDIATE                             
+: <VOCABULARY>                          
+   CREATE                               
+      0 ,                               
+      41089 , ( dummy NFA )             
+      HERE VOC-LINK @ ,                 
+      VOC-LINK !                        
+      LAST-NFA @ , ( my NFA )           
+   <DOVOC> ( DOES> CONTEXT ! ) ;        
+MAIN -->                                
+                                        
+════════════════════════════════════════   SCREEN 117
+( <EXPECT>               < 1/19/90>257) 
+APPENDIX                                
+                                        
+: <EXPECT>                              
+   OVER + OVER                          
+   DO KEY DUP 8 = OVER 127 = OR         
+      IF DROP DUP I = DUP R> 2- + >R    
+         IF 7                           
+         ELSE 8 DUP EMIT SPACE          
+            -3 OUT +!                   
+         THEN                           
+      ELSE DUP 13 =                     
+         IF LEAVE DROP BL 0             
+         ELSE DUP                       
+         THEN I C! 0 I 1+ !             
+      THEN EMIT 1                       
+   /LOOP DROP ;                         
+                                        
+MAIN -->                                
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 118
+( <INTERPRET>            <12/18/89>254) 
+APPENDIX                                
+                                        
+: <INTERPRET>                           
+   BEGIN                                
+      -FIND                             
+      IF STATE @ <                      
+         IF   DUP ?APP-CALL CFA ,       
+         ELSE CFA EXECUTE ?STCK         
+              IF ?STACK THEN            
+         THEN                           
+      ELSE HERE NUMBER DPL @ 1+         
+         IF   [COMPILE] DLITERAL        
+         ELSE DROP [COMPILE] LITERAL    
+         THEN                           
+      THEN                              
+   AGAIN ;                              
+                                        
+MAIN -->                                
+                                        
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 119
+( <QUIT>                 < 1/19/90>259) 
+APPENDIX                                
+                                        
+: <QUIT>                                
+   0 BLK ! [COMPILE] [                  
+   BEGIN                                
+      CR RP! QUERY INTERPRET            
+      STATE @ NOT                       
+      IF ."  Ok" THEN                   
+   AGAIN ;                              
+                                        
+MAIN -->                                
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 120
+( DO LOOP +LOOP /LOOP    < 1/19/90>260) 
+APPENDIX                                
+                                        
+: DO  ?COMP                             
+   COMPILE <DO> HERE 3 ; IMMEDIATE      
+                                        
+: LOOP   3 ?PAIRS                       
+   COMPILE <LOOP> HERE - , ; IMMEDIATE  
+                                        
+: +LOOP  3 ?PAIRS                       
+   COMPILE <+LOOP> HERE - , ; IMMEDIATE 
+                                        
+: /LOOP 3 ?PAIRS                        
+   COMPILE </LOOP> HERE - , ; IMMEDIATE 
+                                        
+: IF                                    
+   ?COMP COMPILE 0BRANCH HERE 0 , 2 ;   
+   IMMEDIATE                            
+                                        
+: THEN                                  
+   ?COMP 2 ?PAIRS                       
+   HERE OVER - SWAP ! ;  IMMEDIATE      
+                                        
+MAIN -->                       ( bobp ) 
+════════════════════════════════════════   SCREEN 121
+( ELSE BEGIN UNTIL AGAIN < 1/19/90>261) 
+APPENDIX                                
+: ELSE                                  
+   2 ?PAIRS COMPILE BRANCH HERE 0 ,     
+   SWAP 2 [COMPILE] THEN 2 ;            
+   IMMEDIATE                            
+                                        
+: BEGIN  ?COMP HERE 1 ;  IMMEDIATE      
+                                        
+: UNTIL  1 ?PAIRS COMPILE 0BRANCH       
+   HERE - , ;  IMMEDIATE                
+                                        
+: AGAIN  1 ?PAIRS COMPILE BRANCH        
+   HERE - , ;  IMMEDIATE                
+                                        
+: WHILE  [COMPILE] IF 2+ ;              
+     IMMEDIATE                          
+                                        
+: REPEAT                                
+   >R >R [COMPILE] AGAIN                
+   R> R> 2- [COMPILE] THEN ;  IMMEDIATE 
+                                        
+MAIN -->                                
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 122
+( ABORT" ." WHERE1 FREEZE< 1/19/90>262) 
+APPENDIX                                
+: ABORT"                                
+   ?COMP COMPILE <ABORT">               
+   34 WORD C@ 1+ ALLOT                  
+; IMMEDIATE                             
+                                        
+: ." STATE @                            
+   IF COMPILE <.">                      
+     34 WORD C@ 1+ ALLOT                
+   ELSE 34 WORD COUNT TYPE              
+   THEN ; IMMEDIATE                     
+                                        
+: WHERE1                                
+   CR HERE COUNT TYPE ."  - "           
+   BLK @ DUP >IN-BLK !                  
+   >IN @ >IN-ERR ! ;                    
+                                        
+: FREEZE                                
+   VOC-LINK @  ICEBOX !                 
+   HERE        ICEBOX 2+ !              
+   CURRENT @ @ ICEBOX 4 + ! ;           
+                                        
+MAIN -->                       ( bobp ) 
+════════════════════════════════════════   SCREEN 123
+( LOAD THRU -->          < 1/19/90>263) 
+APPENDIX                                
+: LOAD                                  
+   DUP 0= ABORT" UNLOADABLE" DUP .      
+   BLK @ >R >IN @ >R                    
+   BLK ! 0 >IN ! INTERPRET              
+   R> >IN ! R> BLK ! QTERM              
+   IF KEY 27 = IF QUIT THEN             
+   THEN ;                               
+                                        
+: THRU ( first last -- )                
+   1+ SWAP                              
+   DO I LOAD LOOP ;                     
+                                        
+: EDIT->LOAD  LOAD ."  OK" QUIT ;       
+                                        
+: -->                                   
+   ?LOADING 0 >IN ! 1 BLK +!            
+   BLK @ DUP SCR ! .                    
+   ;  IMMEDIATE                         
+                                        
+MAIN -->                                
+                                        
+                                        
+════════════════════════════════════════   SCREEN 124
+( L#ADDR                 < 1/19/90>264) 
+MAIN HEX                                
+                                        
+CODE SCRWID ( -- n )                    
+   'NEW mainzp JSR, 21 LDA,             
+   'NEW altzp JSR, DEX, DEX,            
+   BOT STA, BOT 1+ STY,                 
+   NEXT JMP, C;                         
+                                        
+APPENDIX                                
+: MODE80? ( -- T/F, T=80 column )       
+   C01F C@ 80 AND 0= NOT ;              
+                                        
+CODE L#ADDR ( l -- adr )                
+   BOT LDA, .A LSR, 03 # AND,           
+   04 # ORA, BOT 1+ STA,                
+   BOT LDA, 18 # AND,                   
+   CS IF, 7F # ADC, THEN, BOT STA,      
+   .A ASL, .A ASL, BOT ORA, BOT STA,    
+   NEXT JMP, C;                         
+                                        
+DECIMAL MAIN -->                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 125
+( L->CRT40               < 1/19/90>265) 
+APPENDIX HEX                            
+                                        
+( MEMADDR L#ADDR COUNT ---, )           
+                                        
+CODE L->CRT40                           
+   SEC 4 + LDA, N 2 + STA,              
+   SEC 5 + LDA, N 3 + STA,              
+   SEC 3 + LDA, N 1 + STA,              
+   CLC, SEC LDA, SEC 2+ ADC, N STA,     
+   BOT LDY, DEY,                        
+   BEGIN,                               
+      N 2+ )Y LDA, 80 # EOR,            
+      N )Y STA, DEY, 0<                 
+   UNTIL,                               
+   TXA, 08 # ADC, TAX,                  
+   NEXT JMP, C;                         
+MAIN DECIMAL -->                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 126
+( L->CRT                 < 1/19/90>266) 
+APPENDIX HEX                            
+( MEMADDR L#ADDR DELTX COUNT -- )       
+CODE L->CRT \ 80 column mode            
+  BOT LDA, N 1- STA, N 4 + STY,         
+  SEC LDA, .A LSR, CS                   
+  IF, N 4 + INC, CLC, THEN,             
+  SEC 2 + ADC, N STA, SEC 3 + LDA,      
+  N 1+ STA, SEC 4 + LDA, N 2+ STA,      
+  SEC 5 + LDA, N 3 + STA, TXA, CLC,     
+  08 # ADC, XSAVE STA, TYA, TAX,        
+  N 4 + LDA, 0= NOT                     
+  IF, BEGIN, 4 ROLL 4 ROLL C054 STA,    
+   N 2+ )Y LDA, 80 # EOR,               
+   N X) STA, INY, N 1- CPY, 0=          
+  IF, XSAVE LDX, NEXT JMP, THEN, N INC, 
+  THEN, C055 STA, N 2+ )Y LDA,          
+  80 # EOR, N X) STA, INY, N 1- CPY, 0= 
+  UNTIL, XSAVE LDX, C054 STA,           
+ NEXT JMP, C;                           
+                                        
+DECIMAL MAIN -->                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 127
+( BLK->CRT               < 1/19/90>267) 
+                                        
+APPENDIX                                
+                                        
+: BLK->CRT                              
+   MODE80? NOT C/L 40 > AND             
+   ABORT" MODE80 REQUIRED!"             
+   DUP 0<                               
+   ABORT" NEGATIVE SCRN NO."            
+   BLOCK DUP NLINS +EDY + +EDY          
+   DO I L#ADDR MODE80?                  
+    IF +EDX C/L L->CRT                  
+    ELSE +EDX C/L L->CRT40 THEN         
+    C/L + DUP                           
+   LOOP DDROP ;                         
+                                        
+                                        
+MAIN -->                                
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 128
+( L L40 L64 LL LN LB     < 1/19/90>268) 
+APPENDIX                                
+                                        
+: L ( n -- )                            
+   DUP ?VALID-SCR                       
+   PAGE 0 'NEW +EDY !                   
+   MODE80? 8 * 'NEW +EDX !              
+   DUP SCR ! DUP                        
+   0 0 XYTAB 3 .R BLK->CRT              
+   0 22 XYTAB ;                         
+                                        
+: L40                                   
+   24 'NEW NLINS ! 40 'NEW C/L ! ;      
+: L64                                   
+   16 'NEW NLINS ! 64 'NEW C/L ! ;      
+                                        
+: LL  SCR @ L ;                         
+: LN  SCR @ 1+ L ;                      
+: LB  SCR @ 1- L ;                      
+                                        
+MAIN -->                                
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 129
+( COPY <Y/N>?            < 1/19/90>269) 
+APPENDIX                                
+                                        
+: COPY                                  
+   SWAP BLOCK 2- !                      
+   UPDATE SAVE-BUFFERS ;                
+                                        
+                                        
+: (Y/N)?                                
+   ."  (Y/N)? " XY@ 0                   
+   BEGIN DROP                           
+      DDUP XYTAB KEY DUP EMIT           
+      DUP 78 = OVER 89 = OR             
+   UNTIL 89 =                           
+   >R DDROP R> ;                        
+                                        
+MAIN -->                                
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 130
+( .M/D/Y .HR:MIN    .    < 1/19/90>270) 
+APPENDIX                                
+                                        
+( format: " MM/DD/YY" )                 
+: .M/D/Y ." 09/01/91" ;                 
+                                        
+( format:  " ?????" )                   
+: .HR:MIN ." fah  " ;                   
+                                        
+: STOP? ( -- T/F, T=stop whatever )     
+   \ ESC to exit, any key to pause      
+   QTERM DUP                            
+   IF DROP KEY 27 = DUP 0=              
+    IF DROP KEY 27 = THEN               
+   THEN ;                               
+                                        
+: ? @ . ;                               
+                                        
+MAIN -->                                
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 131
+( <ONLY> <ALSO>          < 1/19/90>271) 
+APPENDIX                                
+\ based on #VOCS = 8                    
+                                        
+: <ALSO> ( do not overwrite last voc )  
+   CONTEXT DUP 2+ #VOCS 2* 4 - BMOVE ;  
+                                        
+: <ONLY>                                
+   CONTEXT #VOCS 2* 0 FILL              
+   [COMPILE] ROOT  CONTEXT @            
+   #VOCS 2* 2- CONTEXT + ! ( <ALSO> ) ; 
+                                        
+: <ORDER>                               
+   CR #VOCS 2* 0                        
+   DO CONTEXT I + @ ?DUP                
+    IF 6 + @ ID. SPACE                  
+    THEN                                
+   2 +LOOP 2 SPACES                     
+   CURRENT @ 6 + @ ID.                  
+   ;                                    
+MAIN -->                                
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 132
+( .NF <VL> <<WORDS>>     < 1/19/90>272) 
+APPENDIX                                
+MAIN-HSTART CONSTANT MAIN-HSTART        
+                                        
+: .NF-VOC ( nfa -- print voc name )     
+   CR 8 0 DO 45 EMIT LOOP SPACE ID.     
+   BEGIN OUT @ SCRWID 1- <              
+   WHILE 45 EMIT REPEAT CR ;            
+                                        
+: .NF ( lfa -- print word name )        
+   LFA>NFA DUP C@HEAD 31 AND            
+   OUT @ + 4 + SCRWID >                 
+   IF CR THEN                           
+   SPACE ID. ;                          
+                                        
+: <VL> ( lfa -- )                       
+   BEGIN DUP 0= STOP? OR NOT            
+   WHILE DUP .NF @HEAD                  
+   REPEAT DROP CR ;                     
+                                        
+MAIN -->                                
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 133
+( <WORDS> <VLIST>        < 1/19/90>273) 
+APPENDIX                                
+                                        
+: <<WORDS>> ( voc )                     
+   DUP 6 + @ .NF-VOC @ <VL> ;           
+                                        
+: <WORDS> CONTEXT @ <<WORDS>> ;         
+                                        
+: <VLIST>                               
+   CR [COMPILE] ' 'X =                  
+   IF #VOCS 2* 0                        
+    DO CONTEXT I + @ ?DUP               
+     IF <<WORDS>> THEN                  
+    2 +LOOP                             
+   ELSE CR HEAD-LFA <VL>                
+   THEN ;                               
+                                        
+MAIN -->                                
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 134
+( forward references     < 1/19/90>274) 
+                                        
+HEX MAIN                                
+DPNEW @ 4 +                             
+  CONSTANT EXTRA                        
+                                        
+MOVEWORD?                               
+4004 DPNEW ! ( reserve 1 page )         
+                                        
+                                        
+06 BYTE:IN <ABORT"> REPLACED:BY WHERE1  
+16 BYTE:IN <ABORT"> REPLACED:BY QUIT    
+                                        
+02 BYTE:IN NAME     REPLACED:BY WORD    
+00 BYTE:IN CLOSE    REPLACED:BY FLUSH   
+00 BYTE:IN ?CLOSE   REPLACED:BY FLUSH   
+                                        
+( 'NEW EXTRA  DUP !NEW )                
+                                        
+DECIMAL -->                             
+                                        
+                                        
+                                        
+                               ( bobp ) 
+════════════════════════════════════════   SCREEN 135
+( forward references     <12/18/89>275) 
+                                        
+00 BYTE:IN EXPECT  REPLACED:BY <EXPECT> 
+00 BYTE:IN QUIT    REPLACED:BY <QUIT>   
+00 BYTE:IN INTERPRET                    
+            REPLACED:BY <INTERPRET>     
+00 BYTE:IN <DOVOC> REPLACED:BY <;CODE>  
+00 BYTE:IN VOCABULARY                   
+            REPLACED:BY <VOCABULARY>    
+                                        
+00 BYTE:IN FORGET REPLACED:BY <FORGET>  
+00 BYTE:IN WORDS  REPLACED:BY <WORDS>   
+00 BYTE:IN VLIST  REPLACED:BY <VLIST>   
+00 BYTE:IN ONLY   REPLACED:BY <ONLY>    
+00 BYTE:IN ALSO   REPLACED:BY <ALSO>    
+00 BYTE:IN ORDER  REPLACED:BY <ORDER>   
+                                        
+( split heads patches )                 
+'NEW <CONST> 'NEW HEAD-LFA 2- !NEW      
+                                        
+                                        
+DECIMAL -->                             
+                                        
+                                        
+════════════════════════════════════════   SCREEN 136
+( forward references     <12/18/89>276) 
+HEX                                     
+( resolve null word )                   
+08   BYTE:IN X  REPLACED:BY  STATE      
+0C   BYTE:IN X  REPLACED:BY  ?STREAM    
+                                        
+( zap nfa of null word; make immediate) 
+80C0 X-LFA @ LFA>NFA !HEADS             
+                                        
+( set up initial search order )         
+'NEW FORTH  00 BYTE:IN CONTEXT !NEW     
+'NEW FORTH  02 BYTE:IN CONTEXT !NEW     
+'NEW ROOT   0E BYTE:IN CONTEXT !NEW     
+                                        
+   ( make ROOT point to its top )       
+TOP-ROOT @ @HEADS 'NEW ROOT !NEW        
+   ( link FORTH around ROOT )           
+BOT-ROOT @ @HEADS ( lfa of 1st below)   
+TOP-ROOT @ !HEADS ( pt word above)      
+   ( clip ROOT )                        
+0 BOT-ROOT @ !HEADS                     
+                                        
+DECIMAL -->                             
+                                        
+════════════════════════════════════════   SCREEN 137
+( ADJ VOC ETC,           <12/18/89>277) 
+HEX                                     
+                                        
+( set up initial boot parameters )      
+                                        
+'NEW FORTH 04 + 00 BYTE:IN ICEBOX !NEW  
+                                        
+DPNEW @ DELTA - 02 BYTE:IN ICEBOX !NEW  
+DPNEW @ DELTA - 00 BYTE:IN DP !NEW      
+                                        
+HLAST @         04 BYTE:IN ICEBOX !NEW  
+                                        
+                                        
+( set up latest )                       
+                                        
+HLAST @         00 BYTE:IN FORTH  !NEW  
+HDP @           00 BYTE:IN HDP !NEW     
+                                        
+DECIMAL FORTH DEFINITIONS               
+-->                                     
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 138
+( APPENDIX ADJUSTMENTS   <12/18/89>278) 
+                                        
+( allow initial APPENDIX )              
+0 COMP-SEG 'NEW OLD-DP !L               
+                                        
+( set kernel to ending values )         
+APP-DPNEW @   'NEW APP-DP !NEW          
+APP-LAST @    'NEW APP-LATEST !NEW      
+APP-HDP @     'NEW APP-HDP !NEW         
+                                        
+( Hook in appendix between )            
+( APP-LINK1 and APP-LINK2 )             
+RELINK-APPENDIX                         
+                                        
+( set values for APP-LINK1 & 2  )       
+APP-BLINK @ 'NEW APP-LINK1 !NEW         
+APP-TLINK @ 'NEW APP-LINK2 !NEW         
+                                        
+                                        
+-->                                     
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 139
+( FINISHED               <12/20/85>279) 
+                                        
+CR CR 2BEEP                             
+." Compilation finished." CR CR         
+                                        
+STATUS?  CR                             
+                                        
+  ." EXTRA=" HEX                        
+  COMP-SEG 'NEW EXTRA @L DUP . CR       
+  ." HEXTRA="                           
+  COMP-SEG 'NEW HEXTRA @L DUP . CR      
+                                        
+  DECIMAL                               
+  CR CR                                 
+                                        
+CR CR                                   
+." PSAVE-NFORTH NEW.I" CR               
+." PSAVE-APP NEW.A" CR                  
+." PSAVE-HEADS NEW.H " CR CR            
+QUIT                                    
+                                        
+                                        
+                                        
+                                        

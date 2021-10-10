@@ -1,0 +1,119 @@
+════════════════════════════════════════════════════════════════   SCREEN 005
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                       ( fah  ) 
+                                                                
+                                                                
+                                                                
+                                                                
+════════════════════════════════════════════════════════════════   SCREEN 008
+( ALTZP-SETUP                                    <03/14/90>  4) 
+EXIT                                                            
+HEX                                                             
+CODE ALTZP-SETUP ( -- copy non-changing info to ALTZP )         
+( ALTZP-ON                                       <03/14/90>  5) 
+HEX                                                             
+CODE ALTZP-ON \ swtich to ALTZP, copy                           
+\ **** STARTS WITH ALTZP OFF! ****                              
+   C009 STA,  \ *** ALTZP-ON                                    
+   # 6C LDA, W 1- STA,  \ setup indirect jump                   
+   C008 STA,  \ *** ALTZP-OFF                                   
+   NEXT JMP, C;                                                 
+             W     LDA, C009 STA, W     STA,                    
+   C008 STA, W 1+  LDA, C009 STA, W 1+  STA,                    
+   C008 STA, IP    LDA, C009 STA, IP    STA,                    
+   C008 STA, IP 1+ LDA, C009 STA, IP 1+ STA,                    
+════════════════════════════════════════════════════════════════   SCREEN 009
+DECIMAL                                                         
+                                                                
+                                                                
+                                                                
+\ **** LEAVES ALTZP ON! ****                                    
+   NEXT JMP, C;                                                 
+DECIMAL                                                         
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+════════════════════════════════════════════════════════════════   SCREEN 010
+( ALTZP-SETUP                                    <03/14/90>  4) 
+HEX                                                             
+CODE ALTZP-SETUP ( -- copy non-changing info to ALTZP )         
+                                                                
+( ALTZP-OFF                                      <03/14/90>  5) 
+HEX                                                             
+                                                                
+CODE ALTZP-OFF \ swtich to ALTZP, copy                          
+   C009 STA,  \ *** ALTZP-ON                                    
+   # 6C LDA, W 1- STA,  \ setup indirect jump                   
+   C008 STA,  \ *** ALTZP-OFF                                   
+   NEXT JMP, C;                                                 
+\ **** STARTS WITH ALTZP ON! ****                               
+             W     LDA, C008 STA, W     STA,                    
+   C009 STA, W 1+  LDA, C008 STA, W 1+  STA,                    
+   C009 STA, IP    LDA, C008 STA, IP    STA,                    
+════════════════════════════════════════════════════════════════   SCREEN 011
+DECIMAL                                                         
+                                                                
+                                                                
+                                                                
+   C009 STA, IP 1+ LDA, C008 STA, IP 1+ STA,                    
+\ **** LEAVES ALTZP OFF! ****                                   
+   NEXT JMP, C;                                                 
+DECIMAL                                                         
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+════════════════════════════════════════════════════════════════   SCREEN 012
+(                                                <03/14/90>  7) 
+                                                                
+: ZZ 65 1024 C! ;                                               
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+: TT                                                            
+  ALTZP-ON                                                      
+  ALTZP-OFF ;                                                   
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+════════════════════════════════════════════════════════════════   SCREEN 013
+: T                                                             
+  ALTZP-ON ZZ                                                   
+  ALTZP-OFF ;                                                   
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                

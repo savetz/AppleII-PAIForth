@@ -1,0 +1,1925 @@
+════════════════════════════════════════   SCREEN 035
+( ASSEMBLER FOR 6502 BY: < 6/14/83> 35) 
+( WM. F. RAGSDALE, FORTH DIMENSIONS   ) 
+( VOL. III, NO. 5, P. 143             ) 
+HEX                                     
+VOCABULARY ASSEMBLER IMMEDIATE          
+ASSEMBLER DEFINITIONS                   
+                                        
+: IS CONSTANT ;                         
+                                        
+ 800    IS COLD                         
+ 0F0    IS N       N 0A + IS XSAVE      
+ N 0B + IS IP      N 0E + IS W          
+                                        
+          ' <DO> 0C + IS POPTWO         
+          ' <DO> 0E + IS POP            
+          ' LIT  11 + IS PUSH           
+          ' LIT  13 + IS PUT            
+          ' LIT  18 + IS NEXT           
+          COLD   15 + IS SETUP          
+                                        
+  VARIABLE INDEX  1E ALLOT              
+  VARIABLE MODE                         
+DECIMAL -->                             
+                               ( 11:45) 
+════════════════════════════════════════   SCREEN 036
+( ASSEMBLER CONT         < 6/14/83> 36) 
+HEX                                     
+: .A  0 MODE ! ;    : #  1 MODE ! ;     
+                                        
+: MEM  2 MODE ! ;                       
+                                        
+: ,X  3 MODE ! ;   : ,Y  4 MODE ! ;     
+                                        
+: X)  5 MODE ! ;   : )Y  6 MODE ! ;     
+                                        
+: )  F MODE ! ;   : BOT  0 ,X ;         
+                                        
+: SEC  2 ,X ;      : TOP  BOT ;         
+                                        
+: RP) 101 ,X ;                          
+                                        
+: UPMODE                                
+   IF MODE C@ 8 AND 0=                  
+    IF 8 MODE +!                        
+   THEN THEN                            
+  1 MODE C@ F AND ?DUP                  
+   IF 0 DO DUP + LOOP THEN              
+   OVER 1+ @ AND 0= ;                   
+DECIMAL -->                    ( 11:45) 
+════════════════════════════════════════   SCREEN 037
+( ASSEMBLER CONT         < 6/14/83> 37) 
+HEX                                     
+                                        
+: CPU  CREATE C, DOES> C@ C, MEM ;      
+                                        
+00 CPU BRK,        18 CPU CLC,          
+D8 CPU CLD,        58 CPU CLI,          
+B8 CPU CLV,        CA CPU DEX,          
+88 CPU DEY,        E8 CPU INX,          
+C8 CPU INY,        EA CPU NOP,          
+48 CPU PHA,        08 CPU PHP,          
+68 CPU PLA,        28 CPU PLP,          
+40 CPU RTI,        60 CPU RTS,          
+38 CPU SEC,        F8 CPU SED,          
+78 CPU SEI,        AA CPU TAX,          
+A8 CPU TAY,        BA CPU TSX,          
+8A CPU TXA,        9A CPU TXS,          
+98 CPU TYA,                             
+                                        
+DECIMAL -->                             
+                                        
+                                        
+                                        
+                               ( 11:45) 
+════════════════════════════════════════   SCREEN 038
+( ASSEMBLER CONT         < 6/14/83> 38) 
+HEX                                     
+                                        
+: M/CPU  CREATE C, , DOES>              
+   DUP 1+ C@ 80 AND                     
+    IF 10 MODE +! THEN                  
+   OVER -100 AND UPMODE UPMODE          
+    ABORT" INCORRECT ADDRESSING MODE"   
+   C@ MODE C@ INDEX + C@ + C,           
+   MODE C@ 7 AND                        
+    IF MODE C@ 0F AND 7 <               
+     IF C, ELSE , THEN                  
+    THEN MEM ;                          
+                                        
+1C6E 60 M/CPU ADC,   1C6E 20 M/CPU AND, 
+1C6E C0 M/CPU CMP,   1C6E 40 M/CPU EOR, 
+1C6E A0 M/CPU LDA,   1C6E 00 M/CPU ORA, 
+1C6E E0 M/CPU SBC,   1C6C 80 M/CPU STA, 
+0D0D 01 M/CPU ASL,   0C0C C1 M/CPU DEC, 
+0C0C E1 M/CPU INC,   0D0D 41 M/CPU LSR, 
+0D0D 21 M/CPU ROL,   0D0D 61 M/CPU ROR, 
+DECIMAL -->                             
+                                        
+                               ( 11:45) 
+════════════════════════════════════════   SCREEN 039
+( ASSEMBLER CONT         < 6/14/83> 39) 
+HEX                                     
+                                        
+0414 81 M/CPU STX,   0486 E0 M/CPU CPX, 
+0486 C0 M/CPU CPY,   1496 A2 M/CPU LDX, 
+0C8E A0 M/CPU LDY,   048C 80 M/CPU STY, 
+0480 14 M/CPU JSR,   8480 40 M/CPU JMP, 
+0484 20 M/CPU BIT,                      
+                                        
+: ?RANGE DUP ABS 7F >                   
+   ABORT" BRANCH TOO LARGE" ;           
+                                        
+: BEGIN,  HERE 1 ;                      
+                                        
+: UNTIL,  >R 1 ?PAIRS R> C, HERE 1+     
+   - ?RANGE C, ;                        
+                                        
+: IF,  C, HERE 0 C, 2 ;                 
+                                        
+: THEN,  2 ?PAIRS HERE OVER C@          
+   IF SWAP ! ELSE OVER 1+ - ?RANGE SWAP 
+    C! THEN ;                           
+                                        
+DECIMAL -->                    ( 11:45) 
+════════════════════════════════════════   SCREEN 040
+( ASSEMBLER CONT         < 6/14/83> 40) 
+HEX                                     
+                                        
+: ELSE,  2 ?PAIRS HERE 1+ 1 JMP, SWAP   
+   HERE OVER 1+ - ?RANGE SWAP C! 2 ;    
+                                        
+: NOT  20 + ;   90 IS CS    50 IS OV    
+                                        
+  D0 IS 0=   10 IS 0<   90 IS >=        
+                                        
+: C;  ?CSP SMUDGE CURRENT @ CONTEXT ! ; 
+   IMMEDIATE                            
+                                        
+: END-CODE [COMPILE] C; ; IMMEDIATE     
+                                        
+: AGAIN, 1 ?PAIRS JMP, ;                
+                                        
+: WHILE,  >R DUP 1 ?PAIRS R> IF, 2+ ;   
+                                        
+: REPEAT,  >R >R 1 ?PAIRS JMP, R> R>    
+   2 - THEN, ;                          
+                                        
+DECIMAL -->                             
+                               ( 11:45) 
+════════════════════════════════════════   SCREEN 041
+( ASSEMBLER CONT         < 6/14/83> 41) 
+HEX                                     
+                                        
+0909 INDEX !        1505 INDEX 2+ !     
+0115 INDEX 4 + !    8011 INDEX 6 + !    
+8009 INDEX 8 + !    1D0D INDEX A + !    
+8019 INDEX C + !    8080 INDEX E + !    
+0080 INDEX 10 + !   1404 INDEX 12 + !   
+8014 INDEX 14 + !   8080 INDEX 16 + !   
+8080 INDEX 18 + !   1C0C INDEX 1A + !   
+801C INDEX 1C + !   2C80 INDEX 1E + !   
+                                        
+: !CSP  SP@ CSP ! ;                     
+FORTH DEFINITIONS  DECIMAL CR CR        
+." NOW LOAD SCREEN 42 (ONB) FOR ASSEMBLE
+R" CR ." IN LOWER MEMORY"               
+CR CR 10 SPACES ." OR"                  
+CR CR                                   
+." LOAD SCREEN 43 (ONB) FOR VIRTUAL SYST
+EM" CR ." ASSEMBLER AND EDITOR." CR CR  
+EXIT                                    
+                                        
+                                        
+                               ( 21:47) 
+════════════════════════════════════════   SCREEN 042
+( ASSEMBLER FOR LWR MEM  < 6/14/83> 42) 
+                                        
+FORTH DEFINITIONS                       
+                                        
+: CODE  CREATE SMUDGE [COMPILE]         
+ ASSEMBLER ASSEMBLER MEM !CSP FORTH     
+ HERE DUP 2 - ! ;  IMMEDIATE            
+                                        
+: ;CODE  ?CSP COMPILE <;CODE> [COMPILE] 
+   ASSEMBLER ASSEMBLER MEM FORTH        
+   [COMPILE] [ ; IMMEDIATE              
+                                        
+EXIT                                    
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( 11:45) 
+════════════════════════════════════════   SCREEN 043
+( ASSEMBLER FOR VIRTUAL  < 6/14/83> 43) 
+                                        
+FORTH DEFINITIONS                       
+: CODE  CREATE SMUDGE [COMPILE]         
+ ASSEMBLER ASSEMBLER  MEM !CSP          
+ HERE DUP 2 - ! ;  IMMEDIATE            
+                                        
+: ;CODE  ?CSP COMPILE <;CODE> [COMPILE] 
+   ASSEMBLER ASSEMBLER MEM              
+   [COMPILE] [ ; IMMEDIATE              
+                                        
+                                        
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( 11:45) 
+════════════════════════════════════════   SCREEN 044
+( APPLE II  EDITOR BY:   < 6/14/83> 44) 
+( THOMAS E. WEMPE, FORTHKIT           ) 
+( FOR: MVP-FORTH                      ) 
+FORTH DEFINITIONS                       
+                                        
+VOCABULARY EDITOR IMMEDIATE             
+EDITOR DEFINITIONS                      
+                                        
+                                        
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( 11:45) 
+════════════════════════════════════════   SCREEN 045
+( <#SPCS?>               < 6/14/83> 45) 
+                                        
+( L#ADDR +EDX E/L ---, NSPCSATEND )     
+HEX                                     
+CODE <#SPCS?>  SEC 3 + LDA, N 1+ STA,   
+  SEC LDA, CLC, SEC 2+ ADC, N STA,      
+  SEC 2+ STY, SEC 3 + STY, BOT LDA,     
+  TAY, A0 # LDA,                        
+  BEGIN, DEY, 0<                        
+   IF, POPTWO JMP,                      
+   THEN, N )Y CMP, 0=                   
+  WHILE, SEC 2+ INC,                    
+  REPEAT, POPTWO JMP, C;                
+                                        
+DECIMAL -->                             
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( 11:45) 
+════════════════════════════════════════   SCREEN 046
+( <ENDWRD>               < 6/14/83> 46) 
+                                        
+( L#ADDR +EDX E/L ---, DELTX COUNT )    
+HEX                                     
+CODE <ENDWRD>  SEC 3 + LDA, N 1+ STA,   
+  SEC LDA, CLC, SEC 2+ ADC, N STA,      
+  SEC LDA, BOT ADC, SEC STY,            
+  SEC 3 + STY, SEC 2+ STA, BOT LDA,     
+  TAY, A0 # LDA,                        
+  BEGIN, DEY, 0<                        
+   IF, POP JMP, THEN,                   
+   N )Y CMP, 0= NOT                     
+  WHILE, SEC INC, SEC 2+ DEC,           
+  REPEAT, POP JMP, C;                   
+                                        
+DECIMAL -->                             
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( 11:45) 
+════════════════════════════════════════   SCREEN 047
+( <DELC>                 < 6/14/83> 47) 
+HEX                                     
+( L#ADDR +EDX C/L DELTX ---, )          
+CODE <DELC>  TXA, CLC, 08 # ADC,        
+  XSAVE STA, BOT LDA, CLC, SEC 4 + ADC, 
+  N STA, SEC 5 + LDA, N 1+ STA, SEC LDA,
+  SEC 2+ ADC, SEC, BOT SBC, TAX, DEX,   
+  DEX, 0<                               
+   IF, A0 # LDA, N )Y STA, XSAVE LDX,   
+    NEXT JMP,                           
+   THEN,                                
+   BEGIN, INY, N )Y LDA, DEY, N )Y STA, 
+     INY, DEX, 0<                       
+    IF, A0 # LDA, N )Y STA, XSAVE LDX,  
+     NEXT JMP,                          
+    THEN,                               
+   AGAIN, C;                            
+DECIMAL -->                             
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( 11:45) 
+════════════════════════════════════════   SCREEN 048
+( <PUSHRIGHT>            < 6/14/83> 48) 
+HEX                                     
+( L#ADDR +EDX E/L DELTX ---, )          
+CODE <PUSHRIGHT>  TXA, CLC, 08 # ADC,   
+  XSAVE STA, SEC 4 + LDA, N STA,        
+  SEC 5 + LDA, N 1+ STA, SEC LDA,       
+  SEC 2+ ADC, TAY, SEC, BOT SBC, TAX,   
+  DEX,                                  
+ BEGIN, DEX, 0<                         
+   IF, XSAVE LDX, NEXT JMP,             
+   THEN, DEY, DEY, N )Y LDA, INY,       
+    N )Y STA,                           
+ AGAIN, C;                              
+DECIMAL  -->                            
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( 11:45) 
+════════════════════════════════════════   SCREEN 049
+( <BUFSRCH>              < 6/14/83> 49) 
+                                        
+( WADDR BFADDR BFEND---,FNDADDR 1 OR 0) 
+CODE <BUFSRCH> SEC LDA, N 2+ STA,       
+    SEC 1+ LDA, N 3 + STA,              
+    SEC 2+ LDA, N STA, SEC 3 + LDA,     
+    N 1+ STA, SEC 2+ STY, SEC 3 + STY,  
+    SEC 1+ STY, N 2+ )Y LDA,            
+   BEGIN, N )Y CMP, 0= ( CMP WI WORD )  
+      IF, INY,                          
+         BEGIN, N )Y LDA, 0=            
+            IF, N 2+ LDA, SEC 2+ STA,   
+             N 3 + LDA, SEC 3 + STA,    
+             01 # LDA, SEC STA, POP JMP,
+            THEN, N 2+ )Y CMP, 0=       
+         WHILE, INY,                    
+         REPEAT, TYA, CLC, N 2+ ADC,    
+          N 2+ STA, CS                  
+         IF, N 3 + INC, THEN, 00 # LDY, 
+      THEN, N 2+ INC, 0=                
+         IF, N 3 + INC, THEN,           
+       N 2+ )Y LDA, 0=                  
+   UNTIL, POPTWO JMP, C; -->            
+                               ( 11:45) 
+════════════════════════════════════════   SCREEN 050
+( L40->ADDR              < 6/14/83> 50) 
+HEX                                     
+( MEMADDR L#ADDR XOFF COUNT ---, )      
+CODE L40->ADDR  SEC 4 + LDA, N 2+ STA,  
+   SEC 5 + LDA, N 3 + STA, SEC 3 + LDA, 
+   N 1+ STA, CLC, SEC LDA, SEC 2+ ADC,  
+   N STA, BOT LDY, TXA, 08 # ADC, TAX,  
+   DEY,                                 
+  BEGIN, N )Y LDA, 80 # EOR,            
+   N 2+ )Y STA, DEY, 0<                 
+  UNTIL, NEXT JMP, C;                   
+                                        
+DECIMAL -->                             
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( 11:45) 
+════════════════════════════════════════   SCREEN 051
+( VARIABLES & CONSTANTS  < 6/14/83> 51) 
+                                        
+  39  CONSTANT E/L 27  CONSTANT EXITKEY 
+ 897  CONSTANT  LRCRT  VARIABLE NO.LINS 
+ VARIABLE LMOD         VARIABLE CMOD    
+ VARIABLE BLNKLN  78 ALLOT              
+          BLNKLN  80 BL FILL            
+ VARIABLE LINSPC  80 ALLOT              
+ VARIABLE LINSPC2 80 ALLOT              
+ VARIABLE 1STC    66 ALLOT              
+ VARIABLE KEYTBL  66 ALLOT              
+ VARIABLE CHRPTR   VARIABLE LINPTR      
+ VARIABLE ORGCHBUF VARIABLE ORGLINBUF   
+ VARIABLE LINLIM   VARIABLE CHRLIM      
+ VARIABLE #CHRS    VARIABLE LVSRCH      
+ VARIABLE 'COMLIST                      
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( 11:45) 
+════════════════════════════════════════   SCREEN 052
+( L->L                   < 6/14/83> 52) 
+                                        
+( L#ADDRA XA L#ADDRB XB COUNT ---, )    
+( 40-COL VERSION )                      
+: L->L 5 ROLL 5 ROLL + 4 ROLL 4 ROLL +  
+   3 ROLL CMOVE ;                       
+-->                                     
+                                        
+                                        
+( THIS COULD BE IN CODE FOR SPEED )     
+( L#ADDRA XA L#ADDRB XB COUNT ---, )    
+: L->L LINSPC 6 ROLL 6 ROLL             
+  4 PICK L40->ADDR                      
+   LINSPC 4 ROLL 4 ROLL 4 ROLL          
+   L->CRT40 ;                           
+                                        
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( 11:45) 
+════════════════════════════════════════   SCREEN 053
+( X@ Y@ HVTAB HV@ H@ V@  < 6/14/83> 53) 
+                                        
+: X@  36 C@ ;                           
+                                        
+: Y@  37 C@ ;                           
+                                        
+: HVTAB  SWAP +EDX + SWAP +EDY + XYTAB ;
+                                        
+: HV@  X@ +EDX - Y@ +EDY - ;            
+                                        
+: H@  X@ +EDX - ;                       
+                                        
+: V@  Y@ +EDY - ;                       
+                                        
+( L#ADDR DELTX COUNT---,<FILLS WI BLS>) 
+: BFILL  BLNKLN 4 ROLL 4 ROLL 4 ROLL    
+   L->CRT40 ;                           
+                                        
+( L#ADDR DELTX ---, CHAR )              
+: <CH4@>  + C@ 128 XOR ;                
+                                        
+( CHAR L#ADDR DELTX ---, )              
+: <CH4!>  + SWAP 128 XOR SWAP C! ;      
+-->                            ( 11:45) 
+════════════════════════════════════════   SCREEN 054
+( <LINE & CHAR DATA>     < 6/14/83> 54) 
+                                        
+( <CURSOR> ---, L#ADDR +EDX E/L )       
+: THIS-LINE  Y@ L#ADDR +EDX E/L ;       
+                                        
+( <CURSOR> ---, L1+#ADDR +EDX E/L )     
+: NEXT-LINE  Y@ 1+ L#ADDR +EDX E/L ;    
+                                        
+( ---, L# )                             
+: LAST-L#  NLINS +EDY + 1- ;            
+                                        
+( <CURSOR> ---, L#ADDR +EDX C/L DELTX)  
+: THIS-CHR  Y@ L#ADDR +EDX C/L X@ ;     
+                                        
+                                        
+( <CURSOR> ---, L#ADDR DELTX )          
+: THIS-X  Y@ L#ADDR X@ ;                
+                                        
+( <CURSOR> ---, CHR )                   
+: LAST-CHR@  THIS-LINE + 1- <CH4@> ;    
+                                        
+: ERAS-TIME  LAST-L# L#ADDR +EDX C/L +  
+    9 - 9 BFILL ;                       
+-->                            ( 11:45) 
+════════════════════════════════════════   SCREEN 055
+(                        < 6/14/83> 55) 
+                                        
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( 11:45) 
+════════════════════════════════════════   SCREEN 056
+( ERSBFS ERASBUFS        < 6/14/83> 56) 
+                                        
+: ERSBFS  0 NO.LINS ! PAD 256 + DUP     
+   ORGCHBUF ! DUP CHRPTR ! 512 + DUP    
+   CHRLIM ! 64 + DUP ORGLINBUF !        
+   LINPTR ! FIRST LINLIM ! ;            
+                                        
+: EBUFS ." E=ERASE-BUFFERS" ;           
+                                        
+: ERASBUFS  2BEEP HV@                   
+   LINSPC 10 L#ADDR 0 C/L L40->ADDR     
+   BLNKLN 10 L#ADDR 0 C/L L->CRT40      
+   ' EBUFS 3 +                          
+   10 L#ADDR 10 15 L->CRT40 KEY 05 =    
+  IF ERSBFS                             
+  THEN LINSPC 10 L#ADDR 0 C/L L->CRT40  
+   HVTAB ;                              
+                                        
+' EBUFS 3 + LINSPC 15 CMOVE             
+LINSPC ' EBUFS 3 + 0 15 L->CRT40        
+-->                                     
+                                        
+                                        
+                               ( 11:45) 
+════════════════════════════════════════   SCREEN 057
+( ADD PROMPT STRINGS     < 6/14/83> 57) 
+                                        
+VARIABLE PROMP                          
+                                        
+878 ALLOT                               
+                                        
+SCR @ 1+ BLOCK 40 + PROMP 880 CMOVE     
+                                        
+SCR @ 2+ LOAD                           
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( 11:45) 
+════════════════════════════════════════   SCREEN 058
+( PROMPTS & STATUS TABLE < 6/14/83> 58) 
+CURSOR   CHARACTER        CURRENT MODE  
+-------  ---------        ------------  
+A=LEFT   D=DELETE CHAR    INSRT MODE    
+S=RIGHT  J=JERK-->BUFFER                
+W=UP     C=CHRS<--BUFFER  BUFFS STATUS  
+Z=DOWN   I=INSERT CHRS    ------------- 
+O=HOME   P=PULLUP WORDS      NO.  CHRS. 
+R=RTAB                       NO.  LINES 
+V=VTAB   LINE                           
+Y=TAB    --------         OTHER         
+F=FWORD  K=KILL LINE      -----         
+B=BWORD  G=GOBBLE-->BUFF  Q=QUIT INSRT  
+         @=COPY-->BUFFER     MODES      
+         L=LINE<--BUFFER  X=PROMPTS     
+         N=NEW LINES         ON/OFF     
+ESC + ONE OF THE FOLLOWING KEYS         
+-------------------------------------   
+ESC=NO UPDATE        R=RESTORE SCREEN   
+F=UPDAT&FIN EDIT     P=UPDATE & PRINT   
+B=UPDAT& BACK SCR    L=UPDATE & LOAD    
+N=UPDATE & NXT SCR   W=WORD FOR SEARCH  
+U=UPDATE NOW         S=SEARCH SCREENS   
+                               ( 11:45) 
+════════════════════════════════════════   SCREEN 059
+( MAKETBL EXECKEY UP DOWN< 6/14/83> 59) 
+                                        
+: MAKETBL  2 * KEYTBL + SWAP CFA SWAP   
+   ! ;                                  
+                                        
+: EXECKEY  2 * KEYTBL + @ EXECUTE ;     
+                                        
+: UP  HV@ DUP 0 >                       
+     IF 1 -                             
+     THEN HVTAB ;                       
+                                        
+: DOWN  HV@ DUP 1+ NLINS <              
+     IF 1+                              
+     THEN HVTAB ;                       
+                                        
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( 11:45) 
+════════════════════════════════════════   SCREEN 060
+( RIGHT LEFT MSG-L 0MODES< 6/14/83> 60) 
+                                        
+: RIGHT  HV@ SWAP DUP 1+ E/L <          
+     IF 1+                              
+     THEN SWAP HVTAB ;                  
+                                        
+: LEFT  HV@ SWAP DUP 0 >                
+     IF 1 -                             
+     THEN SWAP HVTAB ;                  
+                                        
+: MSG-LOC 0 NLINS 2 - ;                 
+                                        
+: 0MODES  0 CMOD ! 0 LMOD ! BEEP        
+   32 0 L#ADDR C/L 1- <CH4!> ;          
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( 11:45) 
+════════════════════════════════════════   SCREEN 061
+( ILINES INSRTON DELC CPY< 6/14/83> 61) 
+                                        
+: ILINES LMOD @ 0=                      
+  IF 0 CMOD ! 1 LMOD ! BEEP 206 0       
+   L#ADDR C/L 1- <CH4!>                 
+  THEN ;                                
+                                        
+: INSRTON  1 CMOD ! 0 LMOD !            
+   BEEP 201 0 L#ADDR C/L 1- <CH4!> ;    
+                                        
+( <CURSOR> ---, <DELETES & MOVS LFT)    
+: DELC  H@ E/L <                        
+     IF THIS-CHR <DELC>                 
+     THEN ;                             
+                                        
+( V# ---,  <CPYS V# TO V#1+> )          
+: CPYDN +EDY + DUP L#ADDR +EDX 3 ROLL 1+
+   L#ADDR +EDX C/L L->L ;               
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                               ( 11:45) 
+════════════════════════════════════════   SCREEN 062
+( ERASLN LV CPYUP REMOV-L< 6/14/83> 62) 
+                                        
+( V# ---, )                             
+: ERASLN  BLNKLN SWAP +EDY + L#ADDR +EDX
+   C/L  L->CRT40 ;                      
+                                        
+: LV  (  R> R> R> R> SP! ; )            
+    40 33 C! SP! QUIT ;                 
+                                        
+( V# ---, <CPYS V# TO V#1-> )           
+: CPYUP  +EDY + DUP L#ADDR +EDX 3 ROLL  
+   1- L#ADDR +EDX C/L  L->L ;           
+                                        
+: REMOV-LN  V@ 1+                       
+     BEGIN DUP CPYUP 1+ DUP NLINS =     
+     UNTIL 1- ERASLN ;                  
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( 11:45) 
+════════════════════════════════════════   SCREEN 063
+( OPENLINE WRD->NXTLN    < 6/14/83> 63) 
+                                        
+: OPENLINE  V@ NLINS 2 - <              
+     IF NLINS 1-                        
+        BEGIN 1- DUP CPYDN DUP V@ 1+ =  
+        UNTIL DROP                      
+     ELSE 0MODES                        
+     THEN ;                             
+                                        
+: WRD->NXTLN  LINSPC2 80 BL FILL        
+   THIS-LINE <ENDWRD> LINSPC2 Y@ L#ADDR 
+   4 PICK 4 PICK L40->ADDR              
+   NEXT-LINE <#SPCS?> OVER >            
+    IF LINSPC2 OVER +  1+               
+     NEXT-LINE 5 PICK - 1- L40->ADDR    
+    ELSE OPENLINE                       
+    THEN LINSPC2 NEXT-LINE L->CRT40     
+   Y@ L#ADDR 3 PICK 3 PICK BFILL ;      
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                               ( 11:45) 
+════════════════════════════════════════   SCREEN 064
+( INSRTC ECR HOM-CUR RTAB< 6/14/83> 64) 
+                                        
+: INSRTC  LAST-CHR@ 32 =                
+     IF THIS-CHR <PUSHRIGHT>            
+     ELSE V@ NLINS 2 - <                
+        IF WRD->NXTLN DDROP ( DX & CNT) 
+        ELSE 0MODES                     
+        THEN THIS-CHR <PUSHRIGHT>       
+     THEN ;                             
+                                        
+: ECR  0 V@ 1+ NLINS 1- MIN HVTAB ;     
+                                        
+: HOM-CUR  0 0 HVTAB 0MODES ;           
+                                        
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( 11:45) 
+════════════════════════════════════════   SCREEN 065
+( ONE<- ONE-> PULLUP     < 6/14/83> 65) 
+                                        
+: ONE<-  H@ 1- V@ HVTAB ;               
+                                        
+: ONE->  H@ 1+ V@ HVTAB ;               
+                                        
+: PULLUP  HV@ THIS-X <CH4@> 32 =        
+   IF C/L H@ - 2                        
+      DO DELC THIS-X <CH4@> 32 = NOT    
+         IF LEAVE THEN                  
+      LOOP                              
+   ELSE C/L H@ - 2                      
+      DO ONE-> THIS-X <CH4@> 32 =       
+         IF ONE-> THIS-X <CH4@> 32 =    
+            IF LEAVE THEN               
+         THEN                           
+      LOOP C/L H@ - 2                   
+      DO THIS-X <CH4@> 32 =             
+         IF DELC ELSE LEAVE THEN        
+      LOOP                              
+   THEN HVTAB ;                         
+      -->                               
+                                        
+                               ( 11:45) 
+════════════════════════════════════════   SCREEN 066
+( PSHLNS NEWLNS KILLN    < 6/14/83> 66) 
+                                        
+: PSHLNS  V@ 1+ NLINS <                 
+     IF 0 V@ HVTAB                      
+      NLINS 1 -                         
+        BEGIN 1 - DUP CPYDN DUP V@ =    
+        UNTIL ERASLN                    
+     THEN ;                             
+                                        
+: NEWLNS ILINES PSHLNS ;                
+                                        
+: KILLN  V@ 1+ NLINS <                  
+     IF ERAS-TIME REMOV-LN              
+     ELSE NLINS 1- ERASLN               
+     THEN ;                             
+                                        
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( 11:45) 
+════════════════════════════════════════   SCREEN 067
+( GETLN  LBACK           < 6/14/83> 67) 
+                                        
+: GETLN  LINPTR @ LINLIM @ U<           
+     IF LINPTR @ THIS-LINE L40->ADDR    
+      E/L LINPTR +! KILLN 1             
+      NO.LINS +!                        
+     ELSE BEEP                          
+     THEN ;                             
+                                        
+: LBACK  NO.LINS @                      
+     IF PSHLNS E/L NEGATE LINPTR +!     
+      LINPTR @ THIS-LINE L->CRT40       
+      -1 NO.LINS +!                     
+     THEN ;                             
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( 11:45) 
+════════════════════════════════════════   SCREEN 068
+( JERKC CPYLN            < 6/14/83> 68) 
+                                        
+( JERKS CHRS <WORD> TO WRD BUFFER )     
+: JERKC  CHRPTR @ CHRLIM @ U<           
+     IF H@ E/L <                        
+        IF                              
+           BEGIN THIS-X <CH4@> DUP      
+            CHRPTR @ ! 1 CHRPTR +!      
+            DELC 32 = ( APPLE SPACE)    
+           UNTIL                        
+        THEN                            
+     ELSE BEEP                          
+     THEN ;                             
+                                        
+( COPIES THIS-LINE TO LINE BUFFER )     
+: CPYLN  LINPTR @ LINLIM @ U<           
+     IF LINPTR @ THIS-LINE L40->ADDR    
+      E/L LINPTR +! ECR 1               
+      NO.LINS +!                        
+     ELSE BEEP                          
+     THEN ;                             
+-->                                     
+                                        
+                               ( 11:45) 
+════════════════════════════════════════   SCREEN 069
+( RTAB VTAB CBACK        < 6/14/83> 69) 
+( TABS TO END OF LINE )                 
+: RTAB  E/L THIS-LINE <#SPCS?> - 1+     
+    E/L 1- MIN V@ HVTAB ;               
+                                        
+( TABS DOWN TO FIRST BLANK LINE )       
+: VTAB  NLINS V@ - 1- ?DUP              
+    IF 1                                
+       DO 0 V@ 1+ HVTAB E/L THIS-LINE   
+        <#SPCS?> =                      
+          IF LEAVE                      
+          THEN                          
+       LOOP                             
+    THEN ;                              
+( CHRS <A WORD> BACK FROM BUFFER )      
+: CBACK  CHRPTR @ ORGCHBUF @ -          
+     IF -1 CHRPTR +!                    
+        BEGIN INSRTC CHRPTR @ C@ THIS-X 
+         <CH4!> CHRPTR @ 1 - DUP C@     
+         32 = NOT PAD 255 + ROT U< AND  
+        WHILE -1 CHRPTR +!              
+        REPEAT                          
+     THEN ;                             
+-->                            ( 11:45) 
+════════════════════════════════════════   SCREEN 070
+( RWORD                  < 6/14/83> 70) 
+                                        
+( TABS TO ONE SPACE AFTER WORD OR ENDL) 
+: RWORD  THIS-X <CH4@> 32 = ( SPACE)    
+     IF                                 
+        BEGIN THIS-X <CH4@> 32 = H@     
+         2+ E/L < AND                   
+        WHILE ONE->                     
+        REPEAT                          
+     ELSE                               
+        BEGIN THIS-X <CH4@> 32 = NOT    
+         H@ 2+ E/L < AND                
+        WHILE ONE->                     
+        REPEAT H@ 1+ E/L <              
+        IF ONE->                        
+        THEN                            
+     THEN ;                             
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( 11:45) 
+════════════════════════════════════════   SCREEN 071
+( LWORD                  < 6/14/83> 71) 
+                                        
+( SET CONSTANT TAB INTERVAL IN TABY )   
+VARIABLE TABY  3 TABY !                 
+                                        
+( TABS LEFT A WORD )                    
+: LWORD  H@ 2 - 0 MAX V@ HVTAB          
+     BEGIN THIS-X <CH4@> 32 = H@        
+      0> AND                            
+     WHILE ONE<-                        
+     REPEAT                             
+     BEGIN THIS-X <CH4@> 32 = NOT H@    
+      0> AND                            
+     WHILE ONE<-                        
+     REPEAT THIS-X <CH4@> 32 =          
+     IF ONE->                           
+     THEN ;                             
+                                        
+( TABS TABY FIXED SPACES EACH TIME )    
+: YTAB  H@ TABY @ / 1+ TABY @ * E/L 1-  
+    MIN V@ HVTAB ;                      
+-->                                     
+                                        
+                               ( 11:45) 
+════════════════════════════════════════   SCREEN 072
+( RETN NEWCHR SAVESCRN   < 6/14/83> 72) 
+                                        
+: RETN  V@ DUP NLINS 1- <               
+     IF 1+ 0 SWAP HVTAB LMOD @          
+        IF PSHLNS                       
+        THEN CMOD @                     
+        IF 0MODES                       
+        THEN                            
+     ELSE DROP 0MODES                   
+     THEN ;                             
+                                        
+: NEWCHR  CMOD @                        
+     IF INSRTC                          
+     THEN ;                             
+                                        
+: CRT->BUF  SCR @ BLOCK NLINS +EDY +    
+    +EDY                                
+     DO DUP I L#ADDR +EDX C/L           
+      L40->ADDR C/L +                   
+     LOOP DROP ;                        
+                                        
+: SAVESCRN CRT->BUF SCR @ DUP BLOCK SWAP
+     0 R/W ;                            
+-->                            ( 11:45) 
+════════════════════════════════════════   SCREEN 073
+( EDTNO  NXTSCR          < 6/14/83> 73) 
+                                        
+: EDTNO SCR @ ;                         
+                                        
+: NXTSCR  SAVESCRN SCR @ BLKMAX @ <     
+     IF 1 SCR +! EDTNO BLK->CRT         
+      HOM-CUR                           
+     ELSE 2BEEP DROP                    
+     THEN ;                             
+                                        
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( 11:45) 
+════════════════════════════════════════   SCREEN 074
+( COUNT-CHRS             < 6/14/83> 74) 
+                                        
+( ALLOWS LEADING BLANKS FOR I.D.   )    
+: COUNT-CHRS  0 #CHRS ! 1STC            
+     BEGIN DUP C@                       
+     WHILE 1+ 1 #CHRS +!                
+     REPEAT DROP ;                      
+                                        
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( 11:45) 
+════════════════════════════════════════   SCREEN 075
+( GETWORD BKSCR SERCH    < 6/14/83> 75) 
+                                        
+: GETWORD  ECR ." LAST WORD WAS : "     
+   91 EMIT 1STC #CHRS @ TYPE 93 EMIT    
+   ECR ECR ." CHANGE IT? " (Y/N)?       
+     IF ECR ECR ." WORD? " ECR ECR      
+      1STC E/L EXPECT COUNT-CHRS        
+     THEN ;                             
+                                        
+: BKSCR  SAVESCRN -1 SCR +! EDTNO       
+   BLK->CRT HOM-CUR ;                   
+                                        
+: SERCH  0 LVSRCH ! SCR @ BLOCK 1STC    
+   OVER HV@ C/L * + + 3 PICK 1024 +     
+   <BUFSRCH>                            
+     IF SWAP - C/L /MOD HVTAB           
+       1 LVSRCH !                       
+     ELSE DROP 0 0 HVTAB                
+     THEN ;                             
+-->                                     
+                                        
+                                        
+                                        
+                               ( 11:45) 
+════════════════════════════════════════   SCREEN 076
+( CLREDIT SEARCH         < 6/14/83> 76) 
+                                        
+: CLREDIT NLINS +EDY + +EDY             
+   DO BLNKLN I L#ADDR +EDX C/L          
+     L->CRT40                           
+   LOOP ;                               
+                                        
+: SEARCH  SERCH LVSRCH @ 0=             
+     IF SAVESCRN CLREDIT 0 2 HVTAB 1STC 
+      #CHRS @ TYPE 0 0 HVTAB            
+        BEGIN 1 SCR +! SCR @ . 0 0      
+         HVTAB SERCH ?TERMINAL BLKMAX   
+         @ SCR @ 1+ < OR LVSRCH @ OR    
+        UNTIL HV@ EDTNO BLK->CRT HVTAB  
+     THEN ;                             
+                                        
+                                        
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( 11:45) 
+════════════════════════════════════════   SCREEN 077
+( ESCAPESCR LOADSCR NEXTS< 6/14/83> 77) 
+                                        
+: ESCAPESCR  EXITKEY =                  
+     IF MSG-LOC 1+ HVTAB SCR @ DUP      
+      BLK->CRT                          
+      ." NO UPDATE TO: " . CR           
+      LV                                
+     THEN ;                             
+                                        
+: LOADSCR  DUP 76 =                     
+     IF DROP SAVESCRN SCR @             
+      MSG-LOC 1+ HVTAB ." LOADING "     
+      . 6 SPACES CR R> R> R> SP! SCR @  
+      EDIT->LOAD                        
+     THEN ;                             
+                                        
+: NEXTSCR  DUP 78 =                     
+     IF NXTSCR                          
+     ELSE DUP 66 =                      
+        IF BKSCR                        
+        THEN                            
+     THEN ;                             
+                                        
+-->                            ( 11:45) 
+════════════════════════════════════════   SCREEN 078
+( COMLIST PRINTSCR WRDWRP< 6/14/83> 78) 
+                                        
+: COMLIST  'COMLIST @ EXECUTE ;         
+                                        
+: PRINTSCR  DUP 80 =                    
+     IF DROP SAVESCRN SCR @ COMLIST     
+      PAGE LV                           
+     THEN ;                             
+                                        
+: WRDWRAP  V@ NLINS 2 - <               
+     IF WRD->NXTLN V@ 1+ HVTAB DROP     
+     ELSE BEEP H@ 1- V@ HVTAB           
+     THEN ;                             
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( 11:45) 
+════════════════════════════════════════   SCREEN 079
+( FILESCR SEARCHSCR WORDS< 6/14/83> 79) 
+                                        
+: FILESCR  DUP 70 =                     
+     IF DROP SAVESCRN MSG-LOC 1+ HVTAB  
+      SCR @ . ." FLUSHED"               
+      7 SPACES CR LV                    
+     THEN ;                             
+                                        
+: SEARCHSCR  DUP 83 =                   
+     IF CRT->BUF HV@ SWAP 1+ SWAP       
+      HVTAB SEARCH                      
+     THEN ;                             
+                                        
+: WORDSCR  DUP 87 =                     
+     IF CRT->BUF CLREDIT HOM-CUR        
+      GETWORD SCR @ BLK->CRT HOM-CUR    
+     THEN ;                             
+                                        
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                               ( 11:45) 
+════════════════════════════════════════   SCREEN 080
+( RESTRORESCR UPD ESCSCR < 6/14/83> 80) 
+                                        
+: RESTORESCR  DUP 82 =                  
+     IF EMPTY-BUFFERS SCR @ BLK->CRT    
+     THEN ;                             
+                                        
+: UPDATESCR  DUP 85 =                   
+     IF SAVESCRN                        
+     THEN ;                             
+                                        
+: ESCAPESUB  2BEEP 0MODES  KEY          
+   WORDSCR SEARCHSCR FILESCR PRINTSCR   
+   NEXTSCR LOADSCR RESTORESCR           
+   UPDATESCR ESCAPESCR ;                
+                                        
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( 11:45) 
+════════════════════════════════════════   SCREEN 081
+( EDITADAPT              < 6/14/83> 81) 
+                                        
+: EDITADAPT MODE40 40 ' C/L ! 24        
+   ' NLINS ! 0 ' +EDY ! 0 ' +EDX !      
+   NLINS 1- E/L 1- * ' LRCRT !          
+   E/L 1+ 33 C! ;                       
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( 11:45) 
+════════════════════════════════════════   SCREEN 082
+(                        < 6/14/83> 82) 
+                                        
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( 11:45) 
+════════════════════════════════════════   SCREEN 083
+(                        < 6/14/83> 83) 
+                                        
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( 11:45) 
+════════════════════════════════════════   SCREEN 084
+(   PRMPTS               < 6/14/83> 84) 
+                                        
+: PRMPTS HV@                            
+    CRT->BUF CLREDIT PROMP 22 0         
+   DO DUP I L#ADDR 0 C/L L->CRT40 C/L + 
+   LOOP DROP 26 2 XYTAB CMOD @          
+   IF ." INSRT CHRS."                   
+   ELSE LMOD @                          
+      IF ." NEW LINES  "                
+      ELSE ." MODES OFF  "              
+      THEN                              
+   THEN CHRPTR @ ORGCHBUF @ - 28 6      
+    XYTAB 4 .R NO.LINS @ 28 7 XYTAB     
+    4 .R 26 13 XYTAB                    
+    KEY DROP SCR @ BLK->CRT HVTAB ;     
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( 11:45) 
+════════════════════════════════════════   SCREEN 085
+(                        < 6/14/83> 85) 
+                                        
+                                        
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( 11:45) 
+════════════════════════════════════════   SCREEN 086
+( EDSETUP SUBKEY         < 7/16/83> 86) 
+                                        
+: EDSETUP  ?NUM DUP SCR ! EDITADAPT     
+   PAD 256 + ORGCHBUF @ -               
+     IF ERSBFS                          
+     THEN                               
+      0MODES BLK->CRT                   
+   HOM-CUR ;                            
+                                        
+: SUBKEY  KEY DUP  EXITKEY =            
+   IF DROP 31                           
+   ELSE DUP 29 =                        
+      IF DROP 91                        
+      THEN                              
+   THEN ;                               
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( 13:23) 
+════════════════════════════════════════   SCREEN 087
+( EDIT                   < 6/14/83> 87) 
+                                        
+: EDIT  EDSETUP                         
+     BEGIN SUBKEY DUP 32 <              
+        IF EXECKEY                      
+        ELSE HV@ * LRCRT =              
+           IF DROP 2BEEP                
+           ELSE H@ E/L < NOT            
+              IF INSRTON DUP 32 =       
+                 IF ECR NEWCHR EMIT     
+                  ONE<-                 
+                 ELSE THIS-LINE <#SPCS?>
+                    IF ECR NEWCHR EMIT  
+                      32 NEWCHR EMIT    
+                      ONE<-             
+                    ELSE WRDWRAP NEWCHR 
+                      EMIT              
+                    THEN                
+                 THEN                   
+              ELSE NEWCHR EMIT          
+              THEN                      
+           THEN                         
+        THEN                            
+     AGAIN ;   -->             ( 11:45) 
+════════════════════════════════════════   SCREEN 088
+( SCRHD EDIT SCRHDS      < 6/14/83> 88) 
+                                        
+: SCRHD  0 0 HVTAB ." (" C/L 15 - 0     
+   HVTAB ." <" .M/D/Y ." >" SCR @       
+   3 .R ." )" C/L 9 - NLINS 1-  HVTAB   
+   ." ( " .HR:MIN ." )" 2 0             
+   HVTAB 0MODES ;                       
+                                        
+( FORTH DEFINITIONS IF IN LWR MEM )     
+( : EDIT EDITOR EDIT FORTH ;      )     
+                                        
+: SCRHDS ?2NUM                          
+   SWAP DUP SCR ! DUP BLK->CRT          
+   DO ( EDITOR ) SCRHD I NXTSCR DROP    
+   LOOP SCRHD SAVESCRN PAGE ( FORTH ) ; 
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( 11:45) 
+════════════════════════════════════════   SCREEN 089
+( EDITOR KEY ASSIGN.     < 6/14/83> 89) 
+                                        
+                                        
+                                        
+DECIMAL                                 
+                                        
+ ' CPYLN         0 MAKETBL              
+ ' LEFT          1 MAKETBL              
+ ' LWORD         2 MAKETBL              
+ ' CBACK         3 MAKETBL              
+ ' DELC          4 MAKETBL              
+ ' ERASBUFS      5 MAKETBL              
+ ' RWORD         6 MAKETBL              
+ ' GETLN         7 MAKETBL              
+ ' LEFT          8 MAKETBL              
+ ' INSRTON       9 MAKETBL              
+ ' JERKC        10 MAKETBL              
+ ' KILLN        11 MAKETBL              
+ ' LBACK        12 MAKETBL              
+ ' RETN         13 MAKETBL              
+                                        
+-->                                     
+                                        
+                               ( 11:45) 
+════════════════════════════════════════   SCREEN 090
+( EDITOR KEY ASSIGN.     < 6/14/83> 90) 
+                                        
+ ' NEWLNS       14 MAKETBL              
+ ' HOM-CUR      15 MAKETBL              
+ ' PULLUP       16 MAKETBL              
+ ' 0MODES       17 MAKETBL              
+ ' RTAB         18 MAKETBL              
+ ' RIGHT        19 MAKETBL              
+ ' SCRHD        20 MAKETBL              
+ ' RIGHT        21 MAKETBL              
+ ' VTAB         22 MAKETBL              
+ ' UP           23 MAKETBL              
+ ' PRMPTS       24 MAKETBL              
+ ' YTAB         25 MAKETBL              
+ ' DOWN         26 MAKETBL              
+ ' NOOP ( \ )   27 MAKETBL              
+ ' NOOP ( ] )   28 MAKETBL              
+ ' NOOP ( ^ )   29 MAKETBL              
+ ' NOOP ( - )   30 MAKETBL              
+ ' ESCAPESUB    31 MAKETBL              
+                                        
+FORTH DEFINITIONS                       
+   -->                                  
+                               ( 11:45) 
+════════════════════════════════════════   SCREEN 091
+( EDITERR                < 6/14/83> 91) 
+                                        
+( AFTER A LOAD ERROR DETECTION, TYPE: ) 
+( EDITERR AND WHEN EDITOR HAS BEEN    ) 
+( CALLED UP, TYPE: ESC S <SEARCH> AND ) 
+( CURSOR WILL BE PLACED ON THE ERR WRD) 
+                                        
+( ---, <NOTE THAT NO ARGUMENT IS USED>) 
+: EDITERR  SCR @ BLOCK >IN-ERR @ + 1-   
+   DUP C@ 32 =                          
+  IF 1- THEN PAD 2- SWAP 0 3 PICK !     
+  BEGIN DUP C@ 32 = NOT                 
+  WHILE 1 3 PICK +! 1-                  
+  REPEAT 1+ EDITOR 1STC 3 ROLL          
+   @ DUP #CHRS ! CMOVE 0 1STC #CHRS @ + 
+   ! SCR @ EDIT FORTH ;                 
+                                        
+EXIT                                    
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( 11:45) 
+════════════════════════════════════════   SCREEN 092
+( EXEC-INIT EXEC-ERASE   < 8/ 2/83> 92) 
+VARIABLE R-DRV    VARIABLE R-SLOT       
+VARIABLE W-DRV    VARIABLE W-SLOT       
+: D&S  ."  DRV " 65 + EMIT ."  SLOT "   
+   . CR CR ;                            
+: EX?  ." EXECUTE " (Y/N)? CR CR ;      
+                                        
+( ---, <INITIALIZES W-DRV )             
+: EXEC-INIT  CR ." INITIALIZING" CR 0   
+   W-SLOT @ W-DRV @ 0 0 4 1 RWTS ;      
+                                        
+        ( NFA&PFA: 16799 16812 )        
+: EXEC-ERASE  CR ." ERASING" CR FIRST   
+   PAD - PAD OVER BL FILL 0 256 U/MOD   
+   SWAP DROP SECS/TRK TRKS/HD *         
+   HDS/DRV * OVER /MOD 3 ROLL 3 ROLL    
+   SWAP 0 4 ROLL 0                      
+     DO PAD W-SLOT @ W-DRV @ 4 PICK     
+      SECS/TRK /MOD 0 8 PICK RWTS OVER +
+     LOOP SWAP DROP OVER                
+   IF PAD W-SLOT @ W-DRV @ 4 ROLL       
+    SECS/TRK /MOD 0 7 ROLL RWTS         
+   ELSE DDROP THEN ;                    
+-->                            (  0:00) 
+════════════════════════════════════════   SCREEN 093
+( NORMDISKS INITDISK EXEC< 7/16/83> 93) 
+: NORMDISKS  0 R-DRV ! 6 R-SLOT ! 1     
+   W-DRV ! 6 W-SLOT ! ;                 
+                                        
+: INITDISK  CR CR                       
+   ." WILL INITIALIZE AND ERASE"        
+   W-SLOT @ W-DRV @ D&S EX?             
+     IF EXEC-INIT EXEC-ERASE CR         
+     THEN NORMDISKS ;                   
+                                        
+( COPYS FROM R-DRV TO W-DRV )           
+: EXEC-COPY  CR ." COPYING" CR          
+   SECS/TRK TRKS/HD * FIRST PAD - 0     
+   256 U/MOD SWAP DROP DUP NEGATE       
+     BEGIN OVER + 3 PICK 3 PICK 3 PICK  
+      + <                               
+        IF SWAP DROP OVER OVER - SWAP   
+        THEN PAD W-SLOT @ W-DRV @       
+      4 PICK SECS/TRK /MOD 0 8 PICK     
+      7 PICK R-SLOT @ R-DRV @ 7 PICK    
+      7 PICK 1 7 PICK RWTS RWTS 3 PICK  
+      3 PICK 3 PICK + =                 
+     UNTIL DROP DROP DROP ;             
+-->                            ( 13:23) 
+════════════════════════════════════════   SCREEN 094
+( COPYDISK MCOMP COMPMEM < 7/16/83> 94) 
+                                        
+: COPYDISK  CR CR ." WILL COPY" R-SLOT  
+   @ R-DRV @ D&S ." TO" W-SLOT @ W-DRV  
+   @ D&S EX?                            
+     IF EXEC-COPY CR                    
+     THEN NORMDISKS ;                   
+                                        
+( ADDR1 ADDR2 NBYTES ---, <0=O.K.> )    
+CODE MCOMP SEC LDA, N STA, SEC 1+ LDA,  
+  N 1+ STA, SEC 2+ LDA, N 2+ STA,       
+  SEC 3 + LDA, N 3 + STA, BOT 1+ LDA,   
+  N 1- STA, SEC 1+ STY, SEC 2+ STY,     
+  SEC 3 + STY,                          
+   BEGIN, N )Y LDA, N 2+ )Y CMP, 0=     
+   WHILE, INY, 0=                       
+    IF, N 1+ INC, N 3 + INC, N 1- DEC,  
+      0= IF, POPTWO JMP, THEN,          
+    THEN,                               
+   REPEAT, N STY, SEC, 00 # LDA, N SBC, 
+  SEC 2+ STA, N 1- LDA, 00 # SBC,       
+  SEC 3 + STA, 01 # LDA, SEC STA,       
+  POP JMP, C; -->                       
+                               ( 13:23) 
+════════════════════════════════════════   SCREEN 095
+( COMPMEM                < 7/16/83> 95) 
+                                        
+( TOTSEC MSECTSEACHTIME NTHSECTS )      
+( PRIOR ---, <SAME>OR<0 0 0 > )         
+: COMPMEM  OVER 256 * PAD + PAD 4 PICK  
+   256 * MCOMP                          
+     IF 4 ROLL DROP NEGATE 3 ROLL       
+      256 * + 256 /MOD 3 ROLL + 4 /MOD  
+      CR ." COMPARE ERROR AT:" CR CR    
+      R-DRV @ SECS/TRK * TRKS/HD *      
+      HDS/DRV * 4 / + ." SCRN" 5 .R     
+      256 * + C/L /MOD CR ." LINE"      
+      5 .R CR ." CHAR" 5 .R CR 0 0 0    
+      7 EMIT                            
+     THEN ;                             
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( 13:23) 
+════════════════════════════════════════   SCREEN 096
+( COMPDISK               < 7/16/83> 96) 
+                                        
+( COMPARES DISK IN R-DRV TO W-DRV )     
+( ---, <IF A MISMATCH, CITES WHERE   )  
+: COMPDISK  CR CR ." COMPARING" R-SLOT  
+   @ R-DRV @ D&S ." WITH" W-SLOT @      
+   W-DRV @ D&S ." ANY KEY TO QUIT"      
+   CR CR SECS/TRK TRKS/HD * FIRST PAD   
+   - 0 512 U/MOD SWAP DROP DUP NEGATE   
+     BEGIN OVER + 3 PICK 3 PICK 3 PICK  
+      + <                               
+        IF SWAP DROP OVER OVER - SWAP   
+        THEN PAD W-SLOT @ W-DRV @       
+      4 PICK SECS/TRK /MOD 1 8 PICK     
+      9 PICK 256 * 8 PICK + R-SLOT @    
+      R-DRV @ 7 PICK 7 PICK 1 7 PICK    
+      RWTS RWTS COMPMEM 3 PICK 3 PICK   
+      3 PICK + = QTERM OR               
+     UNTIL DROP DROP DROP CR ?TERMINAL  
+   DROP NORMDISKS ;                     
+-->                                     
+                                        
+                                        
+                               ( 13:23) 
+════════════════════════════════════════   SCREEN 097
+( COPYNEW                < 7/16/83> 97) 
+                                        
+( INITIALIZES, COPIES, AND COMPARES )   
+: COPYNEW  CR CR ." WILL INITIALIZE"    
+   W-SLOT @ W-DRV @ D&S                 
+   ." THEN COPY AND COMPARE" R-SLOT @   
+   R-DRV @ D&S ." TO" W-SLOT @ W-DRV @  
+   D&S EX?                              
+     IF EXEC-INIT EXEC-COPY COMPDISK    
+      CR                                
+     THEN NORMDISKS ;                   
+                                        
+    NORMDISKS                           
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( 13:23) 
+════════════════════════════════════════   SCREEN 098
+( COPY-VIRTUAL R-DRV TO W< 7/16/83> 98) 
+                                        
+( ---, COPIES VIRTUAL ONLY )            
+: COPY-VIRTUAL VIRTUAL UTIL-RWTS FORTH  
+   2+ @ DUP R-SLOT ! W-SLOT ! CR CR     
+   ." COPIES VIRTUAL IMAGES FROM DRV "  
+   R-DRV @ 65 + EMIT CR CR              
+   ." TO DRV " W-DRV @ 65 + EMIT CR CR  
+   ." IN SLOT " R-SLOT @ . CR CR EX?    
+     IF SECS/TRK TRKS/HD * FIRST PAD -  
+      0 256 U/MOD SWAP DROP VIRTUAL     
+      NEXT-SECTOR FORTH @ 1+ OVER -     
+        BEGIN OVER + 3 PICK 3 PICK      
+         3 PICK + <                     
+           IF SWAP DROP OVER OVER -     
+            SWAP                        
+           THEN PAD W-SLOT @ W-DRV @    
+         4 PICK SECS/TRK /MOD 0 8 PICK  
+         7 PICK R-SLOT @ R-DRV @        
+         7 PICK 7 PICK 1 7 PICK RWTS    
+         RWTS 3 PICK 3 PICK 3 PICK + =  
+        UNTIL DROP DROP DROP CR         
+     THEN NORMDISKS ;                   
+-->                            ( 13:23) 
+════════════════════════════════════════   SCREEN 099
+( COPYSCRNS <USES R/W>   < 7/16/83> 99) 
+( FIRSTSOURCE LASTSOURCE FIRSTDEST---,) 
+: COPYSCRNS  DEPTH 3 <                  
+     IF CR CR BEEP                      
+      ." INCOMPLETE ARGUMENTS" CR SP!   
+      QUIT                              
+     THEN >R DDUP >                     
+     IF SWAP                            
+     THEN R> CR CR                      
+   ." WILL COPY SCRNS  " 3 PICK .       
+   ." THRU " 2 PICK . CR CR             
+   ." TO SCRNS " DUP . ." THRU " 2      
+   PICK 4 PICK - 2 PICK + . CR CR EX?   
+     IF DUP 4 PICK <                    
+        IF 3 ROLL SWAP 1 3 ROLL 3 ROLL  
+        ELSE -1 3 ROLL 3 ROLL 2 PICK    
+         5 PICK - +                     
+        THEN                            
+        BEGIN OVER OVER COPY 3 PICK +   
+         SWAP 3 PICK + SWAP 4 PICK      
+         4 PICK + 3 PICK =              
+        UNTIL DROP                      
+     THEN DROP DROP DROP ;              
+-->                            ( 13:23) 
+════════════════════════════════════════   SCREEN 100
+( ERASESCRNS DUMP-HEADER < 7/16/83>100) 
+                                        
+( FIRSTSCRN LASTSCRN ---, )             
+: ERASESCRNS  DUP 3 PICK CR CR          
+   ." WILL ERASE SCR " . ." THRU "      
+   . CR CR EX?                          
+     IF DUP SCR ! 1+ SWAP FIRST DUP     
+      1024 BL FILL 3 ROLL 3 ROLL        
+        DO DUP I 0 R/W                  
+        LOOP DROP EMPTY-BUFFERS         
+     ELSE DROP DROP                     
+     THEN ;                             
+                                        
+( ADDR N 0 ---, ADDR N 0 )              
+: DUMP-HEADER  CR CR 3 PICK             
+    ." ADDRESS    " DUP 8 0             
+     DO DUP 15 AND 3 .R 1+              
+     LOOP SPACE 8 0                     
+     DO DUP 15 AND 3 .R 1+              
+     LOOP DROP 3 SPACES 16 0            
+     DO DUP 15 AND 0 <# # #> TYPE 1+    
+     LOOP DROP CR ; -->                 
+                                        
+                               ( 13:23) 
+════════════════════════════════════════   SCREEN 101
+( DUMP                   < 6/14/83>101) 
+                                        
+( ADDR N ---, )                         
+: DUMP  0 BASE @ >R HEX DUMP-HEADER     
+   DO CR DUP I + DUP 0 9 D.R 2 SPACES   
+    DUP 8 0                             
+     DO DUP I + C@ 3 .R                 
+     LOOP DROP SPACE DUP 8 + 8 0        
+     DO DUP I + C@ 3 .R                 
+     LOOP DROP 3 SPACES 16 0            
+     DO DUP I + C@ DUP 32 < OVER 126 >  
+      OR                                
+       IF DROP 46                       
+       THEN EMIT                        
+     LOOP DROP 16 PAUSE ?TERMINAL       
+     IF LEAVE                           
+     THEN                               
+   /LOOP DROP CR R> BASE ! ;            
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                               ( 11:45) 
+════════════════════════════════════════   SCREEN 102
+(                        < 6/14/83>102) 
+EXIT  ( END OF VIRTUAL UTILITIES )      
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( 21:47) 
+════════════════════════════════════════   SCREEN 103
+( TONE                   < 7/13/83>243) 
+                                        
+CODE <TONE>  2 # LDA, SETUP JSR,        
+   N 3 + INC, N 1+ INC,                 
+   BEGIN, N 3 + LDA, N 4 + STA,         
+    N 2+ LDY, 49200 LDA,                
+      BEGIN, DEY, 0=                    
+         IF, N 4 + DEC,                 
+         THEN, 0=                       
+      UNTIL, N DEC, 0=                  
+      IF, N 1+ DEC,                     
+      THEN, 0=                          
+   UNTIL, NEXT JMP, C;                  
+                                        
+( FREQ,HZ DURATION,1/100SEC ---,      ) 
+: TONE  68500. 4 ROLL U/MOD SWAP DROP   
+    SWAP 1278 3 PICK 3 + */ <TONE> ;    
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( 10:15) 
+════════════════════════════════════════   SCREEN 104
+( SHOW INDEX             < 6/14/83>104) 
+( FIRST OF RESIDENT MISC SCRNS    )     
+                                        
+( NO. = DELAY, 1/100 SECONDS IF > 33 )  
+  VARIABLE SHOWDELAY                    
+                                        
+( FIRSTSCRN LASTSCRN ---, )             
+: SHOW  PAGE 1+ SWAP                    
+   DO I 0 22 XYTAB                      
+    DUP BLK->CRT SCR ! 33 SHOWDELAY @ < 
+     IF SHOWDELAY @ 33 - 0              
+       DO 73 0 DO LOOP LOOP             
+     THEN ?TERMINAL IF LEAVE THEN       
+   LOOP 0 22 XYTAB ;                    
+                                        
+( FIRSTSCRN LASTSCRN ---, )             
+: INDEX  CR 1+ SWAP                     
+   DO CR I 3 .R SPACE 0 I .LINE         
+    ?TERMINAL IF LEAVE THEN             
+   LOOP ; -->                           
+                                        
+                                        
+                                        
+                               ( 21:47) 
+════════════════════════════════════════   SCREEN 105
+( PRLIST PRFF            < 6/14/83>105) 
+                                        
+( SET YOUR PRINTER SLOT NUMBER HERE )   
+   VARIABLE PRSLOT   5 PRSLOT !         
+                                        
+( SCRN ---, )                           
+( PRINTS ONE SCRN THRU PRINTER CARD )   
+: PRLIST DUP SCR ! LIST CR ;            
+                                        
+( FORMFEED )                            
+: PRFF 12 EMIT ;                        
+                                        
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( 11:45) 
+════════════════════════════════════════   SCREEN 106
+( 3LST <PRINTS 3 SCREENS < 6/14/83>106) 
+                                        
+( LISTS 3 64X16 SCREENS                 
+( FIRSTSCRN LASTSCRN ---, )             
+: 3LST  ?NUM SWAP OVER OVER <           
+   IF SWAP THEN 1- PRSLOT @ PR#         
+      BEGIN 3 0                         
+         DO 1+ DUP PRLIST OVER OVER =   
+            IF LEAVE THEN               
+         LOOP PRFF OVER OVER =          
+       ?TERMINAL OR                     
+      UNTIL DDROP 0 PR# ;               
+                                        
+DECIMAL -->                             
+                                        
+( LISTS 2 40X24 SCREENS PER PAGE )      
+: LST PRSLOT @ PR# 1+ SWAP              
+    DO CR I LIST I 2 MOD                
+     IF 12 EMIT                         
+     THEN                               
+    LOOP CR 0 PR# ;                     
+                                        
+                                        
+                               ( 11:45) 
+════════════════════════════════════════   SCREEN 107
+( 4LST                   < 6/14/83>107) 
+  VARIABLE BLCNT                        
+: TAB48  27 EMIT 81 EMIT 79 EMIT ;      
+: 2LIST  27 EMIT 93 EMIT                
+    74 EMIT CR DUP SCR !                
+    ." SCR NO. " DUP . 1+ TAB48         
+    ." SCR NO. " . CR 24 0              
+      DO CR I SCR @ .LINE TAB48 I SCR @ 
+       1+ .LINE                         
+      LOOP CR CR ;                      
+                                        
+( 4 SCRNS/PAGE MODE40 WITH SPINWRITER ) 
+( FIRSTSCRN LASTSCRN ---, )             
+: 4LST ?2NUM 0 BLCNT ! 0 1784 PRSLOT @  
+    + ! ( NO CR ) PRSLOT @ PR# 1+ SWAP  
+    DO CR I 2LIST 2 BLCNT +! BLCNT      
+     @ 4 MOD 0=                         
+      IF 12 EMIT THEN  2                
+    +LOOP CR BLCNT @ 4 MOD              
+    IF 12 EMIT THEN 0 PR# ;             
+-->                                     
+                                        
+                                        
+                               ( 11:45) 
+════════════════════════════════════════   SCREEN 108
+( \ .SL .SR .S           < 6/14/83>108) 
+                                        
+    -1 CONSTANT .SS                     
+                                        
+: \  >IN @ C/L / 1+ C/L * >IN ! ;       
+    IMMEDIATE                           
+                                        
+: .SL   0 ' .SS ! ;                     
+                                        
+: .SR  -1 ' .SS ! ;                     
+                                        
+: .S  CR DEPTH                          
+   IF .SS                               
+      IF SP@ 2- S0 2-                   
+      ELSE SP@ S0 SWAP                  
+      THEN                              
+      DO I @ 0 D. 2 .SS +-              
+      +LOOP                             
+   ELSE ." EMPTY STACK"                 
+   THEN CR ;                            
+-->                                     
+                                        
+                                        
+                               ( 11:45) 
+════════════════════════════════════════   SCREEN 109
+( BUFFERS                < 6/14/83>109) 
+                                        
+( N ---, <INSTALLS N OR MAX AVAIL. )    
+: BUFFERS CR FLUSH LIMIT PAD            
+   200 + - 0 1028 U/MOD SWAP            
+   DROP DUP 2 <                         
+    IF 2BEEP ." OUT OF MEMORY" QUIT     
+    THEN MIN 2 MAX DUP . DUP ' #BUFF !  
+  ." BUFFERS INSTALLED" CR 1028 * LIMIT 
+   SWAP - DUP ' FIRST ! DUP USE !       
+   PREV ! EMPTY-BUFFERS ;               
+                                        
+EXIT                                    
+                                        
+END OF ADDED RESIDENT WORDS             
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( 11:45) 
+════════════════════════════════════════   SCREEN 110
+(                        < 6/14/83>110) 
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( 21:47) 
+════════════════════════════════════════   SCREEN 111
+(                        < 6/ 4/83>111) 
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( 13:35) 

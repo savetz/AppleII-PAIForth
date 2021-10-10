@@ -1,0 +1,34 @@
+DISK CONTENT EXTRACTION LOG
+Performed by Applesauce v1.48.1
+www.applesaucefdc.com
+
+Timestamp: Aug 26, 2021, 12:20
+
+    Media: 5.25" Floppy Disk
+   Format: Apple ProDOS
+
+== STATUS ======================================================================
+
+1 file was detected on the disk.
+No issues were encountered with the extraction process.
+
+== CATALOG =====================================================================
+
+ALTZP
+
+ NAME           TYPE  BLOCKS  MODIFIED          CREATED          ENDFILE SUBTYPE
+
+ ALTZP           $F7      43  <NO DATE>         <NO DATE>          21504 
+
+
+== FILE DETAILS ================================================================
+
+ALTZP
+Other File ($F7)                           MD5: 0a63465456940b155060732bc05627c4
+
+File Type: $F7       Aux Type: $0000      Storage: Sapling ($2)                 
+   Sparse: No       Block Qty: 43       File Size: 21504    Index Qty: 1        
+Data Size: 21504    Data Blks: 42       
+
+--------------------------------------------------------------------------------
+
