@@ -1,0 +1,74 @@
+DISK CONTENT EXTRACTION LOG
+Performed by Applesauce v1.48.1
+www.applesaucefdc.com
+
+Timestamp: Aug 26, 2021, 11:51
+
+    Media: 5.25" Floppy Disk
+   Format: Apple ProDOS
+
+== STATUS ======================================================================
+
+5 files were detected on the disk.
+No issues were encountered with the extraction process.
+
+== CATALOG =====================================================================
+
+EXPLORER
+
+ NAME           TYPE  BLOCKS  MODIFIED          CREATED          ENDFILE SUBTYPE
+
+ PRODOS          SYS      30  18-SEP-84  00:00  <NO DATE>          14848 
+ EURO10.FONT     $F7       5  <NO DATE>         <NO DATE>           1746 
+ RC8.FONT        $F7       4  <NO DATE>         <NO DATE>           1280 
+ RUN.SYSTEM      SYS       1  <NO DATE>         <NO DATE>            485 
+ RUN.I           $F8      57  <NO DATE>         <NO DATE>          28233 
+
+
+== FILE DETAILS ================================================================
+
+PRODOS
+SYS - ProDOS System File ($FF)             MD5: 1e340730560e1ed45cd0e8e0f313ff0c
+
+File Type: $FF       Aux Type: $2000      Storage: Sapling ($2)                 
+   Sparse: No       Block Qty: 30       File Size: 14848    Index Qty: 1        
+Data Size: 14848    Data Blks: 29       
+
+--------------------------------------------------------------------------------
+
+EURO10.FONT
+Other File ($F7)                           MD5: 8641aeaa5b90d31b421d0c238a4d1d5b
+
+File Type: $F7       Aux Type: $0000      Storage: Sapling ($2)                 
+   Sparse: No       Block Qty: 5        File Size: 1746     Index Qty: 1        
+Data Size: 1746     Data Blks: 4        
+
+--------------------------------------------------------------------------------
+
+RC8.FONT
+Other File ($F7)                           MD5: e900abceb56ba20ae810a424fc71e2b8
+
+File Type: $F7       Aux Type: $0000      Storage: Sapling ($2)                 
+   Sparse: No       Block Qty: 4        File Size: 1280     Index Qty: 1        
+Data Size: 1280     Data Blks: 3        
+
+--------------------------------------------------------------------------------
+
+RUN.SYSTEM
+SYS - ProDOS System File ($FF)             MD5: 756dc7ec37a42f8e92ec721b217a2a2b
+
+File Type: $FF       Aux Type: $2000      Storage: Seedling ($1)                
+   Sparse: No       Block Qty: 1        File Size: 485      Index Qty: 0        
+Data Size: 485      Data Blks: 1        
+
+--------------------------------------------------------------------------------
+
+RUN.I
+Other File ($F8)                           MD5: 1f3cf0cbebddb3ab057ce197a733224b
+
+File Type: $F8       Aux Type: $6000      Storage: Sapling ($2)                 
+   Sparse: No       Block Qty: 57       File Size: 28233    Index Qty: 1        
+Data Size: 28233    Data Blks: 56       
+
+--------------------------------------------------------------------------------
+

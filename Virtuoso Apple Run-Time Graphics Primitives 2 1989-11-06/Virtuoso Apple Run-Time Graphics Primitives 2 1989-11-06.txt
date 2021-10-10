@@ -1,0 +1,3150 @@
+════════════════════════════════════════   SCREEN 000
+( NOTES                  <10/15/89>140) 
+                                        
+Virtuoso - Apple run-time graphics prims
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+════════════════════════════════════════   SCREEN 001
+( LOADBLOCK              <11/ 6/89>141) 
+L40 ONLY FORTH ALSO DEFINITIONS         
+APPENDIX CREATE ASTART MAIN CR CR       
+." First word: CODE-VEC (ASTART)" CR CR 
+                                        
+  146     LOAD \ CODE-VEC               
+  150     LOAD \ main page variables    
+  151     LOAD \ b/mod                  
+  155     LOAD \ table driven YADDR     
+  160 164 THRU \ dual-page words        
+  152 154 THRU \ CLS, HGR, etc          
+  165 174 THRU \ shift tables           
+  175 204 THRU \ DRAWCHAR routines      
+  205 219 THRU \ Unpack routines        
+  240 274 THRU \ HLINE words            
+  277     LOAD \ temp font              
+  225 239 THRU L40 \ misc prims         
+\ 220 224 THRU \ unpack tester          
+FORGET ASTART                           
+CR CR ." DONE!" CR                      
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 002
+( RELOAD BLOCK           <11/ 6/89>142) 
+L40                                     
+                                        
+FORGET ASTART                           
+FORGET CODE-VEC                         
+                                        
+  141 LOAD                              
+\ 265 LOAD                              
+\ 190 LOAD                              
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( fah  ) 
+════════════════════════════════════════   SCREEN 003
+( CREATE BASIC FORTH     < 7/26/89>143) 
+                                        
+FORTH DEFINITIONS                       
+  FORGET APP-AUX                        
+                                        
+ROOT DEFINITIONS                        
+  FORGET ORDER                          
+  24576 10 + DP !                       
+  : ORDER <ORDER> ;                     
+                                        
+FORTH DEFINITIONS                       
+' EXIT CFA ' <!APPENDIX> !              
+  APPENDIX CREATE AMARK                 
+  MAIN     CREATE MARK                  
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+════════════════════════════════════════   SCREEN 004
+( RECVFIG                < 9/ 9/86>144) 
+                                        
+VARIABLE FWID \ width of fig in bytes   
+                                        
+: RECVFIG                               
+  SET-I/O PAGE HGR 1HG 0 20 XYTAB       
+  ." Start SENDFIG now" CR              
+  XIN 5 = NOT ABORT" Bad ID"            
+  230 XOUT                              
+  XIN DUP FWID ! XIN 255 XOR = NOT >R   
+  XIN DUP XIN 255 XOR = NOT R> OR       
+  IF 44 XOUT ( indicate error to send)  
+   1 ABORT" Err recieving size"         
+  THEN                                  
+  211 XOUT ( go to sender )             
+  BEGIN XIN 8 = UNTIL                   
+  0 DO I YADDR FWID @ SPECRECV          
+  LOOP ;                                
+                                        
+: R RECVFIG ;                           
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 005
+   # 0 LDX, GFIG X) LDA,                
+   GFIG INC, 0=                         
+   IF, GFIG 1+ INC, THEN,               
+    # 0 LDX,                            
+    GFIG X) LDA,   \ get next byte      
+     \ increment word pointer           
+    GFIG INC, 0=                        
+    IF, GFIG 1+ INC, THEN,              
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 006
+( CODE-VEC               <11/ 6/89>146) 
+                                        
+                                        
+\ to define: CODE-VEC name              
+\ to set: adr name !                    
+\ to use in code: ' name JSR,           
+0 FWARNING !                            
+                                        
+: CODE-VEC                              
+   CREATE                               
+    76 C, ( jump opcode )               
+    0 ,                                 
+   DOES> \ normally jump address        
+    1+                                  
+;                                       
+                                        
+1 FWARNING !                            
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( fah  ) 
+════════════════════════════════════════   SCREEN 007
+( SUBR S; LOBYTE HIBYTE  <10/11/86>147) 
+EXIT --- DEFINED ON DISK 1 ----         
+\ things to make assembler more useful  
+                                        
+GET-A&E APPENDIX                        
+: SUBR                                  
+  GET-A&E ?MAIN                         
+  HERE 255 AND 255 = ALLOT              
+  HERE [APPN] CONSTANT SMUDGE           
+  [COMPILE] ASSEMBLER                   
+  ASSEMBLER MEM !CSP FORTH [MAIN] ;     
+                                        
+: S;                                    
+  ?CSP [APPN] SMUDGE [MAIN]             
+  CURRENT @ CONTEXT ! ;                 
+                                        
+: S'                                    
+  ?FIND DROP @ [COMPILE] LITERAL        
+; IMMEDIATE                             
+                                        
+: LOBYTE 255 AND ;                      
+: HIBYTE SP@ 1+ C@ SWAP DROP ;          
+                                        
+MAIN                                    
+════════════════════════════════════════   SCREEN 008
+( ZERO PAGE USAGE        <10/ 9/86>148) 
+EXIT --- DEFINED ON DISK 1 ----         
+HEX APPENDIX                            
+                                        
+  0E0 CONSTANT GBASE  \ >Y address      
+  0E2 CONSTANT 0ADR   \ >something      
+  0E4 CONSTANT GFIG   \ >fig data       
+  0E6 CONSTANT &QUO   \ quocient        
+  0E7 CONSTANT &REM   \ remainder       
+  0E8 CONSTANT PMSK   \ pix to change   
+  0E9 CONSTANT TCLR   \ text color      
+  0EA CONSTANT PVAL   \ {putpack} temp  
+  0EB CONSTANT REMCNT \ pack cntr       
+  0EC CONSTANT REP?   \ pack reg        
+  0ED CONSTANT BYTE#  \ pack reg        
+\ 0EE CONSTANT ????   \                 
+DECIMAL EXIT                            
+--------------------------------------- 
+Locations D0 through EF are not used    
+by MVP-PADS, to allow use of the        
+Applesoft ram floating-point and        
+graphics routines.                      
+                                        
+                                        
+════════════════════════════════════════   SCREEN 009
+( MORE ZERO PAGE         <10/ 9/86>149) 
+EXIT --- DEFINED ON DISK 1 ----         
+                                        
+                                        
+APPENDIX HEX                            
+\   D9 CONSTANT ????   \                
+\   DA CONSTANT ????   \                
+\   DB CONSTANT ????   \                
+\   DC CONSTANT ????   \                
+\   DD CONSTANT ????   \                
+\   DE CONSTANT ????   \                
+\   DF CONSTANT ????   \                
+DECIMAL MAIN                            
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 010
+( NORMAL VARIABLES       < 7/26/89>150) 
+                                        
+  \ holds value to add to hi byte of    
+  \ YADDR to offset to another page     
+  \ 0=PAGE 1   32=PAGE 2                
+XVARIABLE DPAGE                         
+                                        
+  \ holds number of the current page    
+  \ being viewed (0=page 1 1=page 2)    
+XVARIABLE VPAGE                         
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+════════════════════════════════════════   SCREEN 011
+( b/mod  unsigned divide < 7/26/89>151) 
+\ entry:YA/X=&QUO &REM                  
+\ exit: All regs preserved              
+                                        
+LABEL b/mod \                           
+  &REM STX, ( divisor )                 
+  &QUO STA, ( dividend lsb)             
+  PHA, TYA, PHA, ( msb )                
+  # 8 LDY,                              
+  BEGIN, &QUO ASL, .A ROL,              
+   &REM CMP, CS                         
+   IF, &REM SBC, &QUO INC,              
+   THEN,                                
+   DEY, 0=                              
+  UNTIL,                                
+  &REM STA, PLA, TAY, PLA,              
+  RTS, C;                               
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+════════════════════════════════════════   SCREEN 012
+( fast CLS               < 7/26/89>152) 
+                                        
+SUBR cls # 0 LDX, # 0 LDA,              
+  BEGIN, # 0 LDY, yaddr JSR,            
+   BEGIN, \ inline code makes faster    
+    GBASE )Y STA, INY,                  
+    GBASE )Y STA, INY,                  
+    GBASE )Y STA, INY,                  
+    GBASE )Y STA, INY,                  
+    GBASE )Y STA, INY,                  
+    GBASE )Y STA, INY,                  
+    GBASE )Y STA, INY,                  
+    GBASE )Y STA, INY,                  
+    GBASE )Y STA, INY,                  
+    GBASE )Y STA, INY,                  
+    # 40 CPY, 0=                        
+   UNTIL,                               
+   INX, # 192 CPX, 0=                   
+  UNTIL,                                
+ RTS, S;                                
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+════════════════════════════════════════   SCREEN 013
+( CLW VP HG 1HG HGR      < 7/26/89>153) 
+                                        
+                                        
+: CLS FORGET-SYS S' cls CALL ;          
+: ZW C@ DROP ;                          
+HEX                                     
+: VP C055 VPAGE @ + ZW ;                
+: HG C050 ZW C057 ZW C052 ZW ;          
+: 1HG C050 ZW C057 ZW C053 ZW ;         
+: HGR S' vdinit CALL CLS HG ;           
+DECIMAL                                 
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 015
+( TABLE DRIVEN YADDR     < 7/26/89>155) 
+\ loading this screen will load         
+\ the table driven version of yaddr     
+\ load the 156-157 to use the           
+\ computed version                      
+                                        
+CREATE LYADDR 256 ALLOT                 
+CREATE HYADDR 256 ALLOT                 
+                                        
+156 157 THRU  \ use to fill table       
+    158 LOAD  \ word to fill table      
+FILLTAB       \ fill the table          
+FORGET $YADDR \ forget old routine      
+    159 LOAD  \ table drive $YADDR      
+\   157 LOAD  \ YADDR is same for both  
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+════════════════════════════════════════   SCREEN 016
+( $YADDR SUBROUTINE      < 7/26/89>156) 
+\ computes values                       
+\ entry: line# in X reg.                
+\ exit:  address in GBASE               
+\ all registers are preserved           
+HEX                                     
+CODE $YADDR                             
+   PHA, TXA, # C0  AND, GBASE STA,      
+             .A LSR, .A LSR,            
+             GBASE ORA, GBASE STA,      
+        TXA, GBASE 1+ STA, .A ASL,      
+             .A ASL, .A ASL,            
+             GBASE 1+ ROL, .A ASL,      
+             GBASE 1+ ROL, .A ASL,      
+             GBASE ROR,                 
+             GBASE 1+ LDA, # 1F AND,    
+             # 20 ORA, GBASE 1+ STA,    
+   PLA, RTS, C;                         
+                                        
+DECIMAL EXIT                            
+--------------------------------------- 
+Note: only valid for 0 <= line# <= 191  
+BOMBS FORTH when -1 or 255              
+                               ( FAH  ) 
+════════════════════════════════════════   SCREEN 017
+( YADDR code version     < 7/26/89>157) 
+                                        
+CODE YADDR ( y -- yaddr )               
+     XSAVE STX, BOT LDA, TAX,           
+     ' $YADDR JSR,                      
+     XSAVE LDX,                         
+     GBASE    LDA, BOT    STA,          
+     GBASE 1+ LDA, BOT 1+ STA,          
+     NEXT JMP, C;                       
+                                        
+EXIT                                    
+--------------------------------------- 
+Algorithm in Basic:                     
+                                        
+ INPUT Y                                
+ Y1 = INT(Y /8) : YR = Y  - Y1*8        
+ Y2 = INT(Y1/8) : YS = Y1 - Y2*8        
+ L  = 8192 + 40*Y2 + 128*YS + 1024*YR   
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+════════════════════════════════════════   SCREEN 018
+( CREATE YADDR TABLES    < 7/26/89>158) 
+\ this word will fill LYADDR and HYADDR 
+\ with the proper values                
+                                        
+\ all values above 191 return the       
+\ address of the last scan line         
+\ to avoid crashes                      
+                                        
+0 FWARNING !                            
+: FILLTAB                               
+  192 0 \ do for the real values        
+  DO I YADDR DROP                       
+     GBASE C@ LYADDR I + C!             
+     GBASE 1+ C@ HYADDR I + C!          
+  LOOP                                  
+  \ fill remainder of table with adr    
+  \ scan line 191 (already in GBASE)    
+  256 192                               
+  DO GBASE C@ LYADDR I + C!             
+     GBASE 1+ C@ HYADDR I + C!          
+  LOOP                                  
+;                                       
+                                        
+1 FWARNING !                   ( FAH  ) 
+════════════════════════════════════════   SCREEN 019
+( yaddr  - TABLE DRIVEN  < 7/26/89>159) 
+\ entry: line# in X reg.                
+\ exit:  address in GBASE               
+\ all registers are preserved           
+                                        
+\ X>191 returns adr of line 191         
+LABEL yaddr                             
+  PHA, LYADDR ,X LDA, GBASE STA,        
+  HYADDR ,X LDA, CLC, DPAGE ADC,        
+  GBASE 1+ STA,                         
+  PLA, RTS, C;                          
+                                        
+CODE YADDR ( line -- address )          
+  XSAVE STX,                            
+  BOT LDA, TAX,                         
+  yaddr JSR,                            
+  XSAVE LDX,                            
+  GBASE LDA, BOT STA,                   
+  GBASE 1+ LDA, BOT 1+ STA,             
+  NEXT JMP, C;                          
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 020
+( two page notes         < 7/26/89>160) 
+                                        
+EXIT ----------------------------- EXIT 
+                                        
+When using two graphics pages, there    
+are two variables to keep track of:     
+the current page being viewed and the   
+page to draw to (they may be different) 
+                                        
+the following routines are previded     
+to maintain screen displayes            
+                                        
+vdinit  \ init - view & draw page 1     
+valt    \ view oppisite page            
+dalt    \ draw to oppisite page         
+vdpage  \ view draw page                
+dvpage  \ draw to view page             
+                                        
+All words assume that the HIRES         
+graphics mode has been set elsewhere    
+                                        
+no registers are altered by any         
+of these words                          
+                               ( FAH  ) 
+════════════════════════════════════════   SCREEN 021
+( vdinit                 < 7/26/89>161) 
+HEX                                     
+SUBR vdinit                             
+  PHA, # 0 LDA, DPAGE STA,              
+  VPAGE STA,                            
+  C054 LDA,                             
+  PLA, RTS, S;                          
+                                        
+SUBR valt                               
+  PHA, VPAGE LDA, 0=                    
+  IF, C055 LDA, # 1 LDA,                
+  ELSE, C054 LDA, # 0 LDA,              
+  THEN,                                 
+  VPAGE STA,                            
+  PLA, RTS, S;                          
+                                        
+SUBR dalt                               
+  PHA, DPAGE LDA, 0=                    
+  IF, # 20 LDA,                         
+  ELSE, # 0 LDA, THEN,                  
+  DPAGE STA,                            
+  PLA, RTS, S;                          
+DECIMAL                                 
+                               ( FAH  ) 
+════════════════════════════════════════   SCREEN 022
+( vdpage dvpage          < 7/26/89>162) 
+HEX                                     
+SUBR vdpage                             
+  PHA, DPAGE LDA, 0=                    
+  IF, C054 LDA, # 0 LDA,                
+  ELSE, C055 LDA, # 1 LDA,              
+  THEN,                                 
+  VPAGE STA,                            
+  PLA, RTS, S;                          
+                                        
+SUBR dvpage                             
+  PHA, VPAGE LDA, 0=                    
+  IF, # 0 LDA,                          
+  ELSE, # 20 LDA,                       
+  THEN,                                 
+  DPAGE STA,                            
+  PLA, RTS, S;                          
+                                        
+DECIMAL                                 
+                                        
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 023
+( copyv                  < 7/26/89>163) 
+\ copies view page to the other         
+\ page sets draw to the other page      
+                                        
+HEX SUBR copyv                          
+  VPAGE LDA, 0=                         
+  IF, # 20 LDA,                         
+  ELSE, # 0 LDA, NOP, THEN,             
+  DPAGE STA, CLC, # 20 ADC,             
+  N 1+ STA, # 60 EOR,                   
+  GBASE 1+ STA, # 0 LDA,                
+  N STA, GBASE STA,                     
+  # 20 LDX, # 0 LDY,                    
+  BEGIN,                                
+   BEGIN,                               
+    GBASE )Y LDA, N )Y STA, INY,        
+    GBASE )Y LDA, N )Y STA, INY,        
+    GBASE )Y LDA, N )Y STA, INY,        
+    GBASE )Y LDA, N )Y STA, INY,        
+DECIMAL                                 
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+════════════════════════════════════════   SCREEN 024
+( copyv cont.            < 7/26/89>164) 
+                                        
+HEX                                     
+    GBASE )Y LDA, N )Y STA, INY,        
+    GBASE )Y LDA, N )Y STA, INY,        
+    GBASE )Y LDA, N )Y STA, INY,        
+    GBASE )Y LDA, N )Y STA, INY,        
+    # 0 CPY, 0= NOT                     
+   WHILE,                               
+   REPEAT,                              
+   N 1+ INC, GBASE 1+ INC,              
+   0 CMP, DEX, 0=                       
+  UNTIL, RTS,                           
+S; DECIMAL                              
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+════════════════════════════════════════   SCREEN 025
+( shift table notes      < 7/26/89>165) 
+                                        
+EXIT ---------- notes ------------ EXIT 
+                                        
+the following shift tables are used     
+within doline to shift the accum        
+2 to 6 bits right (graphicaly)          
+preserving the hibit                    
+                                        
+The trick is that the value to be       
+shifted is masked so that all bits      
+that would be shifted out are removed   
+(except the hibit) that value is then   
+used as an index into the aprropriate   
+table                                   
+                                        
+the table is constructed so that it is  
+not necessary to save the hibit then    
+merge it back in later                  
+the constants after the table point to  
+the starts of the respective subtables  
+                                        
+                                        
+                               ( FAH  ) 
+════════════════════════════════════════   SCREEN 026
+( lrotmasks              < 7/26/89>166) 
+CREATE lrotmasks                        
+HEX \ left mask hi bit clear            
+   0 C,  2 C,  4 C,  6 C, \ 1 bit       
+   8 C,  A C,  C C,  E C,               
+  10 C, 12 C, 14 C, 16 C,               
+  18 C, 1A C, 1C C, 1E C,               
+  20 C, 22 C, 24 C, 26 C,               
+  28 C, 2A C, 2C C, 2E C,               
+  30 C, 32 C, 34 C, 36 C,               
+  38 C, 3A C, 3C C, 3E C,               
+  40 C, 42 C, 44 C, 46 C,               
+  48 C, 4A C, 4C C, 4E C,               
+  50 C, 52 C, 54 C, 56 C,               
+  58 C, 5A C, 5C C, 5E C,               
+  60 C, 62 C, 64 C, 66 C,               
+  68 C, 6A C, 6C C, 6E C,               
+  70 C, 72 C, 74 C, 76 C,               
+  78 C, 7A C, 7C C, 7E C,               
+                                        
+DECIMAL                                 
+                                        
+                                        
+                               ( FAH  ) 
+════════════════════════════════════════   SCREEN 027
+( lrotmasks cont...      < 7/26/89>167) 
+                                        
+HEX \ left mask hi bit clear cont..     
+   0 C,  4 C,  8 C,  C C, \ 2 bits      
+  10 C, 14 C, 18 C, 1C C,               
+  20 C, 24 C, 28 C, 2C C,               
+  30 C, 34 C, 38 C, 3C C,               
+  40 C, 44 C, 48 C, 4C C,               
+  50 C, 54 C, 58 C, 5C C,               
+  60 C, 64 C, 68 C, 6C C,               
+  70 C, 74 C, 78 C, 7C C,               
+   0 C,  8 C, 10 C, 18 C, \ 3 bits      
+  20 C, 28 C, 30 C, 38 C,               
+  40 C, 48 C, 50 C, 58 C,               
+  60 C, 68 C, 70 C, 78 C,               
+   0 C, 10 C, 20 C, 30 C, \ 4 bits      
+  40 C, 50 C, 60 C, 70 C,               
+   0 C, 20 C, 40 C, 60 C, \ 5 bits      
+   0 C, 40 C,             \ 6 bits      
+   0 C,  0 C,             \ filler      
+                                        
+DECIMAL                                 
+                                        
+                               ( FAH  ) 
+════════════════════════════════════════   SCREEN 028
+( lrotmasks cont..       < 7/26/89>168) 
+                                        
+HEX \ left masks hi bit set             
+  80 C, 82 C, 84 C, 86 C, \ 1 bit       
+  88 C, 8A C, 8C C, 8E C,               
+  90 C, 92 C, 94 C, 96 C,               
+  98 C, 9A C, 9C C, 9E C,               
+  A0 C, A2 C, A4 C, A6 C,               
+  A8 C, AA C, AC C, AE C,               
+  B0 C, B2 C, B4 C, B6 C,               
+  B8 C, BA C, BC C, BE C,               
+  C0 C, C2 C, C4 C, C6 C,               
+  C8 C, CA C, CC C, CE C,               
+  D0 C, D2 C, D4 C, D6 C,               
+  D8 C, DA C, DC C, DE C,               
+  E0 C, E2 C, E4 C, E6 C,               
+  E8 C, EA C, EC C, EE C,               
+  F0 C, F2 C, F4 C, F6 C,               
+  F8 C, FA C, FC C, FE C,               
+                                        
+                                        
+DECIMAL                                 
+                                        
+                               ( FAH  ) 
+════════════════════════════════════════   SCREEN 029
+( lrotmasks cont...      < 7/26/89>169) 
+                                        
+HEX \ left masks hi bit set             
+  80 C, 84 C, 88 C, 8C C, \ 2 bits      
+  90 C, 94 C, 98 C, 9C C,               
+  A0 C, A4 C, A8 C, AC C,               
+  B0 C, B4 C, B8 C, BC C,               
+  C0 C, C4 C, C8 C, CC C,               
+  D0 C, D4 C, D8 C, DC C,               
+  E0 C, E4 C, E8 C, EC C,               
+  F0 C, F4 C, F8 C, FC C,               
+  80 C, 88 C, 90 C, 98 C, \ 3 bits      
+  A0 C, A8 C, B0 C, B8 C,               
+  C0 C, C8 C, D0 C, D8 C,               
+  E0 C, E8 C, F0 C, F8 C,               
+  80 C, 90 C, A0 C, B0 C, \ 4 bits      
+  C0 C, D0 C, E0 C, F0 C,               
+  80 C, A0 C, C0 C, E0 C, \ 5 bits      
+  80 C, C0 C,             \ 6 bits      
+                                        
+DECIMAL                                 
+                                        
+                                        
+                               ( FAH  ) 
+════════════════════════════════════════   SCREEN 030
+( rrotmasks              < 7/26/89>170) 
+                                        
+CREATE rrotmasks                        
+HEX \ right rotation masks (interwoven) 
+   0 C,  0 C,  1 C,  0 C,               
+   2 C,  1 C,  3 C,  0 C,               
+   4 C,  2 C,  5 C,  1 C,               
+   6 C,  3 C,  7 C,  0 C,               
+   8 C,  4 C,  9 C,  2 C,               
+   A C,  5 C,  B C,  1 C,               
+   C C,  6 C,  D C,  3 C,               
+   E C,  7 C,  F C,  0 C,               
+  10 C,  8 C, 11 C,  4 C,               
+  12 C,  9 C, 13 C,  2 C,               
+  14 C,  A C, 15 C,  5 C,               
+  16 C,  B C, 17 C,  1 C,               
+  18 C,  C C, 19 C,  6 C,               
+  1A C,  D C, 1B C,  3 C,               
+  1C C,  E C, 1D C,  7 C,               
+  1E C,  F C, 1F C,  0 C,               
+                                        
+DECIMAL                                 
+                                        
+                               ( FAH  ) 
+════════════════════════════════════════   SCREEN 031
+( rrotmasks cont...      < 7/26/89>171) 
+                                        
+                                        
+HEX \ hi bit clear cont...              
+  20 C, 10 C, 21 C,  8 C,               
+  22 C, 11 C, 23 C,  4 C,               
+  24 C, 12 C, 25 C,  9 C,               
+  26 C, 13 C, 27 C,  2 C,               
+  28 C, 14 C, 29 C,  A C,               
+  2A C, 15 C, 2B C,  5 C,               
+  2C C, 16 C, 2D C,  B C,               
+  2E C, 17 C, 2F C,  1 C,               
+  30 C, 18 C, 31 C,  C C,               
+  32 C, 19 C, 33 C,  6 C,               
+  34 C, 1A C, 35 C,  D C,               
+  36 C, 1B C, 37 C,  3 C,               
+  38 C, 1C C, 39 C,  E C,               
+  3A C, 1D C, 3B C,  7 C,               
+  3C C, 1E C, 3D C,  F C,               
+  3E C, 1F C, 3F C,  1 C,               
+                                        
+DECIMAL                                 
+                                        
+                               ( FAH  ) 
+════════════════════════════════════════   SCREEN 032
+( rrotmasks cont...      < 7/26/89>172) 
+                                        
+                                        
+HEX \ hi bit set                        
+  80 C, 80 C, 81 C, 80 C,               
+  82 C, 81 C, 83 C, 80 C,               
+  84 C, 82 C, 85 C, 81 C,               
+  86 C, 83 C, 87 C, 80 C,               
+  88 C, 84 C, 89 C, 82 C,               
+  8A C, 85 C, 8B C, 81 C,               
+  8C C, 86 C, 8D C, 83 C,               
+  8E C, 87 C, 8F C, 80 C,               
+  90 C, 88 C, 91 C, 84 C,               
+  92 C, 89 C, 93 C, 82 C,               
+  94 C, 8A C, 95 C, 85 C,               
+  96 C, 8B C, 97 C, 81 C,               
+  98 C, 8C C, 99 C, 86 C,               
+  9A C, 8D C, 9B C, 83 C,               
+  9C C, 8E C, 9D C, 87 C,               
+  9E C, 8F C, 9F C, 80 C,               
+                                        
+DECIMAL                                 
+                                        
+                               ( FAH  ) 
+════════════════════════════════════════   SCREEN 033
+( rrotmasks cont...      < 7/26/89>173) 
+                                        
+                                        
+HEX \ hi bit set cont...                
+  A0 C, 90 C, A1 C, 88 C,               
+  A2 C, 91 C, A3 C, 84 C,               
+  A4 C, 92 C, A5 C, 89 C,               
+  A6 C, 93 C, A7 C, 82 C,               
+  A8 C, 94 C, A9 C, 8A C,               
+  AA C, 95 C, AB C, 85 C,               
+  AC C, 96 C, AD C, 8B C,               
+  AE C, 97 C, AF C, 81 C,               
+  B0 C, 98 C, B1 C, 8C C,               
+  B2 C, 99 C, B3 C, 86 C,               
+  B4 C, 9A C, B5 C, 8D C,               
+  B6 C, 9B C, B7 C, 83 C,               
+  B8 C, 9C C, B9 C, 8E C,               
+  BA C, 9D C, BB C, 87 C,               
+  BC C, 9E C, BD C, 8F C,               
+  BE C, 9F C, BF C, 81 C,               
+                                        
+DECIMAL                                 
+                                        
+                               ( FAH  ) 
+════════════════════════════════════════   SCREEN 034
+( POINTERS TO TBALES     < 7/26/89>174) 
+                                        
+\ once graphics code has been compiled  
+\ the heads definitions will be         
+\ forgotten                             
+APPENDIX                                
+                                        
+lrotmasks     CONSTANT l1msks           
+l1msks 64 +   CONSTANT l2msks           
+l2msks 32 +   CONSTANT l3msks           
+l3msks 16 +   CONSTANT l4msks           
+l4msks  8 +   CONSTANT l5msks           
+l5msks  4 +   CONSTANT l6msks           
+                                        
+                                        
+rrotmasks     CONSTANT r6msks           
+r6msks  1 +   CONSTANT r5msks           
+r5msks  2 +   CONSTANT r4msks           
+r4msks  4 +   CONSTANT r3msks           
+r3msks  8 +   CONSTANT r2msks           
+r2msks 16 +   CONSTANT r1msks           
+                                        
+MAIN                                    
+                               ( FAH  ) 
+════════════════════════════════════════   SCREEN 035
+( CDRAW notes            <11/ 6/89>175) 
+                                        
+EXIT ---------- notes ------------ EXIT 
+                                        
+*** ASSUMES THAT THERE ARE NO EXTRA *** 
+*** BITS IN THE CHARACTER AFTER ITS *** 
+*** STORED WIDTH !!!                *** 
+                                        
+This version (using !CHAR) will only    
+modify the bits that are set in the     
+character definition.                   
+                                        
+This means that color fonts are not     
+easly supported (or read for that       
+matter)                                 
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( fah  ) 
+════════════════════════════════════════   SCREEN 036
+( drawfig variables      <11/ 6/89>176) 
+                                        
+                                        
+  \ scracth variable for {!char}        
+PVAL CONSTANT CWORK                     
+                                        
+  \ text color 0=black non-zero=white   
+\ VARIABLE  TCLR                        
+                                        
+  \ read figure byte                    
+CODE-VEC {getfig}                       
+                                        
+  \ store byte to screen                
+CODE-VEC {putscr}                       
+                                        
+  \ control code interpreter table      
+CREATE DPARAMS                          
+   50 ALLOT                             
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( fah  ) 
+════════════════════════════════════════   SCREEN 037
+( {!char}                <11/ 6/89>177) 
+                                        
+SUBR {!char} \ DOES NOT CHANGE HI-BIT   
+ \ CALL: A=mask of pixels to write      
+ \       Y=ofs to scr from GBASE        
+ \ RET:  Y incremented                  
+ \       CWORK destoryed                
+  # 127 AND,       \ don't change hibit 
+  CWORK STA,       \ save character     
+  TCLR LDA, 0=     \ black?             
+  IF, GBASE )Y LDA, \ get existing      
+   CWORK ORA,      \ OR XOR clears bits 
+   CWORK EOR,      \ in CWORK from Acum 
+   GBASE )Y STA,   \ store char         
+   INY, RTS,                            
+  THEN, \ set pixels for white          
+  CWORK LDA,       \ get pix            
+  GBASE )Y ORA,    \ set pix in byte    
+  GBASE )Y STA,                         
+  INY, RTS,                             
+S;                                      
+                                        
+                                        
+                               ( fah  ) 
+════════════════════════════════════════   SCREEN 038
+( {@char}                <11/ 6/89>178) 
+                                        
+SUBR {@char} \ get next char byte, inc  
+  \ call: nothing                       
+  \ ret:  A=next character byte         
+  \       X destoryed                   
+                                        
+    \ read character                    
+  # 0 LDX,                              
+  GFIG X) LDA,                          
+    \ increment word pointer            
+  GFIG INC, 0=     \ inc lo byte, wrap? 
+  IF, GFIG 1+ INC, \ yes, inc hi byte   
+  THEN,                                 
+  RTS,                                  
+S;                                      
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( fah  ) 
+════════════════════════════════════════   SCREEN 039
+( CDRAW TABLES           <11/ 6/89>179) 
+                                        
+                                        
+XCREATE rscr \ remove 0->7 pix r to l   
+  255 C, 254 C, 252 C, 248 C,           
+  240 C, 224 C, 192 C, 128 C,           
+                                        
+                                        
+XCREATE irscr \ leave 0->7 pix r to l   
+    0 C,   1 C,   3 C,   7 C,           
+   15 C,  31 C,  63 C, 127 C,           
+                                        
+EXIT                                    
+                                        
+CREATE lscr \ remove 7->0 pix l to r    
+  128 C, 129 C, 131 C, 135 C,           
+  143 C, 159 C, 191 C, 255 C,           
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( fah  ) 
+════════════════════════════════════════   SCREEN 040
+( CDRAW register usage   <11/ 6/89>180) 
+                                        
+EXIT ---------- notes ------------ EXIT 
+                                        
+ENTRY:                                  
+-----                                   
+       Y - set to initial byte offset   
+  (N,+1) - working ver of (n+4,+5)      
+   (N+2) - current line number          
+  (GFIG) - address of character         
+ (GBASE) - start adr of screen line     
+                                        
+EXIT:                                   
+----                                    
+   A,X,Y - destroyed                    
+  (GFIG) - points to start of next line 
+                                        
+USES: (and destroys)                    
+   (N-1) - holds right part of shift    
+   (N+3) - heigth of character          
+(N+4,+5) - width of char in pixels      
+                                        
+                                        
+                               ( fah  ) 
+════════════════════════════════════════   SCREEN 041
+( 0doc                   <11/ 6/89>181) 
+\ draw character with no shift          
+                                        
+SUBR 0doc                               
+   # 255 LDA, PMSK STA,                 
+   BEGIN, \ while moving full bytes     
+    N LDA, SEC, # 7 SBC, TAX,           
+    N 1+ LDA, # 0 SBC, CS               
+    \ while a full byte left            
+   WHILE, ( bcc)                        
+    N 1+ STA,      \ save hi byte       
+    N STX,         \ save lo byte       
+    ' {getfig} JSR, \ char byte         
+    ' {putscr} JSR, \ put it            
+   REPEAT, ( jmp)                       
+                                        
+   \ partial byte left?                 
+   N LDX, 0=                            
+   IF, RTS, THEN, \ no, exit            
+                                        
+\ MORE...                               
+                                        
+                                        
+                               ( fah  ) 
+════════════════════════════════════════   SCREEN 042
+( 0doc cont...           <11/ 6/89>182) 
+                                        
+\ handle last partial character         
+\ X is # pixels in image                
+                                        
+  irscr ,X LDA, \ set valid mask        
+  PMSK STA,                             
+                                        
+                                        
+  ' {getfig} JSR,                       
+  ' {putscr} JMP,                       
+S;                                      
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( fah  ) 
+════════════════════════════════════════   SCREEN 043
+( ndoc notes             <11/ 6/89>183) 
+EXIT ---------------------------------- 
+                                        
+ndoc makes excessive use of self-       
+modifying code. CSETUP patches ndoc     
+to the proper values for the required   
+shift amount.                           
+                                        
+See notes for csetup for more info      
+                                        
+ndoc also uses the top 6 bytes of the   
+stack to hold the values for various    
+constants see csetup                    
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( fah  ) 
+════════════════════════════════════════   SCREEN 044
+( ndoc pointers          <11/ 6/89>184) 
+                                        
+\ these constants holds the addresses   
+\ of patch locations in ndoc. They are  
+\ set in ndoc when ndoc is compiled     
+\ csetup then plants the proper values  
+\ into these locations                  
+                                        
+\ once csetup is compiled the constants 
+\ are forgotten                         
+                                        
+APPENDIX                                
+                                        
+0 CONSTANT LM1                          
+0 CONSTANT LM2                          
+0 CONSTANT LM3                          
+0 CONSTANT LM4                          
+0 CONSTANT RM1                          
+0 CONSTANT RM2                          
+0 CONSTANT ^doc \ used by drawchar      
+                                        
+MAIN                                    
+                                        
+                               ( fah  ) 
+════════════════════════════════════════   SCREEN 045
+( ndoc                   <11/ 6/89>185) 
+\ code for all character shifts         
+                                        
+SUBR ndoc                               
+  \ set initial mask                    
+  SPE LDX, DEX, \ shift amount          
+  rscr ,X LDA, PMSK STA,                
+                                        
+  \ is char all in this byte?           
+  SPE 1+ LDA, N CMP, CS                 
+  IF, \ set mask of characters to set   
+   SPE LDA, CLC, N ADC,                 
+   irscr ,X LDA, PMSK AND,              
+   PMSK STA,                            
+     \ get character, shift it, store   
+   ' {getfig} JSR,                      
+   SPE 4 + AND, TAX,                    
+HERE 1+ ' LM1 ! ( *** PATCH 1 *** )     
+   l2msks ,X LDA,                       
+     \ store left to screen             
+   ' {putscr} JMP, \ *** EXIT ***       
+  THEN,                                 
+                                        
+\ MORE...                      ( fah  ) 
+════════════════════════════════════════   SCREEN 046
+( ndoc cont...           <11/ 6/89>186) 
+  \ spans bytes - do first byte         
+                                        
+  \ get char, shift, merge, store       
+  ' {getfig} JSR, PHA,                  
+  SPE 4 + AND, TAX,                     
+HERE 1+ ' LM2 ! ( *** PATCH 2 *** )     
+  l2msks ,X LDA,                        
+  ' {putscr} JSR,                       
+  \ now set right mask for next         
+  PLA, SPE 5 + AND, TAX,                
+HERE 1+ ' RM1 ! ( *** PATCH 3 *** )     
+  r2msks ,X LDA,                        
+  N 1- STA,                             
+\ decrement remaining count             
+  N LDA, SEC, SPE 1+ SBC, N STA,        
+  N 1+ LDA, # 0 SBC, N 1+ STA,          
+                                        
+  # 127 LDA, PMSK STA,                  
+                                        
+\ MORE...                               
+                                        
+                                        
+                               ( fah  ) 
+════════════════════════════════════════   SCREEN 047
+( ndoc cont...           <11/ 6/89>187) 
+  \ spans bytes - do middle bytes       
+  BEGIN,                                
+    N LDA, SEC, # 7 SBC, TAX,           
+    N 1+ LDA, # 0 SBC, CS               
+     \ while a full byte left           
+  WHILE, N 1+ STA, N STX,               
+    \ get char, shift, merge, store     
+   ' {getfig} JSR, PHA,                 
+   SPE 4 + AND, TAX,                    
+HERE 1+ ' LM3 !  ( *** PATCH 4 *** )    
+   l2msks ,X LDA, N 1- ORA,             
+   ' {putscr} JSR,                      
+    \ now set right mask for next       
+   PLA, SPE 5 + AND, TAX,               
+HERE 1+ ' RM2 !  ( *** PATCH 5 *** )    
+   r2msks ,X LDA, N 1- STA,             
+  REPEAT,                               
+                                        
+\ MORE...                               
+                                        
+                                        
+                                        
+                               ( fah  ) 
+════════════════════════════════════════   SCREEN 048
+( ndoc cont...           <11/ 6/89>188) 
+\ spans bytes - do last byte            
+                                        
+  N LDX, 0=        \ any pixs left?     
+  IF, RTS, THEN,   \ no, exit           
+                                        
+\ was remaing in last byte              
+  SPE CPX, CS NOT                       
+  IF,                                   
+   irscr ,X LDA,                        
+   PMSK STA,                            
+   N 1- LDA,    \ get rt of last        
+   ' {putscr} JMP, \ store & EXIT       
+  THEN,                                 
+                                        
+                                        
+                                        
+\ MORE...                               
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( fah  ) 
+════════════════════════════════════════   SCREEN 049
+( ndoc cont...           <11/ 6/89>189) 
+\ spans bytes - do last byte            
+\ still more data to read               
+                                        
+   \ get char, shift, merge, store      
+\  N LDA, SEC,                          
+\  SPE SBC, TAX,                        
+   irscr ,X LDA,                        
+   PMSK STA,                            
+                                        
+   ' {getfig} JSR,                      
+   SPE 4 + AND, TAX,                    
+HERE 1+ ' LM4 ! ( *** PATCH 6 **** )    
+   l2msks ,X LDA,                       
+   N 1- ORA,                            
+   ' {putscr} JMP,   \ store and exit   
+                                        
+S;                                      
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( fah  ) 
+════════════════════════════════════════   SCREEN 050
+( chsft                  <11/ 6/89>190) 
+                                        
+XCREATE cshft                           
+\ #shf rem  lscr   rscr   lmsk   rmsk   
+  2 C, 6 C, 129 C, 254 C, 191 C, 192 C, 
+  l1msks , r1msks ,                     
+  3 C, 5 C, 131 C, 252 C, 159 C, 224 C, 
+  l2msks , r2msks ,                     
+  4 C, 4 C, 135 C, 248 C, 143 C, 240 C, 
+  l3msks , r3msks ,                     
+  5 C, 3 C, 143 C, 240 C, 135 C, 248 C, 
+  l4msks , r4msks ,                     
+  6 C, 2 C, 159 C, 224 C, 131 C, 252 C, 
+  l5msks , r5msks ,                     
+  7 C, 1 C, 191 C, 192 C, 129 C, 254 C, 
+  l6msks , r6msks ,                     
+                                        
+EXIT ---                                
+                                        
+#shf is the number of bits to shift +1  
+rem is the number of bits left in the   
+original byte after shifting            
+                                        
+                               ( fah  ) 
+════════════════════════════════════════   SCREEN 051
+( csetup notes           <11/ 6/89>191) 
+                                        
+EXIT ---------- notes ------------ EXIT 
+                                        
+csetup is called by all character       
+draw routines except 0doc to patch      
+ndoc with the proper values for the     
+shift desired.                          
+                                        
+The accum has the desire shift amount   
+(1-6).  It is used to create and index  
+to chsft.                               
+                                        
+csetup the copies the first 6 values    
+to SPE (end of stack in zero page)      
+and plants the table vectors into the   
+proper places in the code.              
+                                        
+SPE is used as a work area as it        
+a guaranteed safe area in zero page.    
+If the stack is that close to full you  
+are about to crash anyway.              
+                                        
+                               ( fah  ) 
+════════════════════════════════════════   SCREEN 052
+( csetup                 <11/ 6/89>192) 
+                                        
+\ .A is shift amount (1-6)              
+\ destroys: .A, Y, N, N+1.              
+SUBR csetup \ [87-82]                   
+\ first make index into cshft table     
+  SEC, # 1 SBC,                         
+  .A ASL, N STA,                        
+  .A ASL, .A ASL,                       
+  CLC, N ADC, TAY,                      
+\ Y=A*8+A*2=A*10                        
+\ set pointer to start of table         
+  # cshft LOBYTE LDA, N STA,            
+  # cshft HIBYTE LDA, N 1+ STA,         
+\ copy 1st 6 items to zero page         
+       N )Y LDA, SPE     STA,           
+  INY, N )Y LDA, SPE 1 + STA,           
+  INY, N )Y LDA, SPE 2 + STA,           
+  INY, N )Y LDA, SPE 3 + STA,           
+  INY, N )Y LDA, SPE 4 + STA,           
+  INY, N )Y LDA, SPE 5 + STA,           
+\ MORE....                              
+                                        
+                               ( fah  ) 
+════════════════════════════════════════   SCREEN 053
+( csetup cont...         <11/ 6/89>193) 
+                                        
+  \ now plant table vectors             
+  \ lmsk lo byte                        
+  INY, N )Y LDA,                        
+  LM1 STA, LM2 STA,                     
+  LM3 STA, LM4 STA,                     
+  \ lmsk hi byte                        
+  INY, N )Y LDA,                        
+  LM1 1+ STA, LM2 1+ STA,               
+  LM3 1+ STA, LM4 1+ STA,               
+  \ rmsk lo byte                        
+  INY, N )Y LDA,                        
+  RM1 STA, RM2 STA,                     
+  \ rmsk hi byte                        
+  INY, N )Y LDA,                        
+  RM1 1+ STA, RM2 1+ STA,               
+  RTS,                                  
+S;                                      
+                                        
+                                        
+                                        
+                                        
+                               ( fah  ) 
+════════════════════════════════════════   SCREEN 054
+( drawchar               <11/ 6/89>194) 
+                                        
+SUBR drawchar                           
+   BEGIN,                               
+    \ set Y to start byte offset        
+    &QUO LDA, TAY,                      
+    \ initialize counter to char wid    
+    N 4 + LDA, N STA,                   
+    N 5 + LDA, N 1+ STA,                
+    \ point to this line, inc line #qq  
+    N 2+ LDX, N 2+ INC,                 
+    yaddr JSR,                          
+HERE 1+ ' ^doc ! ( *** FOR gemit *** )  
+    0doc JSR,                           
+    N 3 + DEC, 0=                       
+  UNTIL,                                
+  RTS,                                  
+S;                                      
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( fah  ) 
+════════════════════════════════════════   SCREEN 055
+( gemit variables/notes  <11/ 6/89>195) 
+                                        
+\ start position for next character     
+VARIABLE GX                             
+VARIABLE GY                             
+                                        
+\ number of pixels between characters   
+\ 1 CONSTANT DX ( DPARAMS 24 + )        
+                                        
+\ pointer to font table                 
+\ 0 CONSTANT ASCTAB ( DPARAMS 2+ )      
+                                        
+EXIT ---------- notes ------------ EXIT 
+                                        
+X & Y are preserved                     
+A is destroyed                          
+                                        
+memory locations used:                  
+N-1 to N+4 (239-244)                    
+SPE to SPE+7 (80-87)                    
+&REM &QUO (230-232)                     
+                                        
+                                        
+                               ( fah  ) 
+════════════════════════════════════════   SCREEN 056
+( <gemit>                <11/ 6/89>196) 
+\ print .A (don't incremnt GX,GY)       
+LABEL <gemit>                           
+    \ save X,Y                          
+  SPE 6 + STX, SPE 7 + STY,             
+    \ point to char set start           
+  DPARAMS 2+ LDX,    GFIG STX,          
+  DPARAMS 3 + LDX, GFIG 1+ STX,         
+    \ build pointer to data offset      
+  # 2 LDY, SEC, GFIG )Y SBC,            
+  .A ASL, CLC,                          
+  # 16 ADC, TAY,                        
+    \ check if char exists              
+  GFIG )Y LDA, 0=                       
+  IF, INY,                              
+   GFIG )Y LDA, 0=                      
+   IF, SPE 6 + LDX, SPE 7 + LDY, RTS,   
+   THEN, DEY,                           
+  THEN,                                 
+                                        
+\ MORE...                               
+                                        
+                                        
+                               ( fah  ) 
+════════════════════════════════════════   SCREEN 057
+( <gemit> cont...        <11/ 6/89>197) 
+                                        
+\ add offset of character               
+  CLC, GFIG ADC, TAX,                   
+  INY, GFIG )Y LDA,                     
+  GFIG 1+ ADC,                          
+  GFIG 1+ STA, GFIG STX,                
+                                        
+\ gfig now points to character data     
+                                        
+\ get starting line number              
+  GY LDA, N 2+ STA,                     
+                                        
+\ MORE...                               
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( fah  ) 
+════════════════════════════════════════   SCREEN 058
+( <gemit> cont...        <11/ 6/89>198) 
+                                        
+   \ get/set char width/height          
+   # 1 LDY, GFIG )Y LDA,                
+   N 3 + STA, # 0 LDY,                  
+   GFIG )Y LDA, N 4 + STA,              
+   # 0 LDA, N 5 + STA, \ max wid=255    
+   \ inc past header information        
+   CLC, GFIG LDA, # 2 ADC,              
+   GFIG STA, GFIG 1+ LDA,               
+   # 0 ADC, GFIG 1+ STA,                
+   \ get x cordinate in pixels          
+   GX LDA, GX 1+ LDY,                   
+   # 7 LDX, \ convert to bytes          
+    0 CMP, NOP,                         
+   b/mod JSR,                           
+   \ &QUO is initial byte offset        
+                                        
+\ MORE...                               
+                                        
+                                        
+                                        
+                                        
+                               ( fah  ) 
+════════════════════════════════════════   SCREEN 059
+( <gemit> cont...        <11/ 6/89>199) 
+                                        
+\ figure out which shift routine to use 
+  &REM LDA, 0= NOT \  shift?            
+  IF, csetup JSR,                       
+   # ndoc LOBYTE LDA,                   
+   # ndoc HIBYTE LDX,                   
+  ELSE, # 0doc LOBYTE LDA,              
+   # 0doc HIBYTE LDX,                   
+  THEN,                                 
+  ^doc STA, ^doc 1+ STX,                
+  \ now set vectors for gemit           
+  # {@char} LOBYTE LDA, {getfig} STA,   
+  # {@char} HIBYTE LDA, {getfig} 1+ STA,
+  # {!char} LOBYTE LDA, {putscr} STA,   
+  # {!char} HIBYTE LDA, {putscr} 1+ STA,
+                                        
+  \ draw the character!!                
+  drawchar JSR,                         
+  \ restore X/Y                         
+  SPE 6 + LDX, SPE 7 + LDY,             
+  RTS, C;                               
+                                        
+                               ( fah  ) 
+════════════════════════════════════════   SCREEN 060
+( gemit                  <11/ 6/89>200) 
+                                        
+                                        
+\ print .A ( incremnts GX,GY)           
+LABEL gemit                             
+  <gemit> JSR,                          
+  \ increment GX                        
+  N 4 + LDA, CLC, DPARAMS 24 + ADC,     
+  GX ADC, GX STA,                       
+  GX 1+ LDA, # 0 ADC,                   
+  GX 1+ STA,                            
+                                        
+RTS, C;                                 
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( fah  ) 
+════════════════════════════════════════   SCREEN 061
+( gtype                  <11/ 6/89>201) 
+EXIT                                    
+\ 0ADR points to start of string        
+\ X is the number of characters         
+\ Y is destroyed                        
+\ CALLS: gemit                          
+                                        
+LABEL gtype \ [131-73]                  
+  # 0 LDY,                              
+  BEGIN,                                
+   0ADR )Y LDA, INY,                    
+   0 CMP, NOP,                          
+   gemit JSR,                           
+   NOP, DEX, 0=                         
+  UNTIL,                                
+  RTS,                                  
+C;                                      
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( fah  ) 
+════════════════════════════════════════   SCREEN 062
+( GEMIT                  <11/ 6/89>202) 
+                                        
+CODE <GEMIT> ( C -- )                   
+  BOT LDA,                              
+  XSAVE STX,                            
+  gemit JSR,                            
+  XSAVE LDX,                            
+  POP JMP, C;                           
+                                        
+: GEMIT ( C -- )                        
+   <GEMIT> ;                            
+                                        
+EXIT                                    
+CODE GTYPE ( ADR CNT -- )               
+  XSAVE STX,                            
+  SEC LDA, 0ADR STA,                    
+  SEC 1+ LDA, 0ADR 1+ STA,              
+  BOT LDA, TAX,                         
+  gtype JSR,                            
+  XSAVE LDX,                            
+  POPTWO JMP, C;                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 065
+( UNPACK NOTES           <11/ 6/89>205) 
+EXIT ---------------------------------  
+                                        
+The unpack code will use the same code  
+frame work as the character draw. This  
+will allow the graphics to be placed    
+at any bit boundry as well as being     
+any pixel width.                        
+                                        
+This unpack code will perform the basic 
+initialization of the low memory areas  
+that are required by drawchar           
+(performed by gemit for characters)     
+As well as initializing the unpacker    
+                                        
+The routine @pbyte will return the      
+next pack byte and will be vectored     
+in place of @cbyte                      
+                                        
+@pbyte will use get-gfig, which is      
+defined at the start of the forth       
+kernel, to read figures from extended   
+memory                                  
+                               ( fah  ) 
+════════════════════════════════════════   SCREEN 066
+( UNPACK NOTES CONT      <11/ 6/89>206) 
+EXIT ---------------------------------  
+                                        
+The basic pack method is Count byte,    
+followed by data.                       
+                                        
+IF bit 7 = 1 THEN                       
+  copy n non-repeating bytes            
+IF bit 7 = 0 THEN                       
+  repeat n bytes from two data bytes    
+                                        
+                                        
+bytes will span image lines             
+                                        
+When bit 7 is zero n bytes will be      
+generated not n copies of the two       
+following data bytes                    
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( fah  ) 
+════════════════════════════════════════   SCREEN 067
+( UNPACK NOTES CONT      <11/ 6/89>207) 
+EXIT ---------------------------------  
+                                        
+Header information                      
+                                        
+                                        
+0-1 Word -- bit width of image          
+  2 Byte -- height of image             
+3-?  ??  -- Packed image                
+                                        
+                                        
+Note that the bit width of the image    
+does not have to be a byte multiple     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( fah  ) 
+════════════════════════════════════════   SCREEN 068
+( UNPACK NOTES CONT      <11/ 6/89>208) 
+EXIT ---------------------------------  
+                                        
+REGISTER/MEMORY USAGE                   
+---------------------                   
+                                        
+  GFIG - Pointer to packed image        
+                                        
+general variable                        
+  REMCNT - remaining count of bytes     
+  REP?   - bit 7 of count               
+                                        
+variables for unpacking repeating       
+  BYTE#  - 0=BYTE1 next, 255=BYTE2      
+  BYTE1  - 1st repeating byte           
+  BYTE2  - 2nd repeating byte           
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( fah  ) 
+════════════════════════════════════════   SCREEN 069
+( UNPACK variables       <11/ 6/89>209) 
+                                        
+CREATE -UNPACK-                         
+  \ remaining count of bytes            
+\ VARIABLE REMCNT                       
+  \ bit 7 of count                      
+\ VARIABLE REP?                         
+  \ 0=BYTE1 next, 255=BYTE2 next        
+\ VARIABLE BYTE#                        
+  \ 1st repeating byte                  
+VARIABLE BYTE1                          
+  \ 2nd repeating byte                  
+VARIABLE BYTE2                          
+                                        
+                                        
+  \ unpack X location                   
+VARIABLE PX                             
+  \ unpack Y location                   
+VARIABLE PY                             
+                                        
+                                        
+                                        
+                                        
+                               ( fah  ) 
+════════════════════════════════════════   SCREEN 070
+( {newcnt}               <11/ 6/89>210) 
+                                        
+\ call: GFIG pts to next cnt byte       
+\  ret: sets for calls to {getpack}     
+\       X destroyed                     
+SUBR {newcnt}                           
+     \ read byte, increment             
+   PHA,                                 
+   ' get-gfig JSR, \ read figure byte   
+     \ set type flag, count             
+   REP? STA,     \ save for {getpack}   
+   # 127 AND,                           
+   REMCNT STA,                          
+     \ check if were repeating byte     
+   REP? BIT, 0< \ bit 7 set?            
+   IF, \ yes, WERE DONE --- EXIT ---    
+    PLA, RTS,                           
+   THEN,                                
+                                        
+\ more...                               
+                                        
+                                        
+                                        
+                               ( fah  ) 
+════════════════════════════════════════   SCREEN 071
+( {newcnt} cont          <11/ 6/89>211) 
+                                        
+     \ repeating, get BYTE1             
+   ' get-gfig JSR, \ read figure byte   
+   BYTE1 STA,                           
+     \ and BYTE2                        
+   ' get-gfig JSR, \ read figure byte   
+   BYTE2 STA,                           
+     \ and init BYTE# to use BYTE1      
+   # 0 LDA,                             
+   BYTE# STA,                           
+   PLA, RTS,                            
+S;                                      
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( fah  ) 
+════════════════════════════════════════   SCREEN 072
+( {@pack}                <11/ 6/89>212) 
+                                        
+\ call: GFIG pts to pack buffer         
+\  ret: .A = next character             
+\       X destroyed                     
+                                        
+SUBR {@pack}                            
+  \ check type of last count byte       
+   REP? BIT, 0< \ is this non-repeat?   
+   IF, \ this is non-repeating image    
+    ' get-gfig JSR, \ read figure byte  
+     \ dec remaining in string          
+    REMCNT DEC, 0=                      
+    IF, {newcnt} JMP, THEN,             
+    RTS,                                
+   THEN,                                
+                                        
+\ more...                               
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( fah  ) 
+════════════════════════════════════════   SCREEN 073
+( {@pack} cont           <11/ 6/89>213) 
+                                        
+                                        
+     \ get next byte of repeating       
+   BYTE# BIT, 0<                        
+   IF, \ 255=next is byte 2             
+    BYTE2 LDA,                          
+    BYTE# INC,  \ make zero             
+   ELSE, \ 0=next is byte 1             
+    BYTE1 LDA,                          
+    BYTE# DEC,  \ make 255              
+   THEN,                                
+                                        
+   \ decrement repeat count             
+   REMCNT DEC, 0=                       
+   IF, {newcnt} JMP, THEN,              
+   RTS,                                 
+S;                                      
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( fah  ) 
+════════════════════════════════════════   SCREEN 074
+( {!pack}                <11/ 6/89>214) 
+\ call: .A = value to put               
+\     PMSK = bits to change             
+\ GBASE )Y = ptr to screen              
+\  ret:  A = destoryed                  
+SUBR {!pack}                            
+    \ mask all but selected pixels      
+   PVAL STA,                            
+    \ not storing full byte?            
+   PMSK LDA, # 255 CMP, 0= NOT          
+   IF, PVAL AND,                        
+    PVAL STA,                           
+    GBASE )Y LDA,                       
+    PMSK ORA,                           
+    PMSK EOR,                           
+    \ merge with what we add            
+    PVAL ORA,                           
+    GBASE )Y STA, INY,                  
+    RTS,                                
+   THEN,                                
+   PVAL LDA,                            
+   GBASE )Y STA, INY,                   
+   RTS,                                 
+S;                             ( fah  ) 
+════════════════════════════════════════   SCREEN 075
+( {unpack}               <11/ 6/89>215) 
+\ call: GFIG points to start of pack    
+\       PX, PY is location to unpack    
+\       ' get-gfig 1+ selects mem bank  
+\       (2=main 3=aux)                  
+\  ret: GFIG'd incd, A destoryed        
+                                        
+LABEL {unpack}                          
+  \ save X,Y                            
+  SPE 6 + STX, SPE 7 + STY,             
+  ' get-gfig JSR, \ bit width, lobyte   
+  N 4 + STA,                            
+  ' get-gfig JSR, \ bit width, hibyte   
+  N 5 + STA,                            
+  ' get-gfig JSR, \ line ht             
+  N 3 + STA,                            
+                                        
+\ MORE...                               
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( fah  ) 
+════════════════════════════════════════   SCREEN 076
+( {unpack} cont          <11/ 6/89>216) 
+                                        
+    \ get starting line number          
+  PY LDA, N 2+ STA,                     
+    \ get x cordinate in pixels         
+  PX LDA, PX 1+ LDY,                    
+  # 7 LDX, \ convert to bytes           
+  b/mod JSR,                            
+    \ &QUO is initial byte offset       
+                                        
+   \ pick proper shift routine          
+  &REM LDA, 0= NOT \  shift?            
+  IF, csetup JSR,                       
+   # ndoc LOBYTE LDA,                   
+   # ndoc HIBYTE LDX,                   
+  ELSE, # 0doc LOBYTE LDA,              
+   # 0doc HIBYTE LDX,                   
+  THEN,                                 
+  ^doc STA,                             
+  ^doc 1+ STX,                          
+                                        
+\ MORE...                               
+                                        
+                               ( fah  ) 
+════════════════════════════════════════   SCREEN 077
+( {unpack} cont          <11/ 6/89>217) 
+                                        
+    \ now set vectors for gemit         
+  # {@pack} LOBYTE LDA,                 
+    {getfig} STA,                       
+  # {@pack} HIBYTE LDA,                 
+    {getfig} 1+ STA,                    
+  # {!pack} LOBYTE LDA,                 
+    {putscr} STA,                       
+  # {!pack} HIBYTE LDA,                 
+    {putscr} 1+ STA,                    
+    \ set up 1st string                 
+  {newcnt} JSR,                         
+                                        
+    \ draw the figure!!                 
+  drawchar JSR,                         
+                                        
+  SPE 6 + LDX, SPE 7 + LDY,             
+RTS, C;                                 
+                                        
+                                        
+                                        
+                                        
+                               ( fah  ) 
+════════════════════════════════════════   SCREEN 078
+( UNPACKL                <11/ 6/89>218) 
+                                        
+CODE UNPACKL ( x y seg adr -- )         
+  \ use from_mem to setup N             
+  \ and ' transfer+4 , then copy        
+  from_mem JSR,                         
+  N LDA, GFIG STA,                      
+  N 1+ LDA, GFIG 1+ STA,                
+  ' transfer 4 + LDA,                   
+  ' get-gfig 1+ STA,                    
+  INX, INX, INX, INX,                   
+  \ copy x y to variable                
+  BOT LDA, PY STA,                      
+  BOT 1+ LDA, PY 1+ STA,                
+  INX, INX,                             
+  BOT LDA, PX STA,                      
+  BOT 1+ LDA, PX 1+ STA,                
+  INX, INX,                             
+  {unpack} JSR,                         
+  NEXT JMP, C;                          
+                                        
+                                        
+                                        
+                               ( fah  ) 
+════════════════════════════════════════   SCREEN 080
+(                        < 7/26/89>190) 
+                                        
+CREATE MAKE-TF                          
+                                        
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 081
+(                        < 7/26/89>191) 
+                                        
+FORGET MAKE-TF                          
+                                        
+: MAKE-TF                               
+\ 280 , 192 C,                          
+  258 , 192 C,                          
+  48 0                                  
+  DO 76 C, 85 C, 42 C, \ 2 lines green  
+   76 C, 42 C, 85 C, \ 2 lines violet   
+  LOOP ;                                
+                                        
+CREATE TF                               
+  MAKE-TF                               
+                                        
+: MA                                    
+  SETUP-LONG                            
+  GET:CS TF AUX:SEG TF                  
+  [ LATEST ] LITERAL TF - CMOVEL ;      
+                                        
+-->                                     
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 082
+(                        < 7/26/89>192) 
+                                        
+: <P> ( x y -- )                        
+\ AUX:SEG TF UNPACKL ;                  
+  PY ! PX ! TF GFIG !                   
+  2 ' get-gfig 1+ C!                    
+  {unpack} CALL ;                       
+                                        
+: P ( x -- )                            
+\ 133 TF ! 50 TF 2+ C!                  
+  ( x ) 0 <P> ;                         
+: Q HGR 1HG 140 0 DO I P LOOP ;         
+: 20P                                   
+  HGR 7 EMIT 20 0                       
+  DO 0 0 <P> LOOP 7 EMIT ;              
+                                        
+: PP                                    
+  HGR 1HG                               
+  14 0                                  
+  DO CLS I 0 <P> KEY DROP               
+  LOOP ;                                
+                                        
+-->                                     
+                                        
+════════════════════════════════════════   SCREEN 083
+                                        
+                                        
+0 CONSTANT P#                           
+                                        
+: ZZ                                    
+   BEEP 50 0                            
+   DO P# P                              
+   LOOP                                 
+   BEEP ;                               
+                                        
+EXIT                                    
+                                        
+norm 266x192 @ 0 -- 40sec               
+             @ 1 -- 58                  
+fast         @ 0 -- 15                  
+             @ 1 -- 23                  
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 085
+( NOTES                                 
+         <11/ 2/89>225) L64             
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 086
+( DISPLAY PARAMETER CONSTANTS           
+         <11/ 2/89>226)                 
+                                        
+         280 CONSTANT DISP-WID  \ heigth
+ of display in pixels            192 CON
+STANT DISP-HT   \ width of display in pi
+xels               6 CONSTANT DISP-CLRS 
+\ number of colors                      
+                                        
+                           7 CONSTANT PI
+X/BYTE  \ pixels per byte               
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 087
+( PL                                    
+         <11/ 2/89>227)                 
+                                        
+        : PL \ p -- , set pallete to p  
+                                  TO PL-
+VAL \ for GR-MODE                       
+                ;                       
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 088
+( BG                                    
+         <11/ 2/89>228)                 
+                                        
+        : BG \ n -- , set background (bl
+ack) color                        DROP  
+\ no cooresponding hardware on Apple    
+                ;                       
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 089
+( {tomask}                              
+         <11/ 2/89>229)                 
+                                        
+        EXIT ---------------------------
+---------------                         
+                                        
+                This value can not be ca
+lculated as a general subroutine        
+routines that use this word will have to
+ rewritten              because proper m
+ask depends upon odd/even byte          
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 090
+( {ds:draw} {es:draw} {save:seg} SAVE:SE
+G        <11/ 2/89>230) EXIT \ ---------
+----------------------------------------
+------- No direct translation exists for
+ these words                            
+                                        
+                CRTSEG @ CONSTANT DRAW:S
+EG                                      
+                                        
+                        SUBR {ds:draw}  
+                                        
+          DS, CS: ' DRAW:SEG MOV RET C; 
+                                SUBR {es
+:draw}                                  
+                  ES, CS: ' DRAW:SEG MOV
+ RET C;                                 
+SUBR {save:seg} \ AX=save segment       
+                          AX, CS MOV AX,
+ CS: HEAD-LEN ADD                       
+          AX, # 4096 ADD RET C;         
+                                CODE SAV
+E:SEG \ -- seg, ret seg of save buffer s
+egment            {save:seg} CALL APUSH-
+JMP C;                                  
+════════════════════════════════════════   SCREEN 091
+( LINE-LEN                              
+         <11/ 2/89>231)                 
+                                        
+        0 CONSTANT SA-LL \ line length  
+                                0 CONSTA
+NT SA-SX \ starting x byte              
+                                        
+                                        
+: SCR:SEG ( -- seg, calc segement of cur
+rent view page )           4096 VPAGE @ 
+IF 4096 + THEN ;                        
+                                        
+                                : LINE-L
+EN \ x1 x2 -- n, compute # bytes to stor
+e from x1 to x2    1+ PIX/BYTE /MOD SWAP
+ 0= NOT + ( round up to next byte )     
+   SWAP PIX/BYTE / - ;                  
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 092
+( <SAVE-AREA>                           
+         <11/ 2/89>232)                 
+                                        
+        : <SAVE-AREA> ( sy nlines seg --
+ )                                >R \ s
+tores info in first 8 bytes: sx, sy, bwi
+d , nlines        SA-SX R@ 0 !L  OVER R@
+ 2 !L                                   
+  SA-LL R@ 4 !L  DUP R@ 6 !L   ( nlines 
+) 0                       DO GET:CS OVER
+ I + YADDR SA-SX +                      
+           J ( seg ) I SA-LL * 8 + SA-LL
+ CMOVEL                           LOOP  
+                                        
+                  R> DDROP ;            
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 093
+( SAVE-AREA                             
+         <11/ 2/89>233)                 
+                                        
+        : SAVE-AREA ( x1 y1 x2 y2 -- han
+, save area to memory )            3 PIC
+K - 1+ ( nlines ) >R   \ compute number 
+of lines           ROT DUP 4 / TO SA-SX 
+       \ set starting byte              
+   SWAP LINE-LEN TO SA-LL      \ set num
+ber bytes per line         R> DUP SA-LL 
+* 8 +          \ # bytes required to sav
+e          HALLOC DUP >R                
+                                   PT-HA
+LLOC <SAVE-AREA>                        
+                   R> ;                 
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 094
+( <REST-AREA> REST-AREA                 
+         <11/ 2/89>234)                 
+                                        
+        : <REST-AREA> \ han -- restore a
+rea saved by SAVE-AREA            PT-HAL
+LOC >R                                  
+                  R@ 6 @L ( nlines ) 0  
+                                        
+  DO J ( seg ) DUP 4 @L ( line length ) 
+I * 8 +                     SCR:SEG J 2 
+@L ( start y ) I + YADDR J 0 @L ( startx
+ ) +        J 4 @L ( line length ) CMOVE
+L                                 LOOP  
+                                        
+                  R> DROP ;             
+                                        
+                                        
+                        : REST-AREA \ ha
+n -- restore area saved by SAVE-AREA    
+          DUP <REST-AREA> HFREE ;       
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 095
+( ?HGR                                  
+         <11/ 2/89>235)                 
+                                        
+        HEX                             
+                                : ?HGR (
+ -- switch to hi-res mode if not already
+ there )           C01A C@ 7F >         
+                                        
+   IF HGR THEN                          
+                        ;               
+                                        
+        DECIMAL                         
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 100
+( HLINE NOTES            <11/ 6/89>240) 
+EXIT ---------------------------------- 
+                                        
+The HLINE words were lifted without     
+major change from the last apple        
+version of virtuoso                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( fah  ) 
+════════════════════════════════════════   SCREEN 101
+( BIT MASK TABLES        <11/ 6/89>241) 
+HEX                                     
+                                        
+CREATE LMASKS                           
+       7F C, 7E C, 7C C, 78 C,          
+       70 C, 60 C, 40 C, 00 C,          
+                                        
+CREATE RMASKS                           
+       01 C, 03 C, 07 C, 0F C,          
+       1F C, 3F C, 7F C, FF C,          
+                                        
+DECIMAL EXIT                            
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( fah  ) 
+════════════════════════════════════════   SCREEN 102
+( COLORTAB notes         < 9/23/85>156) 
+                                        
+EXIT                                    
+--------------------------------------- 
+Each entry in COLORTAB is a nine-byte   
+block.                                  
+The first eight bytes form an 8-by-8    
+bit array that is expanded into         
+eight full scan lines.                  
+The ninth byte indicates whether the    
+color bit is turned on for each scan    
+line.                                   
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 103
+( COLORTAB               < 9/23/85>157) 
+HEX \ solid colors                      
+CREATE COLORTAB                         
+                                        
+\ 0=black1                              
+      0000 , 0000 , 0000 , 0000 , 00 C, 
+\ 1=violet                              
+      5555 , 5555 , 5555 , 5555 , 00 C, 
+\ 2=green                               
+      AAAA , AAAA , AAAA , AAAA , 00 C, 
+\ 3=white1                              
+      FFFF , FFFF , FFFF , FFFF , 00 C, 
+\ 4=black2                              
+      0000 , 0000 , 0000 , 0000 , FF C, 
+\ 5=blue                                
+      5555 , 5555 , 5555 , 5555 , FF C, 
+\ 6=orange                              
+      AAAA , AAAA , AAAA , AAAA , FF C, 
+\ 7=white2                              
+      FFFF , FFFF , FFFF , FFFF , FF C, 
+                                        
+DECIMAL EXIT                            
+                                        
+                                        
+════════════════════════════════════════   SCREEN 104
+( COLORTAB CONTINUED     <11/ 6/89>244) 
+HEX                                     
+\ 8-15  small dot patterns              
+\ violet & black                        
+( 8 ) 1144 , 1144 , 1144 , 1144 , 00 C, 
+\ violet & white                        
+( 9 ) DD77 , DD77 , DD77 , DD77 , 00 C, 
+\ green & black                         
+( 10) 8822 , 8822 , 8822 , 8822 , 00 C, 
+\ green & white                         
+( 11) BBEE , BBEE , BBEE , BBEE , 00 C, 
+\ blue & black                          
+( 12) 1144 , 1144 , 1144 , 1144 , FF C, 
+\ blue & white                          
+( 13) DD77 , DD77 , DD77 , DD77 , FF C, 
+\ orange & black                        
+( 14) 8822 , 8822 , 8822 , 8822 , FF C, 
+\ orange & white                        
+( 15) BBEE , BBEE , BBEE , BBEE , FF C, 
+DECIMAL EXIT                            
+                                        
+                                        
+                                        
+                               ( fah  ) 
+════════════════════════════════════════   SCREEN 105
+( COLORTAB CONTINUED     <11/ 6/89>245) 
+HEX                                     
+                                        
+\ four colors of gray                   
+( 16) 33CC , 33CC , 33CC , 33CC , 00 C, 
+( 17) 9966 , 9966 , 9966 , 9966 , 00 C, 
+( 18) 33CC , 33CC , 33CC , 33CC , FF C, 
+( 19) 9966 , 9966 , 9966 , 9966 , FF C, 
+                                        
+\ checks: white & xxx                   
+( 20) 5F5F , 5F5F , F5F5 , F5F5 , 00 C, 
+( 21) AFAF , AFAF , FAFA , FAFA , 00 C, 
+( 22) 5F5F , 5F5F , F5F5 , F5F5 , FF C, 
+( 23) AFAF , AFAF , FAFA , FAFA , FF C, 
+                                        
+\ vertical bars for Sally               
+( 24) A8A8 , A8A8 , A8A8 , A8A8 , FF C, 
+                                        
+DECIMAL                                 
+                                        
+EXIT                                    
+                                        
+                                        
+                               ( fah  ) 
+════════════════════════════════════════   SCREEN 106
+( COLORTAB CONTINUED     <11/ 6/89>246) 
+                                        
+EXIT                                    
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( fah  ) 
+════════════════════════════════════════   SCREEN 108
+( $SETPATTERN VARS       <11/ 6/89>248) 
+                                        
+                                        
+CREATE PATBUF    42 ALLOT               
+                                        
+CREATE TEMPLATE   9 ALLOT               
+                                        
+VARIABLE LEFT.D7     0 LEFT.D7 !        
+VARIABLE LEFT.MSK    0 LEFT.MSK !       
+VARIABLE RIGHT.D7    0 RIGHT.D7 !       
+VARIABLE RIGHT.MSK   0 RIGHT.MSK !      
+                                        
+EXIT                                    
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( fah  ) 
+════════════════════════════════════════   SCREEN 109
+( $>PATBUF               <11/ 6/89>249) 
+\ all registers preserved               
+\ Xreg = y line #                       
+\ N    = color bit mask                 
+\ N 1+ = RIGHT.D7                       
+\ N 2+ = LEFT.D7                        
+                                        
+XCODE $>PATBUF                          
+            PHA, TYA, PHA, TXA, PHA,    
+            # 7 AND, TAX, ( y# mod 8 )  
+                                        
+            RIGHT.D7 LDA, # 40 CMP,     
+ CS IF,     # 39 LDA,                   
+ THEN,      N 1+ STA,                   
+            LEFT.D7 LDA, N 1+ CMP,      
+ CS IF,     N 1+ LDA,                   
+ THEN,      N 2+ STA,                   
+                                        
+            # PATBUF LOBYTE LDA,        
+            GPATTERN STA,               
+            # PATBUF HIBYTE LDA,        
+            GPATTERN 1+ STA,            
+                                        
+EXIT ( more ... )              ( fah  ) 
+════════════════════════════════════════   SCREEN 110
+( $>PATBUF continued     <11/ 6/89>250) 
+                                        
+            TEMPLATE 8 + LDA,           
+            BITTBL ,X AND,              
+ 0= NOT IF, # 128 LDA,                  
+ THEN,      N STA,                      
+                                        
+            TEMPLATE ,X LDA,            
+            # 39 LDY,                   
+ BEGIN,     N 1+ CPY,                   
+ 0= NOT WHILE,                          
+            PHA, .A LSR,                
+            PLA, .A ROR,                
+            DEY,                        
+ REPEAT,                                
+ BEGIN,     PHA, .A LSR, N ORA,         
+            PATBUF ,Y STA,              
+            PLA, .A ROR, N 2+ CPY,      
+ 0= NOT WHILE,                          
+            DEY,                        
+ REPEAT,                                
+            PLA, TAX, PLA, TAY, PLA,    
+            RTS, XC;                    
+EXIT                           ( fah  ) 
+════════════════════════════════════════   SCREEN 111
+( SETPAT SETCOLOR        <11/ 6/89>251) 
+                                        
+VARIABLE COLOR#                         
+VARIABLE GMODE                          
+                                        
+: SETPAT ( ADDR -- )                    
+         TEMPLATE 9 CMOVE ;             
+                                        
+: HCOLOR ( N -- )                       
+         DUP COLOR# !                   
+         9 * COLORTAB +                 
+         SETPAT ;                       
+                                        
+: SETMODE  ( N -- ) GMODE ! ;           
+                                        
+EXIT                                    
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 112
+( $ORPAT SUBROUTINE      <11/ 6/89>252) 
+                                        
+XCODE $ORPATB                           
+                GPATTERN )Y AND,        
+                GBASE )Y ORA,           
+                GBASE )Y STA,           
+                RTS, XC;                
+                                        
+XCODE $ORPAT                            
+               # 0 CPX,                 
+  0= NOT IF,                            
+                GPATTERN )Y AND,        
+    BEGIN,      GBASE )Y ORA,           
+                GBASE )Y STA,           
+                DEY,                    
+                DEX,                    
+    0= NOT WHILE,                       
+                GPATTERN )Y LDA,        
+    REPEAT,     LEFT.MSK LDA,           
+  THEN,         X' $ORPATB JMP, XC;     
+                                        
+EXIT                                    
+                                        
+                               ( fah  ) 
+════════════════════════════════════════   SCREEN 113
+( $INVERT SUBROUTINE     <11/ 6/89>253) 
+                                        
+XCODE $INVERTB                          
+               GBASE )Y EOR,            
+               GBASE )Y STA,            
+               RTS, XC;                 
+                                        
+XCODE $INVERT                           
+               # 0 CPX,                 
+  0= NOT IF,                            
+    BEGIN,     GBASE )Y EOR,            
+               GBASE )Y STA,            
+               # 127 LDA,               
+               DEY,                     
+               DEX,                     
+    0= UNTIL,  LEFT.MSK LDA,            
+  THEN,        X' $INVERTB JMP, XC;     
+                                        
+EXIT                                    
+                                        
+                                        
+                                        
+                                        
+                               ( fah  ) 
+════════════════════════════════════════   SCREEN 114
+( $TURNON SUBROUTINE     <11/ 6/89>254) 
+                                        
+XCODE $TURNONB                          
+               GBASE )Y ORA,            
+               GBASE )Y STA,            
+               RTS, XC;                 
+                                        
+XCODE $TURNON                           
+               # 0 CPX,                 
+  0= NOT IF,                            
+               GBASE )Y ORA,            
+    BEGIN,     GBASE )Y STA,            
+               # 127 LDA,               
+               DEY,                     
+               DEX,                     
+    0= UNTIL,  LEFT.MSK LDA,            
+  THEN,        X' $TURNONB JMP, XC;     
+                                        
+EXIT                                    
+                                        
+                                        
+                                        
+                                        
+                               ( fah  ) 
+════════════════════════════════════════   SCREEN 115
+( $TURNOFF SUBROUTINE    <11/ 6/89>255) 
+                                        
+XCODE $TURNOFFB-                        
+               # 255 EOR,               
+               GBASE )Y AND,            
+               GBASE )Y STA,            
+               RTS, XC;                 
+                                        
+XCODE $TURNOFF-                         
+               # 0 CPX,                 
+  0= NOT IF,                            
+               # 255 EOR,               
+               GBASE )Y AND,            
+    BEGIN,     GBASE )Y STA,            
+               # 0 LDA,                 
+               DEY,                     
+               DEX,                     
+    0= UNTIL,  LEFT.MSK LDA,            
+  THEN,        X' $TURNOFFB- JMP, XC;   
+                                        
+EXIT                                    
+                                        
+                                        
+                               ( fah  ) 
+════════════════════════════════════════   SCREEN 116
+( $INVPAT SUBROUTINE     <11/ 6/89>256) 
+XCODE $INVPATTB-                        
+               # 128 ORA, N STA,        
+               # 255 EOR, GBASE )Y AND, 
+               N 1+ STA,                
+               GPATTERN )Y LDA,         
+               # 127 EOR,               
+               N AND, N 1+ ORA,         
+               GBASE )Y STA,            
+               RTS, XC;                 
+                                        
+XCODE $INVPATT-                         
+               # 0 CPX,                 
+  0= NOT IF,                            
+               X' $INVPATTB- JSR,       
+    BEGIN,     DEY, DEX,                
+    0= NOT WHILE,                       
+               GPATTERN )Y LDA,         
+               # 127 EOR,               
+               GBASE )Y STA,            
+    REPEAT,    LEFT.MSK LDA,            
+  THEN,        X' $INVPATTB- JMP, XC;   
+                                        
+EXIT                           ( fah  ) 
+════════════════════════════════════════   SCREEN 117
+( $EORPAT SUBROUTINE     <11/ 6/89>257) 
+                                        
+XCODE $EORPATB                          
+                # 128 ORA,              
+                GPATTERN )Y AND,        
+                GBASE )Y EOR,           
+                GBASE )Y STA,           
+                RTS, XC;                
+                                        
+XCODE $EORPAT                           
+               # 0 CPX,                 
+  0= NOT IF,                            
+                # 128 ORA,              
+                GPATTERN )Y AND,        
+    BEGIN,      GBASE )Y EOR,           
+                GBASE )Y STA,           
+                DEY,                    
+                DEX,                    
+    0= NOT WHILE,                       
+                GPATTERN )Y LDA,        
+    REPEAT,     LEFT.MSK LDA,           
+  THEN,         X' $EORPATB JMP, XC;    
+                                        
+EXIT                           ( fah  ) 
+════════════════════════════════════════   SCREEN 118
+( FILLPAT                <11/ 6/89>258) 
+                                        
+XCODE $FILLPATB  # 128 ORA,             
+                N STA,                  
+                GBASE )Y LDA,           
+                GPATTERN )Y EOR,        
+                N AND,                  
+                GBASE )Y EOR,           
+                GBASE )Y STA,           
+                RTS, XC;                
+                                        
+XCODE $FILLPAT                          
+               # 0 CPX,                 
+  0= NOT IF,                            
+                X' $FILLPATB JSR,       
+    BEGIN,      DEY,                    
+                DEX,                    
+    0= NOT WHILE,                       
+                GPATTERN )Y LDA,        
+                GBASE )Y STA,           
+    REPEAT,     LEFT.MSK LDA,           
+  THEN,         X' $FILLPATB JMP, XC;   
+                                        
+EXIT                           ( fah  ) 
+════════════════════════════════════════   SCREEN 119
+( $C-HLINE               <11/ 6/89>259) 
+\ .A = draw mask (right mask if .x>0)   
+\ .X = byte count ( 0 => 1 byte )       
+                                        
+CODE $C-HLINE                           
+   PHA,                                 
+   GMODE LDA, N STA, N INC,             
+   PLA,                                 
+   N DEC,                               
+   0= IF, X' $INVERT   JMP, THEN,       
+   N DEC,                               
+   0= IF, X' $TURNON   JMP, THEN,       
+   N DEC,                               
+   0= IF, X' $TURNOFF- JMP, THEN,       
+   N DEC,                               
+   0= IF, X' $INVPATT- JMP, THEN,       
+   N DEC,                               
+   0= IF, X' $EORPAT   JMP, THEN,       
+                                        
+          X' $FILLPAT  JMP,             
+   C;                                   
+EXIT                                    
+                                        
+                               ( fah  ) 
+════════════════════════════════════════   SCREEN 120
+( $HLINEB $HLINE         <11/ 6/89>260) 
+                                        
+CODE $HLINEB   # 192 CPX,               
+  CS IF,       RTS,                     
+  THEN,        TXA, PHA,                
+               RIGHT.MSK LDA,           
+               RIGHT.D7 LDY, # 40 CPY,  
+  CS IF,       # 39 LDY, # 255 LDA,     
+  THEN,        PHA, TYA,                
+               SEC, LEFT.D7 SBC,        
+  CS IF,       TAX,                     
+    0= IF,     PLA, LEFT.MSK AND,       
+    ELSE,      PLA,                     
+    THEN,      ' $C-HLINE JSR,          
+  ELSE,        PLA,                     
+  THEN,        PLA, TAX, RTS, C;        
+                                        
+CODE $HLINE    # 192 CPX,               
+  CS IF,       RTS,                     
+  THEN,        X' $>PATBUF JSR,         
+               yaddr JSR,               
+               ' $HLINEB JMP, C;        
+EXIT                                    
+                               ( fah  ) 
+════════════════════════════════════════   SCREEN 121
+( HLINEB  HLINE          <11/ 6/89>261) 
+\ HLINE :                               
+\  draw horizontal line                 
+\  within current end points            
+\  "X" = y line #                       
+                                        
+CODE HLINE ( y -- )                     
+      XSAVE STX, BOT LDA, TAX,          
+      ' $HLINE JSR,                     
+      XSAVE LDX, POP JMP, C;            
+                                        
+\ HLINEB :                              
+\  draw horizontal line                 
+\  when pattern address                 
+\  {GPATTERN} has been                  
+\  previously computed                  
+                                        
+CODE HLINEB ( y -- )                    
+      TXA, PHA, BOT LDA, TAX,           
+      yaddr JSR,                        
+      ' $HLINEB JSR,                    
+      PLA, TAX, POP JMP, C;             
+                                        
+EXIT                           ( fah  ) 
+════════════════════════════════════════   SCREEN 122
+( $ENDPT                 <11/ 6/89>262) 
+\ Entry:                                
+\ .A = endpt lo byte .Y = endpt hi byte 
+\ Returns:                              
+\ .A = x byte offset .Y = x pix offset  
+\ CS = out of range  ( .X destroyed )   
+                                        
+LABEL $ENDPT # 0 CPY,       \ ? x < 0   
+ 0< IF,     # 0 LDA, # 0 LDY,           
+            SEC, RTS,                   
+ THEN,                                  
+            # 2 CPY,       \ ? x < 512  
+ CS NOT IF, # 0 CPY,       \ ? x < 256  
+   0= IF,   CLC,           \ ok...      
+   ELSE,    # 24 CMP,      \ ? x < 280  
+ THEN, THEN,                            
+ CS IF,     # 39 LDA,      \ .. too big 
+            # 6 LDY,                    
+ ELSE,      # 7 LDX,                    
+            b/mod JSR,                  
+            &QUO LDA,  &REM LDY,        
+            CLC,                        
+ THEN,      RTS, C;                     
+                               ( fah  ) 
+════════════════════════════════════════   SCREEN 123
+( setleft                <11/ 6/89>263) 
+                                        
+\ .A = endpt lo byte .Y = endpt hi byte 
+\ Returns:                              
+\ CS = out of range                     
+LABEL setleft \ A,X,Y altered           
+  $ENDPT JSR,     \ calc byte/bit       
+  LEFT.D7 STA,    \ set left byte       
+  LMASKS ,Y LDA,  \ get left mask       
+  LEFT.MSK STA,   \ set left mask       
+  RTS, C;                               
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 124
+( setright               <11/ 6/89>263) 
+                                        
+\ .A = endpt lo byte .Y = endpt hi byte 
+\ Returns:                              
+\ CS = out of range                     
+LABEL setright \ A,X,Y altered          
+  $ENDPT JSR,     \ calc byte/bit       
+  RIGHT.D7 STA,   \ set right byte      
+  RMASKS ,Y LDA,  \ get right mask      
+  RIGHT.MSK STA,  \ set right mask      
+  RTS, C;                               
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 125
+( ENDPTS                 <11/ 6/89>265) 
+                                        
+\ .A = endpt lo byte .Y = endpt hi byte 
+                                        
+CODE ENDPTS ( lx rx -- )                
+   BOT LDA,                             
+   BOT 1+ LDY, XSAVE STX,               
+   setright JSR,                        
+   XSAVE LDX,                           
+   SEC LDA,                             
+   SEC 1+ LDY,                          
+   setleft JSR,                         
+   POPTWO JMP, C;                       
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 126
+( SETENDPTS              <11/ 6/89>266) 
+                                        
+: SETENDPTS ( X1 X2 -- )                
+   DDUP > IF SWAP THEN                  
+   ENDPTS ;                             
+                                        
+                                        
+\ 0 279 SETENDPTS                       
+                                        
+EXIT                                    
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( fah  ) 
+════════════════════════════════════════   SCREEN 127
+( VLINE                  <11/ 6/89>267) 
+  XVAR VY1                              
+  XVAR VY2                              
+                                        
+LABEL $VLINE                            
+  TXA, PHA, VY1 LDX,                    
+  BEGIN, ' $HLINE JSR,                  
+    VY2 CPX, CS NOT                     
+  WHILE, INX,                           
+  REPEAT, PLA, TAX, RTS, C;             
+                                        
+\ VLINE draw vertical line/bar          
+\       within current end points       
+                                        
+: VLINE ( y1 y2 -- )                    
+   DDUP > IF SWAP THEN                  
+   0 MAX 191 MIN X' VY2 !               
+   0 MAX 191 MIN X' VY1 !               
+   $VLINE CALL ;                        
+                                        
+: VBAR VLINE ;                          
+                                        
+EXIT                                    
+                               ( fah  ) 
+════════════════════════════════════════   SCREEN 128
+( -FS- FS                <11/ 6/89>268) 
+                                        
+\ fill screen with color                
+                                        
+: -FS-                                  
+      FORGET-SYS                        
+      0 279 SETENDPTS                   
+      0 191 VLINE ;                     
+                                        
+: FS ( n -- ) HCOLOR -FS- ;             
+                                        
+EXIT                                    
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( fah  ) 
+════════════════════════════════════════   SCREEN 129
+( BAR                    <11/ 6/89>269) 
+                                        
+: BAR ( x y x y  -- )                   
+   >R ROT SETENDPTS                     
+   R> VBAR ;                            
+                                        
+EXIT                                    
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( fah  ) 
+════════════════════════════════════════   SCREEN 130
+( "IBM"-like words       <11/ 6/89>270) 
+                                        
+0 CONSTANT PL-VAL \ last palette value  
+0 CONSTANT 1COL#                        
+0 CONSTANT 2COL#                        
+0 CONSTANT GPAT#                        
+                                        
+: GR-1COLOR ( n -- )                    
+   TO 1COL# ;                           
+: GR-2COLOR ( n -- )                    
+   TO 2COL# ;                           
+: GR-PATTERN ( n -- )                   
+   TO GPAT# ;                           
+                                        
+: ADD-PL ( n -- n', add for WN-PAL )    
+   PL-VAL 0= NOT IF 4 + THEN ;          
+                                        
+: <SET-COLOR> ( n -- set hcolor to n )  
+   \ looks at window palette to         
+   \ pick which color set to use        
+   ADD-PL HCOLOR ;                      
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 131
+( <SET-PATTERN>          <11/ 6/89>271) 
+                                        
+CREATE pmap \ pattern maps              
+\ bl0   vio   gre   wh0                 
+\ bl1   blu   org   wh1                 
+ 17 C,  8 C, 10 C, 16 C,  \ black 0     
+  0 C, 12 C, 14 C,  0 C,                
+  8 C,  1 C,  8 C,  9 C,  \ vio         
+  8 C,  1 C,  8 C,  9 C,                
+ 10 C, 10 C,  2 C, 11 C,  \ gre         
+ 10 C, 10 C,  2 C, 11 C,                
+ 16 C,  9 C, 11 C,  3 C,  \ wh0         
+ 16 C, 13 C, 11 C,  3 C,                
+  4 C,  8 C, 10 C, 16 C,  \ black 1     
+  4 C, 12 C, 14 C, 18 C,                
+ 12 C,  5 C, 12 C, 13 C,  \ blu         
+ 12 C,  5 C, 12 C, 13 C,                
+ 14 C, 14 C, 14 C, 15 C,  \ org         
+ 14 C, 14 C, 6  C, 15 C,                
+ 19 C,  8 C, 10 C,  7 C,  \ wh1         
+ 19 C, 12 C, 14 C,  3 C,                
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 132
+( GR-MODE                <11/ 6/89>272) 
+                                        
+: <SET-PATTERN> ( -- )                  
+   \ compute hcolor based on palette    
+   1COL# ADD-PL 7 AND 8 *               
+   2COL# ADD-PL 7 AND +                 
+   pmap + C@ HCOLOR ;                   
+                                        
+                                        
+: GR-MODE ( n -- )                      
+   DUP GMODE !                          
+   GMODE @ 1 = ( solid color 1 )        
+   IF 1COL# <SET-COLOR> THEN            
+   GMODE @ 2 = ( solid color 2 )        
+   IF 2COL# <SET-COLOR> THEN            
+   GMODE @ 3 5 WITHIN                   
+   IF <SET-PATTERN> THEN                
+;                                       
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( fah  ) 
+════════════════════════════════════════   SCREEN 133
+( USCROLL                <11/ 6/89>273) 
+EXIT                                    
+\ scroll current window up              
+                                        
+: USCROLL ( -- )                        
+   LMARG RMARG SETENDPTS                
+   GETMODE >R                           
+   5 SETMODE                            
+      BMARG 1+  TMARG YDELTA +          
+      DO                                
+         I YADDR GPATTERN !             
+         I YDELTA - HLINEB              
+      LOOP                              
+   2 SETMODE ( black )                  
+      BMARG 1+ YDELTA - BMARG VLINE     
+   R> SETMODE ;                         
+                                        
+EXIT                                    
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( fah  ) 
+════════════════════════════════════════   SCREEN 134
+( DSCROLL                <11/ 6/89>273) 
+EXIT                                    
+\ scroll current window down            
+                                        
+: DSCROLL ( -- )                        
+   LMARG RMARG SETENDPTS                
+   GETMODE >R                           
+   5 SETMODE                            
+      TMARG 1-  BMARG YDELTA -          
+      DO                                
+         I YADDR GPATTERN !             
+         I YDELTA + HLINEB              
+      -1 +LOOP                          
+   2 SETMODE ( black )                  
+      TMARG DUP YDELTA + VLINE          
+   R> SETMODE ;                         
+                                        
+EXIT                                    
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 137
+( LOAD BRODY FONT        < 9/16/86>277) 
+                                        
+CR ." LOADING EURO10 FONT " CR          
+                                        
+CREATE EURO10 1706 ALLOT                
+                                        
+EURO10 DPARAMS 2+ !                     
+1 DPARAMS 24 + ! ( set DX )             
+                                        
+BLK @ 1+ BLOCK EURO10        1024 CMOVE 
+BLK @ 2+ BLOCK EURO10 1024 +  682 CMOVE 
+                                        
+                                        
+EXIT                                    
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        

@@ -1,0 +1,1819 @@
+════════════════════════════════════════════════════════════════   SCREEN 002
+                                                                
+                                                                
+                                                                
+                                                                
+   210                                                          
+                                                                
+                                                                
+\ FORGET ASTART                                                 
+XCREATE ASTART                                                  
+   150 179 THRU  \ Area words                                   
+   180 199 THRU  \ Window words                                 
+   200 209 THRU  \ Screen words                                 
+( LOADBLOCK                                      <11/10/89>141) 
+L64 ONLY FORTH ALSO DEFINITIONS                                 
+CR CR ." First word: AREA (ASTART)" CR CR                       
+                                                                
+════════════════════════════════════════════════════════════════   SCREEN 008
+                                                                
+                                                                
+                                                                
+                                                                
+  2 FIELD: AR-MIN   @L  !L  \ Area min value (inclusive)        
+  2 FIELD: AR-MAX   @L  !L  \ Area max value (inclusive)        
+  2 FIELD: AR-VAL   @L  !L  \ current area value                
+  1 FIELD: AR-ON    C@L C!L \ elapsed time to draw image        
+  2 FIELD: AR-XPOS  @L  !L  \ area upper left x                 
+  2 FIELD: AR-YPOS  @L  !L  \ area upper left y                 
+  2 FIELD: AR-WID   @L  !L  \ area width                        
+  2 FIELD: AR-HT    @L  !L  \ area heigth                       
+( AREA                                           <11/10/89>151) 
+                                                                
+RECORD: AREA \ holds places locations of places in window       
+  2 FIELD: AR-NEXT  @L  !L  \ seg of next area (zero=end)       
+════════════════════════════════════════════════════════════════   SCREEN 009
+                                                                
+                                                                
+                                                                
+                                                       ( fah  ) 
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+( AREA NOTES                                     <11/10/89>150) 
+EXIT ------------------------------------------------------     
+                                                                
+This file was taken from the IBM with no major changes          
+════════════════════════════════════════════════════════════════   SCREEN 011
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+  1 FIELD: AR-OFF   C@L C!L \ elapsed time to erase image       
+                                                                
+                                                                
+                                                                
+════════════════════════════════════════════════════════════════   SCREEN 012
+( AREA cont                                      <11/10/89>152) 
+                                                                
+  1 FIELD: AR-FLAG  B@L B!L \ area flags (bit# on stack)        
+  1 FIELD: AR-TYPE  C@L C!L \ Area control type                 
+   AR-PT-CA D!L ;                                               
+                                                                
+: AR-@CA ( n -- c a, get condition/action pair n )              
+   AR-PT-CA D@L ;                                               
+   DUP @@ AR-#CA U< NOT ABORT" AR-PT-CA: rng err"               
+   >R ^^ AR-#CA R> 4 * 1+ + ;                                   
+                                                                
+: AR-!CA ( c a n --, set condition/action pair n )              
+( AR-PT-CA AR-PUT-CA AR-GET-CA                   <11/10/89>155) 
+                                                                
+\ for all CA words n=0 is the first pair                        
+: AR-PT-CA ( n -- seg adr, point to condition/action pair n )   
+════════════════════════════════════════════════════════════════   SCREEN 013
+                                                                
+                                                                
+                                                                
+                                                       ( fah  ) 
+3 CONSTANT CALC-WID \ T=calc AR-WID based on WN-WID & AR-XPOS   
+4 CONSTANT NO-DEF   \ T=don't due default actions               
+6 CONSTANT LAST     \ T=last constrol in list                   
+7 CONSTANT 1ST      \ T=first control in list                   
+\ 2 CONSTANT DIM      \ T=control is drawn dimmed               
+\ 5 CONSTANT KEYENAB  \ T=control can recognize keys            
+\ defined in RECORD.SCR                                         
+                                                                
+( AR-FLAGS bit assignments                       <11/10/89>154) 
+                                                                
+\ 0 CONSTANT VISIBLE  \ T=control is visable                    
+\ 1 CONSTANT ENABLE   \ T=control is selectable                 
+════════════════════════════════════════════════════════════════   SCREEN 014
+                                                                
+                                                                
+                                                                
+                                                       ( fah  ) 
+                                                                
+                                                                
+                                                                
+                                                                
+position within the linked list for the window.                 
+Area number 0 is returned if the point is not in a defined area 
+of the current window.                                          
+                                                                
+( AREA notes                                     <11/10/89>153) 
+EXIT                                                            
+                                                                
+Areas are referenced by a number (1-255) which is simply its    
+════════════════════════════════════════════════════════════════   SCREEN 015
+                                                                
+                                                                
+                                                                
+                                                       ( fah  ) 
+                                                                
+REND \ text of string title string follows                      
+                                                                
+                                                                
+  1 FIELD: AR-SUBT  C@L C!L \ Area sub type                     
+  1 FIELD: AR-#CA   C@L C!L \ # cond/action pairs (0=none)      
+   \ AR-#CA pairs of words follow this field                    
+  0 FIELD: AR-TM NOOP NOOP  \ marker to start of AR-TITLE       
+                                                                
+                                                                
+                                                                
+                                                       ( fah  ) 
+════════════════════════════════════════════════════════════════   SCREEN 016
+( AR-TOFS AR-TITLE                               <11/10/89>156) 
+                                                                
+: AR-TSIZE ( -- n, size of area not including title )           
+   [ F[ AR-#CA 1+ ] LITERAL @@ AR-#CA 4 * + ;                   
+     BEGIN @@ AR-NEXT ?DUP             \ find end of the chain  
+     WHILE DUP SETHAN AREA ROT DROP                             
+     REPEAT                                                     
+    ELSE 0 SWAP                        \ 1 area, no prev        
+   \ lhan=segment of last AREA (0=no areas)                     
+   @@ WN-AREAS DUP                     \ any areas at all?      
+   IF DUP SETHAN AREA @@ AR-NEXT ?DUP  \ more than one area?    
+    IF DUP SETHAN AREA                                          
+( AR-LAST                                        <11/10/89>159) 
+                                                                
+: AR-LAST \ -- phan lhan, return adress of last two AREAS       
+   \ phan=segment of next to last AREA (0=only one area)        
+════════════════════════════════════════════════════════════════   SCREEN 017
+                                                                
+                                                                
+                                                                
+                                                       ( fah  ) 
+                                                                
+                                                                
+                                                                
+                                                                
+   GETHAN AREA HRESIZE ;                                        
+                                                                
+                                                                
+                                                                
+( AR-TLEN AR-TITLE-SIZE                          <11/10/89>158) 
+                                                                
+: AR-TLEN ( n --, reserve room for a n character string )       
+   1+ AR-TSIZE +   \ new total length                           
+════════════════════════════════════════════════════════════════   SCREEN 018
+                                                                
+                                                                
+                                                                
+                                                       ( fah  ) 
+   0 AR-TITLE C!L         \ set null title                      
+;                                                               
+                                                                
+                                                                
+   \ **** Sets AR-TITLE to 1 byte of zero ****                  
+   !! AR-#CA              \ set field                           
+   AR-TSIZE 1+            \ offset to start of title            
+   GETHAN AREA HRESIZE    \ make area that size                 
+( AR-NUM-CA                                      <11/10/89>157) 
+                                                                
+: AR-NUM-CA \ n --, increase allocation of area to allow room   
+   \ for n condition pairs (see AR-TLEN)                        
+════════════════════════════════════════════════════════════════   SCREEN 019
+number of pairs.  It is legal for AR-#CA to be zero             
+                                                                
+                                                                
+                                                       ( fah  ) 
+EXIT ---------------------------------------------------------- 
+                                                                
+Since the condition/action list is a variable length structure  
+the address of the title string must be computed based on the   
+                                                                
+: AR-TITLE ( -- seg adr, compute adr of title string )          
+   ^^ AR-TM @@ AR-#CA 4 * + ;                                   
+                                                                
+    THEN                                                        
+   ELSE 0 THEN                                                  
+   ;                                                            
+                                                       ( fah  ) 
+════════════════════════════════════════════════════════════════   SCREEN 020
+( AR-ADD                                         <11/10/89>160) 
+                                                                
+: AR-ADD ( han --, add area at seg to end of chain, zero next ) 
+   DUP SETHAN AREA 0 !! AR-NEXT \ make end of chain             
+    THEN                                                        
+   ELSE DROP                                                    
+   THEN ;                                                       
+                                                                
+   IF <HFREE> ( prev ) ?DUP      \ release it, any AREAS before 
+    IF SETHAN AREA 0 !! AR-NEXT  \ yes, it is now last          
+    ELSE 0 !! WN-AREAS           \ no, all areas free'd         
+     0 SETHAN AREA                                              
+( AR-FREE                                        <11/10/89>163) 
+                                                                
+: AR-FREE ( --, free last area for WINDOW, point area to prev ) 
+   AR-LAST ( prev last -- ) ?DUP \ any at all?                  
+════════════════════════════════════════════════════════════════   SCREEN 021
+                                                                
+                                                                
+                                                                
+                                                       ( fah  ) 
+                                                                
+                                                                
+: AR-SIZE ( -- n, return byte length of current area )          
+   GETHAN AREA HBLK-SIZE ;                                      
+  AREA 1+ HALLOC                                                
+  AR-ALLOC-SET                                                  
+  1 ( ok )                                                      
+;                                                               
+( AR-ALLOC AR-1ALLOC                             <11/10/89>162) 
+                                                                
+: AR-ALLOC ( -- t/f, T=AREA points to new, F=can't alloc )      
+  \ defaults area to current window size, free with AR-FREE     
+════════════════════════════════════════════════════════════════   SCREEN 022
+   <AR-ALLOC-SET> ;                                             
+                                                                
+                                                                
+                                                       ( fah  ) 
+   0 !! AR-SUBT 0 !! AR-ON 0 !! AR-OFF ;                        
+                                                                
+: AR-ALLOC-SET ( han -- )                                       
+   AR-ADD \ add to chain, point to new                          
+   0 !! AR-#CA 0 AR-TITLE C!L \ zero control fields             
+   @@ WN-XPOS  !! AR-XPOS  @@ WN-YPOS !! AR-YPOS                
+   @@ WN-WID   !! AR-WID   @@ WN-HT   !! AR-HT                  
+   0 !! AR-VAL 0 !! AR-MIN 1 !! AR-MAX                          
+( <AR-ALLOC-SET> AR-ALLOC-SET                    <11/10/89>161) 
+                                                                
+: <AR-ALLOC-SET> ( -- )                                         
+   0 !! AR-TYPE 3 ^^ AR-FLAG C!L \ set default values           
+════════════════════════════════════════════════════════════════   SCREEN 023
+                                                                
+                                                                
+                                                                
+                                                       ( fah  ) 
+   R> SETHAN AREA ;                                             
+                                                                
+                                                                
+                                                                
+   GETHAN AREA >R                                               
+   AR-LAST SWAP DROP ?DUP                                       
+   IF SETHAN AREA !! AR-NEXT  \ link into chain                 
+   ELSE !! WN-AREAS THEN      \ point to first in list          
+                                                                
+                                                                
+                                                                
+                                                       ( fah  ) 
+════════════════════════════════════════════════════════════════   SCREEN 024
+( <AR-FREE-ALL> AR-FREE-ALL                      <11/10/89>164) 
+                                                                
+: <AR-FREE-ALL> ( han --, free all areas starting at seg )      
+   ( WARNING: AREA is left dangling! )                          
+   REPEAT                                                       
+   DROP 0                    \ return not found                 
+;                                                               
+                                                                
+   1 @@ WN-AREAS             \ start with first area            
+   BEGIN ?DUP ( 0= NOT )     \ while more                       
+   WHILE <FIND-AREA>         \ check this area                  
+    IF EXIT THEN             \ exit if we have an answer        
+( FIND-AREA                                      <11/10/89>167) 
+                                                                
+: FIND-AREA \ -- n/0, get AREA # containing event coord         
+   ( area 1 is the first AREA in the list )                     
+════════════════════════════════════════════════════════════════   SCREEN 025
+                                                                
+                                                                
+                                                                
+                                                       ( fah  ) 
+   THEN                                                         
+   1+ @@ AR-NEXT 0           \ inc area number, point to next   
+;                                                               
+                                                                
+   ENABLE @@ AR-FLAG         \ is it enabled?                   
+   IF @EVT-XY IN-AREA?       \ and in the area?                 
+    IF ( n ) 1 EXIT          \ yes, we found it                 
+    THEN                                                        
+( <FIND-AREA>                                    <11/10/89>166) 
+                                                                
+: <FIND-AREA> \ n seg -- <n' seg' 0> <n' 1>, 1=area found       
+   SETHAN AREA               \ point to area                    
+════════════════════════════════════════════════════════════════   SCREEN 026
+                                                                
+                                                                
+                                                                
+                                                       ( fah  ) 
+                                                                
+                                                                
+                                                                
+                                                                
+   @@ AR-XPOS - @@ AR-WID U< AND ;                              
+                                                                
+                                                                
+                                                                
+( IN-AREA?                                       <11/10/89>165) 
+                                                                
+: IN-AREA? ( x y -- T/F, return T if x y in AREA )              
+   @@ AR-YPOS - @@ AR-HT U< SWAP                                
+════════════════════════════════════════════════════════════════   SCREEN 027
+   0 SETHAN AREA                                                
+   0 !! WN-AREAS ;                                              
+                                                                
+                                                       ( fah  ) 
+: AR-FREE-ALL ( --, free all areas for WINDOW )                 
+   \ zeros WN-AREAS, leaves AREA undefined!                     
+   @@ WN-AREAS     \ do nothing if no areas defined             
+   <AR-FREE-ALL>                                                
+   BEGIN ?DUP                                                   
+   WHILE DUP SETHAN AREA @@ AR-NEXT SWAP <HFREE>                
+   REPEAT ;                                                     
+                                                                
+                                                                
+                                                                
+                                                                
+                                                       ( fah  ) 
+════════════════════════════════════════════════════════════════   SCREEN 028
+( AR-LOC AR-FILL AR-SET                          <11/10/89>168) 
+                                                                
+: AR-LOC ( x y w h --, set current area location )              
+   !! AR-HT !! AR-WID !! AR-YPOS !! AR-XPOS ;                   
+;                                                               
+                                                                
+                                                                
+                                                                
+   IF @GR-MODE >R AR-HIDE-MOUSE 0 GR-MODE 0                     
+    DO AR-FILL DUP DELAY AR-FILL DUP DELAY LOOP                 
+    DROP R> GR-MODE SHOW-MOUSE                                  
+   ELSE DROP THEN                                               
+( AR-FLASH                                       <11/10/89>171) 
+                                                                
+: AR-FLASH ( n d -- , flash area n times, d is delay between )  
+   ?DUP                                                         
+════════════════════════════════════════════════════════════════   SCREEN 029
+                                                                
+                                                                
+                                                                
+                                                       ( fah  ) 
+   AR-HIDE-MOUSE @GR-MODE 0 GR-MODE                             
+   AR-FILL GR-MODE SHOW-MOUSE ;                                 
+                                                                
+                                                                
+   OVER @@ AR-WID 1- +                                          
+   OVER @@ AR-HT 1- + BAR ;                                     
+                                                                
+: AR-XOR ( -- , xor current area )                              
+( AR-FILL AR-XOR                                 <11/10/89>170) 
+                                                                
+: AR-FILL                                                       
+   @@ AR-XPOS @@ AR-YPOS                                        
+════════════════════════════════════════════════════════════════   SCREEN 030
+                                                                
+                                                                
+                                                                
+                                                       ( fah  ) 
+   @@ AR-XPOS @@ AR-WID + DISP-WID 1- MIN GX->MX                
+   @@ AR-YPOS @@ AR-HT + DISP-HT 1- MIN                         
+   ?HIDE-MOUSE ;                                                
+                                                                
+EXIT ------- MOUSE NOT SUPPORTED ---------                      
+  \ still must call SHOW-MOUSE to balance call                  
+   @@ AR-XPOS 0 MAX GX->MX                                      
+   @@ AR-YPOS 0 MAX                                             
+( AR-HIDE-MOUSE                                  <11/10/89>169) 
+                                                                
+STUB: AR-HIDE-MOUSE ( --, conditional hide if in area )         
+                                                                
+════════════════════════════════════════════════════════════════   SCREEN 031
+                                                                
+                                                                
+                                                                
+                                                       ( fah  ) 
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                       ( fah  ) 
+════════════════════════════════════════════════════════════════   SCREEN 032
+( AR-NUM                                         <11/10/89>172) 
+                                                                
+: AR-NUM ( -- n/0, return area number of AREA or zero)          
+   ( n=0 no match in this window, 1=first area 2=2nd... )       
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+════════════════════════════════════════════════════════════════   SCREEN 033
+                                                                
+                                                                
+                                                                
+                                                       ( fah  ) 
+    ( han ) AR-ADD           \ add to window chain              
+    1 ( O.K. )                                                  
+   ELSE 0 ( fail )                                              
+   THEN ;                                                       
+   AR-SIZE HALLOC ?DUP                                          
+   IF ( han ) DUP PT-HALLOC 0 ( dest pointer )                  
+    GETHAN AREA PT-HALLOC 0 ( source pointer )                  
+    DSWAP AR-SIZE CMOVEL     \ copy area data to new            
+( AR-COPY                                        <11/10/89>174) 
+                                                                
+: AR-COPY ( -- T/F, T=area copied, F=can't alloc )              
+   ( add a copy of the current area to end of chain )           
+════════════════════════════════════════════════════════════════   SCREEN 034
+                                                                
+                                                                
+                                                                
+                                                       ( fah  ) 
+    1-                                                          
+   REPEAT                                                       
+   DROP ;                                                       
+                                                                
+   SETHAN AREA                                                  
+   BEGIN DUP 1 >                                                
+   WHILE @@ AR-NEXT ?DUP                                        
+    IF SETHAN AREA THEN                                         
+( AR-NUM-SET                                     <11/10/89>173) 
+                                                                
+: AR-NUM-SET \ N -- , set AREA to n'th area (1=first)           
+   @@ WN-AREAS DUP 0= ABORT" AR-NUM-SET: no AREA's"             
+════════════════════════════════════════════════════════════════   SCREEN 035
+   THEN                                                         
+   R> SETHAN AREA ;                                             
+                                                                
+                                                       ( fah  ) 
+     IF R> SETHAN AREA EXIT THEN                                
+     1+ @@ AR-NEXT ?DUP                                         
+    WHILE SETHAN AREA                                           
+    REPEAT                                                      
+   GETHAN AREA >R                                               
+   @@ WN-AREAS DUP                                              
+   IF SETHAN AREA 1                                             
+    BEGIN GETHAN AREA R@ =                                      
+                                                                
+                                                                
+                                                                
+                                                                
+════════════════════════════════════════════════════════════════   SCREEN 040
+( WINDOW NOTES                                   <11/10/89>180) 
+EXIT ------------------------------------------------------     
+                                                                
+This file was taken from the IBM with no major changes          
+   3 ^^ WN-FLAG C!L \ set to NOT DIM, ENABLE, VISIBLE           
+   1 !! WN-FADE \ initialize drawing parameters                 
+   0 !! WN-PATTERN 0 !! WN-GDOT 0 !! WN-PL 0 !! WN-BG           
+   DISP-CLRS 1- !! WN-HCOLOR 0 !! WN-BCOLOR                     
+   DISP-WID !! WN-CWID DISP-HT  !! WN-CHT   \ save disp res     
+   0 !! WN-TYPE 0 !! WN-AREAS 0 !! WN-DATA  \ clear fields      
+   0 !! WN-XPOS 0 !! WN-YPOS                \ default to full.. 
+   DISP-WID !! WN-WID DISP-HT !! WN-HT      \ size window       
+( WN-INIT                                        <11/10/89>183) 
+FORTH DEFINTITIONS                                              
+                                                                
+: WN-INIT \ --, initialize window parameters to "default"       
+════════════════════════════════════════════════════════════════   SCREEN 041
+                                                                
+                                                                
+                                                                
+                                                       ( fah  ) 
+   DISP-CLRS 1- !! WN-THFACE 0 !! WN-TEFACE                     
+   DISP-CLRS 2/ 1- !! WN-TDFACE ;                               
+                                                                
+                                                                
+   \ initialize text parameters                                 
+   0 TX-MODE 0 !! WN-TFONT                                      
+   DISP-CLRS 1- TX-COLOR 0 TX-ITAL                              
+   1 TX-DX 1 TX-DY 0 TX-LHT 7 TX-BLHT                           
+( WN-TINIT                                       <11/10/89>182) 
+FORTH DEFINITIONS                                               
+                                                                
+: WN-TINIT ( -- )                                               
+════════════════════════════════════════════════════════════════   SCREEN 042
+                                                                
+                                                                
+                                                                
+                                                       ( fah  ) 
+                                                                
+                                                                
+                                                                
+                                                                
+  VOCABULARY -WINDOW- IMMEDIATE                                 
+                                                                
+ONLY FORTH ALSO -WINDOW- ALSO FORTH DEFINITIONS                 
+                                                                
+( -WINDOW-                                       <11/10/89>181) 
+                                                                
+ONLY FORTH ALSO DEFINITIONS                                     
+                                                                
+════════════════════════════════════════════════════════════════   SCREEN 043
+                                                                
+                                                                
+                                                                
+                                                       ( fah  ) 
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+   DISP-CLRS 2/ 1- !! WN-DCOLOR 0 !! WN-ECOLOR 0 !! WN-FRAME    
+   WN-TINIT ;                                                   
+                                                                
+                                                       ( fah  ) 
+════════════════════════════════════════════════════════════════   SCREEN 044
+( WN-ALLOC                                       <11/10/89>184) 
+FORTH DEFINITIONS                                               
+                                                                
+: WN-ALLOC ( -- t/f, T=WINDOW points to new, F=can't alloc )    
+: ^FIND# ( n -- adr, point to table, N=1 is first )             
+   DUP 1 #FIND WITHIN NOT ABORT" ^FIND#: rng err"               
+   1- 2* FIND-LIST + ;                                          
+                                                                
+                                                                
+CREATE FIND-LIST ( segment of windows to scan in ACTIONS )      
+   20 ALLOT                                                     
+                                                                
+( SCAN-EMPTY ADD-SCAN                            <11/10/89>187) 
+-WINDOW- DEFINITIONS                                            
+EXIT ------------- NOT NEEDED ----------------                  
+0 CONSTANT #FIND  \ # windows in FIND-LIST                      
+════════════════════════════════════════════════════════════════   SCREEN 045
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+: IN-WINDOW? ( x y -- T/F, return T if x y in WINDOW )          
+   @@ WN-YPOS - @@ WN-HT U< SWAP                                
+   @@ WN-XPOS - @@ WN-WID U< AND ;                              
+                                                                
+( IN-WINDOW?                                     <11/10/89>186) 
+FORTH DEFINITIONS                                               
+EXIT ------------- NOT NEEDED ----------------                  
+                                                                
+════════════════════════════════════════════════════════════════   SCREEN 046
+                                                                
+                                                                
+                                                                
+                                                       ( fah  ) 
+   IF <HFREE> THEN                                              
+   GETHAN WINDOW <HFREE>                                        
+   0 SETHAN WINDOW                                              
+;                                                               
+   \ frees all areas in window, set WINDOW to NULL if no prev   
+   \ set WN-HEAD to vaule of WINDOW                             
+   AR-FREE-ALL                                                  
+   @@ WN-DATA ?DUP ( any ALLOC'd data to free? )                
+( WN-FREE                                        <11/10/89>185) 
+FORTH DEFINITIONS                                               
+                                                                
+: WN-FREE ( --, free current window )                           
+════════════════════════════════════════════════════════════════   SCREEN 047
+                                                                
+                                                                
+                                                                
+                                                       ( fah  ) 
+                                                                
+                                                                
+                                                                
+                                                                
+  \ sets fixed fields, if F=WINDOW not changed                  
+  WINDOW HALLOC SETHAN WINDOW                                   
+  WN-INIT 1 ( ok ) ;                                            
+                                                                
+: @FIND# ( n -- seg, return seg of window n, 1=first )          
+   ^FIND# @ ;                                                   
+                                                                
+                                                                
+════════════════════════════════════════════════════════════════   SCREEN 048
+( SCAN-EMPTY ADD-SCAN                            <11/10/89>188) 
+FORTH DEFINITIONS                                               
+EXIT ------------- NOT NEEDED ----------------                  
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+   @@ WN-XPOS @@ WN-YPOS                                        
+   OVER @@ WN-WID 1- +                                          
+   OVER @@ WN-HT 1- + BAR ;                                     
+                                                                
+( WN-FILL                                        <11/10/89>191) 
+FORTH DEFINITIONS                                               
+                                                                
+: WN-FILL ( --, fill window with current color/mode )           
+════════════════════════════════════════════════════════════════   SCREEN 049
+                                                                
+                                                                
+                                                                
+                                                       ( fah  ) 
+                                                                
+                                                                
+                                                                
+                                                                
+   !! WN-HT !! WN-WID !! WN-YPOS !! WN-XPOS ;                   
+                                                                
+                                                                
+                                                                
+( WN-LOC                                         <11/10/89>190) 
+FORTH DEFINITIONS                                               
+                                                                
+: WN-LOC ( x y w h --, set current window location )            
+════════════════════════════════════════════════════════════════   SCREEN 050
+   LOOP                                                         
+  THEN                                                          
+;                                                               
+                                                                
+   ENABLE @@ WN-FLAG       \ is it enabled?                     
+   IF @EVT-XY IN-WINDOW?   \ in this window?                    
+    IF 1+ LEAVE THEN       \ yes, exit pointing to it           
+   THEN                                                         
+: FIND-WINDOW \ -- T/F, find WINDOW containing event coord      
+  0 ( default answer ) #FIND ?DUP                               
+  IF 0                                                          
+   DO I 1+ @FIND# SETHAN WINDOW                                 
+( FIND-WINDOW                                    < 8/21/89> 15) 
+FORTH DEFINITIONS                                               
+EXIT ------------- NOT NEEDED ----------------                  
+                                                                
+════════════════════════════════════════════════════════════════   SCREEN 051
+                                                                
+                                                                
+                                                                
+                                                                
+   #FIND 10 U< NOT ABORT" ADD-FIND: overflow!"                  
+   #FIND 1+ DUP TO #FIND ^FIND# ! ;                             
+                                                                
+                                                                
+: FIND-EMPTY ( --, empty actions scan buffer )                  
+   0 TO #FIND ;                                                 
+                                                                
+: ADD-FIND ( seg -- add window to scan list )                   
+                                                                
+                                                                
+                                                                
+                                                                
+════════════════════════════════════════════════════════════════   SCREEN 052
+( WN-ATTRIB-SET WN-SET                           <11/10/89>192) 
+FORTH DEFINITIONS                                               
+: WN-ATTRIB-SET ( -- , set sys to match attributes in WINDOW )  
+   @@ WN-GDOT  GR-DOT     @@ WN-PATTERN GR-PATTERN              
+                                                                
+                                                                
+                                                                
+                                                                
+: WN-XOR ( -- , xor current window )                            
+  HIDE-MOUSE @GR-MODE 0 GR-MODE                                 
+  WN-FILL GR-MODE SHOW-MOUSE ;                                  
+                                                                
+( WN-XOR                                         < 9/20/88> 17) 
+FORTH DEFINITIONS                                               
+EXIT ------------- NOT NEEDED ----------------                  
+                                                                
+════════════════════════════════════════════════════════════════   SCREEN 053
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+: WN-IS? ( han -- T/F, T=WINDOW is seg )                        
+   GETHAN WINDOW = ;                                            
+                                                                
+: WN-INSIDE? ( han -- T/F, check if event in window at seg )    
+   GETHAN WINDOW >R \ preserves old value of WINDOW             
+   SETHAN WINDOW @EVT-XY IN-WINDOW?                             
+   R> SETHAN WINDOW ;                                           
+( WN-INSIDE? WN-IS?                              < 9/20/88> 16) 
+FORTH DEFINITIONS                                               
+EXIT ------------- NOT NEEDED ----------------                  
+                                                                
+════════════════════════════════════════════════════════════════   SCREEN 054
+   [ WINDOW F[ WN-HCOLOR - ] LITERAL \ len                      
+   BMOVEL ;                                                     
+                                                                
+                                                                
+                                                                
+: WN-PCOPY ( seg --, copy window params to cur window  )        
+   [ F[ WN-HCOLOR ] LITERAL \ source seg offs                   
+   ^^ WN-HCOLOR \ dest seg offs                                 
+: <UPDATE-TXY> ( --, copy text cursor to window pos )           
+   GX @ !! WN-TX GY @ !! WN-TY ;                                
+                                                                
+REVECTOR <UPDATE-TXY> INTO UPDATE-TXY                           
+( <UPDATE-TXY> WN-PCOPY                          <11/10/89>193) 
+FORTH DEFINITIONS                                               
+EXIT ------------- NOT NEEDED ----------------                  
+                                                                
+════════════════════════════════════════════════════════════════   SCREEN 055
+\ use when making the WINDOW current display window             
+   SETHAN WINDOW WN-ATTRIB-SET ;                                
+                                                                
+                                                       ( fah  ) 
+   @@ WN-TLHT  TX-LHT     @@ WN-TBLHT TX-BLHT                   
+;  \ WN-AUX is available for general use                        
+                                                                
+: WN-SET ( han --, set WINDOW to point to window at SEG )       
+   @@ WN-TFONT TX-FONT    @@ WN-TMODE TX-MODE                   
+   @@ WN-TX    GX !       @@ WN-TY    GY !                      
+   @@ WN-TFG   TX-COLOR   @@ WN-TITAL TX-ITAL                   
+   @@ WN-TDX   TX-DX      @@ WN-TDY   TX-DY                     
+                                                                
+                                                                
+                                                                
+                                                                
+════════════════════════════════════════════════════════════════   SCREEN 056
+( WN-BOUNDS WN-SAVE-UNDER                        <11/10/89>196) 
+FORTH                                                           
+                                                                
+: WN-BOUNDS \ -- x1 y1 x2 y2, get window params                 
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+════════════════════════════════════════════════════════════════   SCREEN 059
+                                                                
+: WN-RESTORE \ seg --, restore window contents                  
+   REST-AREA ;                                                  
+                                                       ( fah  ) 
+                                                                
+: WN-SAVE-UNDER \ -- seg, save screen under window              
+   WN-BOUNDS SAVE-AREA                                          
+   DUP 0= ABORT" WN-SAVE-UNDER: mem err" ;                      
+   ( defines box inside the window )                            
+   @@ WN-XPOS @@ WN-YPOS                                        
+   OVER @@ WN-WID + 1-                                          
+   OVER @@ WN-HT + 1- ;                                         
+                                                                
+                                                                
+                                                                
+                                                                
+════════════════════════════════════════════════════════════════   SCREEN 060
+( SCREEN NOTES                                   <11/10/89>200) 
+EXIT ------------------------------------------------------     
+                                                                
+This file was taken from the IBM with no major changes          
+    1 ( ok! )                                                   
+   THEN                                                         
+;                                                               
+                                                                
+   IF SETHAN SCREEN                                             
+    0 !! SCR-#BRA                                               
+    0 !! SCR-#WIN \ clear fields                                
+    1 !! SCR-AWIN \ default to middle position                  
+( SCR-ALLOC                                      <11/10/89>203) 
+                                                                
+: SCR-ALLOC ( -- T/F, T=new empty screen record allocated )     
+   SCREEN HALLOC DUP                                            
+════════════════════════════════════════════════════════════════   SCREEN 061
+                                                                
+                                                                
+                                                                
+                                                       ( fah  ) 
+   @@ SCR-#BRA + 2*   \ skip over branches                      
+   ^^ SCR-DATA ROT + ;                                          
+                                                                
+                                                                
+   2* ^^ SCR-DATA ROT + ;                                       
+                                                                
+: ^SCR-WIN \ n -- seg adr, return pointer to window n (0=first) 
+   DUP 0 @@ SCR-#WIN WITHIN NOT ABORT" ^SCR-WIN: rng err"       
+( ^SCR-BRA ^SCR-WIN                              <11/10/89>202) 
+                                                                
+: ^SCR-BRA \ n -- seg adr, return pointer to branch n (0=first) 
+   DUP 0 @@ SCR-#BRA WITHIN NOT ABORT" ^SCR-BRA: rng err"       
+════════════════════════════════════════════════════════════════   SCREEN 062
+  0 FIELD: SCR-DATA NOOP NOOP \ to find adr where data starts   
+\ SCR-#BRA words containing # of branch screens (or none)       
+\ SCR-#WIN words containing # of windows in screen (or none)    
+REND                                                   ( fah  ) 
+  2 FIELD: SCR-LAST   @L  !L  \ number of previous screen or 0  
+  2 FIELD: SCR-NEXT   @L  !L  \ number of next screen or 0      
+  1 FIELD: SCR-#BRA  C@L C!L  \ number of branch screens        
+  1 FIELD: SCR-#WIN  C@L C!L  \ number of windows               
+  1 FIELD: SCR-PL   SC@L C!L  \ palette for this scren          
+  1 FIELD: SCR-BLINK C@L C!L  \ blink speed (menu items etc)    
+  1 FIELD: SCR-FLASH C@L C!L  \ flash speed (cursors etc)       
+  1 FIELD: SCR-AWIN  C@L C!L  \ Apple window position           
+( SCREEN                                         <11/10/89>201) 
+RECORD: SCREEN \ holds general info pointers/to windows         
+  1 FIELD: SCR-VE    C@L C!L  \ visual effect when drawing scr  
+  1 FIELD: SCR-BG    C@L C!L  \ background for this screen      
+════════════════════════════════════════════════════════════════   SCREEN 063
+                                                                
+                                                                
+                                                                
+                                                       ( fah  ) 
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                       ( fah  ) 
+════════════════════════════════════════════════════════════════   SCREEN 064
+( SCR-ADJUST                                     <11/10/89>204) 
+                                                                
+: SCR-ADJUST \ -- T/F, adjust screen allocation T=adjusted      
+   \ make room to hold SCR-#BRA, and SCR-#WIN                   
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+════════════════════════════════════════════════════════════════   SCREEN 067
+                                                                
+                                                                
+                                                                
+                                                       ( fah  ) 
+   1 ( ok ) ;                                                   
+                                                                
+                                                                
+                                                                
+   \ LOCATION OF 'SCREEN' WILL PROBABLY CHANGE                  
+   @@ SCR-#BRA @@ SCR-#WIN + 2*                                 
+   [ F[ SCR-DATA ] LITERAL +  \ new # bytes for record          
+   GETHAN SCREEN HRESIZE                                        
+                                                                
+                                                                
+                                                                
+                                                                
+════════════════════════════════════════════════════════════════   SCREEN 068
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+  VOCABULARY -CTRUN- IMMEDIATE                                  
+                                                                
+ONLY FORTH ALSO -CTRUN- ALSO FORTH DEFINITIONS                  
+                                                                
+( -CTRUN-                                        <11/10/89>211) 
+                                                                
+ONLY FORTH ALSO DEFINITIONS                                     
+                                                                
+════════════════════════════════════════════════════════════════   SCREEN 069
+                                                                
+                                                                
+                                                                
+                                                       ( fah  ) 
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+( CTRUN NOTES                                    <11/10/89>210) 
+EXIT ------------------------------------------------------     
+                                                                
+This file was taken from the IBM with no major changes          
+════════════════════════════════════════════════════════════════   SCREEN 071
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                       ( fah  ) 
+════════════════════════════════════════════════════════════════   SCREEN 072
+( CONTROL global variables                       <11/10/89>212) 
+FORTH DEFINITIONS                                               
+                                                                
+  0 CONSTANT TRACKING? \ true while in CT-WATCH                 
+   DUP AR-TLEN CT-SET-TITLE ;                                   
+                                                                
+EXIT -----------------------------------------------------      
+: 'FORTH ( adr -- <pfa>, find word in FORTH vocab )             
+   DUP >R AR-TITLE C!L                                          
+   GET:CS SWAP AR-TITLE 1 LA+ R> BMOVEL ;                       
+                                                                
+: CT-TITLE \ adr cnt --, set control title to string            
+( CT-SET-TITLE CT-TITLE 'FORTH                   <11/10/89>215) 
+FORTH                                                           
+                                                                
+: CT-SET-TITLE \ adr cnt --, set title without adj allocation   
+════════════════════════════════════════════════════════════════   SCREEN 073
+                                                                
+                                                                
+                                                                
+                                                       ( fah  ) 
+                                                                
+                                                                
+                                                                
+                                                                
+   \ re-access current records so they won't be purged          
+   GETHAN WINDOW SETHAN WINDOW                                  
+   GETHAN AREA SETHAN AREA ;                                    
+                                                                
+( DEC-DEATH-COUNT                                <11/10/89>214) 
+                                                                
+: DEC-DEATH-COUNT                                               
+   <DEC-DEATH-COUNT>                                            
+════════════════════════════════════════════════════════════════   SCREEN 074
+                                                                
+                                                                
+                                                                
+                                                       ( fah  ) 
+  0 CONSTANT CT-VALID  \ set if still in dial for CT-PART       
+  3 CONSTANT MN-#FLASH \ number of flashes on selection         
+  1 CONSTANT MN-FDELAY \ delay between flashes                  
+  0 CONSTANT DRAW-WIN? \ true while drawing window              
+  0 CONSTANT CT-PART   \ current control part                   
+  0 CONSTANT CT-VALNEW \ new value for field (for track words)  
+  0 CONSTANT CT-MINNEW \ new value for field (for track words)  
+  0 CONSTANT CT-FUNC   \ 0=1stin 1=2ndin 2=move 3=out 4=cleanup 
+( CONTROL global variables                       <11/10/89>213) 
+FORTH DEFINITIONS                                               
+                                                                
+EXIT ------ MOUSE/TRACKING stuff -----------                    
+════════════════════════════════════════════════════════════════   SCREEN 075
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+  0 CONSTANT STOP-SCAN? \ true stop scanning scan list          
+  0 CONSTANT 1ST-PASS?  \ cleared after every ACTIONS           
+  0 CONSTANT NEW-SCR?   \ set true when drawing screen          
+                                                                
+   [ 'NFA FORTH ] LITERAL VOC-TOP <<SPLIT-FIND> NOT             
+   ABORT" Not found in FORTH!"                                  
+   ( count byte ) DROP ;                                        
+                                                       ( fah  ) 
+════════════════════════════════════════════════════════════════   SCREEN 076
+( CONTROL CT-TSIZE                               <11/10/89>216) 
+FORTH DEFINITIONS                                               
+                                                                
+: CONTROL ( n --, execute routine n in control )                
+   THEN ;                                                       
+                                                                
+: CT-FIND-DIAL \ --, set CT-VALID if EVENT in CT-PART for dial  
+   ENABLE @@ WN-FLAG \ only execute if window is enabled        
+: CT-FIND \ --, set CT-PART EVENT is pointing to (0=none)       
+   ENABLE @@ WN-FLAG \ only execute if window is enabled        
+   IF CT-TSIZE 4 CONTROL                                        
+   ELSE 0 TO CT-PART 0 TO CT-VALID                              
+( CT-FIND CT-FIND-DIAL                           <12/ 6/88> 11) 
+EXIT -------------------------------------------------------    
+FORTH DEFINITIONS                                               
+                                                                
+════════════════════════════════════════════════════════════════   SCREEN 077
+                                                                
+                                                                
+                                                                
+                                                                
+   TO CT-FUNC CT-DO-FUNC ;                                      
+                                                                
+                                                                
+                                                                
+: CT-DO-FUNC \ --, execute control function CT-FUNC             
+   3 CONTROL ;                                                  
+                                                                
+: CT-DO-FUNC# \ n -- , set CT-FUNC call CT-FUNC                 
+( CT-DO-FUNC CT-DO-FUNC#                         <11/10/89>218) 
+EXIT -------------------------------------------------------    
+FORTH DEFINITIONS                                               
+                                                                
+════════════════════════════════════════════════════════════════   SCREEN 078
+                                                                
+                                                                
+                                                                
+                                                       ( fah  ) 
+   VISIBLE @@ WN-FLAG \ only execute if window is visible       
+   IF 2 CONTROL THEN ;                                          
+                                                                
+                                                                
+   VISIBLE @@ WN-FLAG \ only execute if window is visible       
+   IF 1 CONTROL THEN ;                                          
+                                                                
+: CT-DRAW-VAL \ --, draw "value" control part                   
+( CT-DRAW CT-DRAW-VAL                            <11/10/89>217) 
+FORTH DEFINITIONS                                               
+                                                                
+: CT-DRAW \ --, draw entire control                             
+════════════════════════════════════════════════════════════════   SCREEN 079
+   ELSE BL CSIZE THEN \ make empty return true height           
+   DDROP ;                                                      
+                                                                
+                                                       ( fah  ) 
+   IF 0                                                         
+    DO COUNTL DUP 32 <                                          
+     IF DROP ELSE CSIZE THEN                                    
+    LOOP                                                        
+   QUIT ; \ vector planted when defined in CONTROL.SCR          
+                                                                
+: CT-TSIZE ( -- run area title through CSIZE )                  
+   CS-INIT AR-TITLE COUNTL ?DUP                                 
+   IF 5 CONTROL                                                 
+   ELSE 0 TO CT-VALID                                           
+   THEN ;                                                       
+                                                                
+════════════════════════════════════════════════════════════════   SCREEN 080
+( FADE-REGN AR-FADE-REGN                         <11/10/89>220) 
+FORTH DEFINITIONS                                               
+                                                                
+CREATE FADE-REGN \ 0=bwidth , 2=nlines , 4=bstart , 6=lstart,   
+    BEGIN DI, DX MOV {yaddr} CALL                               
+      BX, CS: FADE-REGN 4 + ADD                                 
+      SI, BX MOV DI, BX MOV                                     
+      CX, CS: FADE-REGN MOV BYTE REP MOVS                       
+    DX, FADE-REGN 6 + MOV                                       
+    ES, CRTSEG MOV                  \ ES=screen segment         
+    {save:seg} CALL DS, AX MOV      \ DS=buffer's segment       
+    AH, CS: FADE-REGN 2+ MOV  \ AH=number of lines              
+( FX-RESTORE -- CGA version                      < 5/20/89> 13) 
+FORTH CGA-EXIT \ -------------------------------                
+CODE FX-RESTORE \ -- , restore FADE-REGN from save:seg          
+    SI PUSH DS PUSH ES PUSH                                     
+════════════════════════════════════════════════════════════════   SCREEN 081
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+      DX INC AH DEC                                             
+   UNTIL=                                                       
+   ES POP DS POP SI POP NEXT-JMP C;                             
+                                                                
+    BEGIN DI, DX MOV {yaddr} CALL                               
+      BX, CS: FADE-REGN 4 + ADD                                 
+      SI, BX MOV DI, BX MOV                                     
+      CX, CS: FADE-REGN MOV BYTE REP MOVS                       
+════════════════════════════════════════════════════════════════   SCREEN 082
+                                                                
+                                                                
+                                                                
+                                                                
+    AH, CS: FADE-REGN 2+ MOV  \ AH=number of lines              
+                                                                
+                                                                
+                                                                
+    SI PUSH DS PUSH ES PUSH                                     
+    DX, FADE-REGN 6 + MOV                                       
+    ES, CRTSEG MOV                  \ ES=screen segment         
+    {save:seg} CALL DS, AX MOV      \ DS=buffer's segment       
+( FX-RESTORE                                     < 5/20/89> 13) 
+FORTH DEFINITIONS                                               
+                                                                
+CODE FX-RESTORE \ -- , restore FADE-REGN from save:seg          
+════════════════════════════════════════════════════════════════   SCREEN 083
+                                                                
+                                                                
+                                                                
+                                                       ( fah  ) 
+   @@ AR-HT FADE-REGN 2+ !                                      
+   @@ AR-XPOS PIX/BYTE /MOD FADE-REGN 4 + !                     
+   0= NOT FADE-REGN +!                                          
+   @@ AR-YPOS FADE-REGN 6 + ! ;                                 
+  8 ALLOT                                                       
+                                                                
+: AR-FADE-REGN ( -- , set fade region to match area )           
+   @@ AR-WID PIX/BYTE /MOD SWAP 0= NOT + FADE-REGN !            
+      DX INC AH DEC                                             
+   UNTIL=                                                       
+   ES POP DS POP SI POP NEXT-JMP C;                             
+                                                                
+════════════════════════════════════════════════════════════════   SCREEN 084
+( FX-RESTORE -- EGA version                      < 5/20/89> 14) 
+FORTH EGA-EXIT \ -------------------------------                
+                                                                
+CODE FX-RESTORE \ -- , restore FADE-REGN from save:seg          
+: ER-CONTROL ( --, copy screen under control from SAVE:SEG )    
+   AR-FADE-REGN FX-RESTORE                                      
+   0 VISIBLE !! AR-FLAG ;                                       
+                                                                
+: CT-DEF-ACT ( --, run any control specific default actions )   
+  \ @@ AR-TYPE 14 = NOT                                         
+; \ IF 6 CONTROL THEN ;                                         
+                                                                
+( ELAPSED CT-DEF-ACT ER-CONTROL DR-CONTROL       < 7/ 2/89> 17) 
+FORTH                                                           
+ 0 CONSTANT ELAPSED     \ ticks since STARTTIME                 
+                                                                
+════════════════════════════════════════════════════════════════   SCREEN 085
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+    0 VISIBLE !! AR-FLAG                                        
+    0 KEYENAB !! AR-FLAG ;                                      
+                                                                
+                                                                
+( CT-DISAB                                       <10/ 5/89> 16) 
+                                                                
+                                                                
+: CT-DISAB                                                      
+════════════════════════════════════════════════════════════════   SCREEN 086
+   ES POP DS POP SI POP NEXT-JMP C;                             
+                                                                
+                                                                
+                                                                
+     DX INC CX POP                                              
+   LOOP                                                         
+   STI \ enable interupts                                       
+   G12-PORT 8 255 OUTIND           \ BIT-MASK=255               
+     DI, DX MOV {yaddr} CALL                                    
+     BX, CS: FADE-REGN 4 + ADD                                  
+     SI, BX MOV DI, BX MOV                                      
+     CX, CS: FADE-REGN MOV BYTE REP MOVS                        
+( FX-RESTORE -- EGA version cont                 < 5/20/89> 15) 
+EGA-EXIT \ -------------------------------                      
+                                                                
+   DO CX PUSH                                                   
+════════════════════════════════════════════════════════════════   SCREEN 087
+                                                                
+\ More...                                                       
+                                                                
+                                                                
+    ES, ' EGA-SEG MOV               \ ES=screen segment         
+    DS, ' EGA-OS-SEG MOV            \ DS=source segment         
+    CX, CS: FADE-REGN 2+ MOV        \ CX=number of lines        
+    CLI \ suppress processor interupts                          
+    SEQ-PORT 2 15 OUTIND            \ BP-MASK=15                
+    G12-PORT 8 0 OUTIND             \ BIT-MASK=0                
+    SI PUSH DS PUSH ES PUSH                                     
+    DX, FADE-REGN 6 + MOV           \ start line                
+: DR-CONTROL ( --, draw the control, set visible )              
+   1 VISIBLE !! AR-FLAG CT-DRAW ;                               
+                                                                
+                                                                
+════════════════════════════════════════════════════════════════   SCREEN 088
+( ?ON-TIME                                       < 7/ 2/89> 18) 
+FORTH                                                           
+                                                                
+: ?ON-TIME ( --, see if it time to turn on )                    
+     \ run auto timing controls                                 
+    @@ AR-ON 0> IF ?ON-TIME THEN                                
+    @@ AR-OFF 0> IF ?OFF-TIME THEN                              
+   THEN                                                         
+   NEW-SCR? IF GET-DATA THEN                                    
+   NO-DEF @@ AR-FLAG NOT     \ run default actions?             
+   IF \ run any control specific defs                           
+    CT-DEF-ACT                                                  
+( DEF-ACTS                                       < 6/17/89> 21) 
+FORTH                                                           
+                                                                
+: DEF-ACTS ( --, execute any default system actions )           
+════════════════════════════════════════════════════════════════   SCREEN 089
+                                                                
+                                                                
+                                                                
+                                                                
+  @@ AR-TYPE HAS-DATA + C@ \ this have data?                    
+  IF \ ^DATA will load if not resident                          
+   AR-TITLE D@L ^DATA DDROP                                     
+  THEN ;                                                        
+   0 C, 0 C, 0 C, 0 C, 0 C, 0 C, 0 C, 0 C, 1 C, 1 C, \ 10-19    
+   1 C, 0 C, 0 C, 0 C, 0 C, 0 C, 0 C, 0 C, 0 C, 0 C, \ 20-29    
+                                                                
+: GET-DATA \ -- make sure data for control is resident          
+( GET-DATA                                       <10/ 9/89> 20) 
+                                                                
+CREATE HAS-DATA \ set to 1 if control type has data             
+   0 C, 0 C, 0 C, 0 C, 0 C, 0 C, 0 C, 0 C, 0 C, 0 C, \ 0-9      
+════════════════════════════════════════════════════════════════   SCREEN 090
+                                                                
+                                                                
+                                                                
+                                                                
+  THEN ;                                                        
+                                                                
+                                                                
+                                                                
+  IF ELAPSED @@ AR-OFF < NOT   \ and its time to erase!         
+   IF ER-CONTROL               \ copy bg over contol            
+    0 KEYENAB !! AR-FLAG                                        
+   THEN                                                         
+( ?OFF-TIME                                      < 7/ 2/89> 19) 
+                                                                
+: ?OFF-TIME ( --, see if it time to turn off )                  
+  VISIBLE @@ AR-FLAG           \ areaa its drawn                
+════════════════════════════════════════════════════════════════   SCREEN 091
+   THEN                                                         
+  THEN ;                                                        
+                                                                
+                                                                
+   IF ELAPSED @@ AR-ON < NOT    \ and its after time to draw?   
+    IF DR-CONTROL               \ draw the stupid thing         
+     1 KEYENAB !! AR-FLAG                                       
+    THEN                                                        
+  VISIBLE @@ AR-FLAG NOT        \ area is not drawn             
+  IF @@ AR-OFF                  \ off time specifed?            
+   IF ELAPSED @@ AR-OFF <       \ still before off time?        
+   ELSE 1 THEN                  \ no off time, draw it          
+;                                                               
+                                                                
+                                                                
+                                                                
+════════════════════════════════════════════════════════════════   SCREEN 092
+( DO-ACTION                                      < 8/21/89> 22) 
+                                                                
+: DO-ACTION \ n -- T/F, T=skip next cond/action                 
+   AR-@CA ( cond act -- ) DUP                                   
+   @EVTCLK STARTTIME D@ D- DDUP 0 1 D< NOT                      
+   IF DDROP ( -1 ) 0 ELSE DROP THEN TO ELAPSED ;                
+                                                                
+                                                                
+   DVARIABLE STARTTIME  \ EVTCLK at start of screen             
+                                                                
+: CALC-ELAPSED \ calculate elapsed ticks since                  
+   \ STARTTIME was set (for flashing things/timing)             
+( CUR/ALL? STARTTIME ELAPSED CALC-ELAPSED        <12/16/88> 25) 
+FORTH                                                           
+                                                                
+ 0 CONSTANT CUR/ALL?    \ 1=Scan only current winbow/0=all      
+════════════════════════════════════════════════════════════════   SCREEN 093
+                                                                
+                                                                
+                                                                
+                                                       ( 14:35) 
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+( AR-ACTION                                      < 6/28/89> 24) 
+                                                                
+: AR-ACTION \ vector so this can be disabled                    
+   <AR-ACTION> ;                                                
+════════════════════════════════════════════════════════════════   SCREEN 094
+    R> SETHAN AREA R> SETHAN WINDOW R> TO CT-PART               
+   THEN ;                                                       
+                                                                
+                                                                
+    DO I DO-ACTION      \ do action, skip next one?             
+     IF R> 1+ >R THEN   \ yes                                   
+     STOP-SCAN? IF LEAVE THEN                                   
+    LOOP                                                        
+   0 TO STOP-SCAN?  \ start with flag disabled                  
+   DEF-ACTS @@ AR-#CA ?DUP                                      
+   IF CT-PART >R \ any changes to CT-PART affect this AREA only 
+    GETHAN WINDOW >R GETHAN AREA >R 0                           
+( AR-ACTION                                      <11/29/88> 23) 
+FORTH                                                           
+                                                                
+: <AR-ACTION> \ scan AREA for something to do                   
+════════════════════════════════════════════════════════════════   SCREEN 095
+   THEN ;                                                       
+                                                                
+                                                                
+                                                                
+    SWAP ( cond ) ?EXECUTE       \ did cond return true?        
+    IF ( act ) ?EXECUTE          \ yes, do action               
+    ELSE DROP THEN               \ no, drop action              
+    0 ( don't skip next )                                       
+   [ ' AND CFA ] LITERAL =       \ "AND" action?                
+   IF ( act ) DROP                                              
+    ?EXECUTE NOT                 \ did 1st cond return false?   
+   ELSE \ not "AND" action execute as normal                    
+                                                                
+                                                                
+                                                                
+                                                                
+════════════════════════════════════════════════════════════════   SCREEN 096
+( WN-ACTION                                      < 1/24/89> 26) 
+FORTH                                                           
+                                                                
+: WN-ACTION \ scan all areas in WINDOW for something to do      
+     STOP-SCAN? IF LEAVE THEN                                   
+    LOOP                                                        
+   THEN                                                         
+   R> SETHAN WINDOW ;                                           
+   GETHAN WINDOW >R \ default condition                         
+   #SCAN ?DUP                                                   
+   IF 0                                                         
+    DO I 1+ @SCAN# SETHAN WINDOW WN-ACTION                      
+( <ACTIONS>                                      < 6/27/89> 29) 
+FORTH                                                           
+                                                                
+: <ACTIONS> \ -- execute all current actions                    
+════════════════════════════════════════════════════════════════   SCREEN 097
+                                                                
+                                                                
+                                                                
+                                                                
+   1 TO STOP-SCAN? ( stop if windows added )                    
+   #SCAN 20 U< NOT ABORT" ADD-SCAN: overflow!"                  
+   #SCAN 1+ DUP TO #SCAN ^SCAN# ! ;                             
+                                                                
+   1 TO STOP-SCAN? ( stop scanning, we have new windows )       
+;                                                               
+                                                                
+: ADD-SCAN ( seg -- add window to scan list )                   
+( SCAN-EMPTY ADD-SCAN                            < 5/ 8/89> 28) 
+                                                                
+: SCAN-EMPTY ( --, empty actions scan buffer )                  
+   0 TO #SCAN                                                   
+════════════════════════════════════════════════════════════════   SCREEN 098
+   ^SCAN# @ ;                                                   
+                                                                
+                                                                
+                                                                
+   DUP 1 #SCAN WITHIN NOT ABORT" ^SCAN#: rng err"               
+   1- 2* SCAN-LIST + ;                                          
+                                                                
+: @SCAN# ( n -- seg, return seg of window n, 1=first )          
+CREATE SCAN-LIST ( segment of windows to scan in ACTIONS )      
+   40 ALLOT                                                     
+                                                                
+: ^SCAN# ( n -- adr, point to table, N=1 is first )             
+( SCAN-EMPTY ADD-SCAN                            < 5/ 8/89> 27) 
+                                                                
+0 CONSTANT #SCAN  \ # windows in SCAN-WINS                      
+                                                                
+════════════════════════════════════════════════════════════════   SCREEN 099
+   R> SETHAN AREA                                               
+;                                                               
+                                                                
+                                                                
+    STOP-SCAN?                                                  
+    IF 0 ELSE @@ AR-NEXT THEN                                   
+   REPEAT DROP                                                  
+   0 INIT !! WN-FLAG ( init has now been done )                 
+   GETHAN AREA >R                                               
+   @@ WN-AREAS                                                  
+   BEGIN DUP                                                    
+   WHILE SETHAN AREA AR-ACTION                                  
+                                                                
+                                                                
+                                                                
+                                                                
+════════════════════════════════════════════════════════════════   SCREEN 100
+( ACTIONS                                        < 6/28/89> 30) 
+                                                                
+: ACTIONS \ scan all windows for anything to do                 
+   CALC-ELAPSED            \ set ELAPSED ticks                  
+   BEGIN DO-TRACK @EVTNUM R@ = NOT                              
+   WHILE R@ GET-TRACK-EVENT REPEAT                              
+   CT-VALID DUP                     \ still inside control?     
+   IF 3 CT-DO-FUNC# ELSE 0 TO CT-PART THEN \ turn it off        
+                                                                
+: CT-TRACK \ -- t/f, track mouse t=release in part              
+   @EVTNUM 1+ >R                  \ exit event number           
+   0 TO CT-FUNC 1 TO CT-VALID       \ set first func number     
+( CT-TRACK                                       <11/23/88> 33) 
+-CTRUN-                                                         
+  \ CT-FUNC: 0=1st in 1=2nd in 2=move 3=out 4=cleanup           
+  \ function 2 not used by CT-TRACK                             
+════════════════════════════════════════════════════════════════   SCREEN 101
+   TO CT-FUNC                                                   
+;                                                               
+                                                                
+                                                                
+   R> TO CT-PART                                                
+   CT-VALID CT-FUNC 1 > XOR    \ moved in/out of original part? 
+   IF CT-DO-FUNC THEN          \ turn on/off                    
+   CT-VALID IF 3 ELSE 1 THEN   \ set next function number       
+: DO-TRACK \ --, track mouse for CT-TRACK                       
+   \ CT-PART holds original part number                         
+   CT-PART >R CT-FIND                                           
+   CT-PART R@ = TO CT-VALID    \ set valid flag                 
+( DO-TRACK                                       <11/23/88> 32) 
+-CTRUN-                                                         
+  \ CT-FUNC: 0=1st in 1=2nd in 2=move 3=out 4=cleanup           
+                                                                
+════════════════════════════════════════════════════════════════   SCREEN 102
+   REPEAT-UNTIL                                                 
+   DDROP R> DROP 0 TO GNME-FLAG ;                               
+                                                                
+                                                                
+    IF DDUP @EVT-XY D= NOT ELSE 0 THEN                          
+    \ if we are going to loop again check actions               
+    DUP 0= KEY-EVENT? NOT AND                                   
+    IF ACTIONS THEN                                             
+   \ execute ACTIONS while waiting                              
+   >R @EVT-XY                                                   
+   BEGIN GET-EVENT @EVTNUM R@ = NOT GNME-FLAG 0= AND            
+   WHILE MOUSE-EVENT?                                           
+( GET-TRACK-EVENT                                <11/29/88> 31) 
+FORTH                                                           
+                                                                
+: GET-TRACK-EVENT ( n --, n is exit event )                     
+════════════════════════════════════════════════════════════════   SCREEN 103
+                                                                
+                                                                
+                                                                
+                                                       ( 10:40) 
+   R> TO CT-PART                                                
+   0 TO 1ST-PASS?          \ clear flag                         
+;                                                               
+                                                                
+   CT-PART >R 0 TO CT-PART \ temp clear part value              
+   CUR/ALL?                \ scan only the current window?      
+   IF WN-ACTION            \ only look at the current window    
+   ELSE <ACTIONS> THEN                                          
+   4 CT-DO-FUNC# R> DROP ;          \ cleanup                   
+                                                                
+                                                                
+                                                                
+════════════════════════════════════════════════════════════════   SCREEN 104
+( CT-DIAL                                        <11/23/88> 34) 
+-CTRUN-                                                         
+  \ CT-FUNC: 0=1st in 1=2nd in 2=move 3=out 4=cleanup           
+                                                                
+     !! AR-MIN 1 !! AR-VAL CT-DRAW-VAL                          
+    ELSE @@ WN-TED AR-NUM = IF CT-DRAW-VAL THEN                 
+    THEN                                                        
+   THEN ;                                                       
+   @@ AR-TYPE 10 = \ editable text?                             
+   IF @@ WN-TED 0= ( none set? )                                
+    IF WN-ATTRIB-SET ( use default set )                        
+     AR-NUM !! WN-TED AR-TITLE C@L 1+                           
+( ?TAREA                                         <12/ 1/88> 37) 
+ROOT FORTH -CTRUN-                                              
+                                                                
+: ?TAREA ( --, handle displaying text area )                    
+════════════════════════════════════════════════════════════════   SCREEN 105
+    THEN                                                        
+   THEN 0 TO TRACKING? ;                                        
+                                                                
+                                                                
+   IF 1 TO CT-PART 1 TO CT-VALID 1                              
+   ELSE CT-FIND CT-PART DUP                                     
+    IF 128 < \ is it a normal part or a dial?                   
+     IF CT-TRACK ELSE CT-DIAL THEN                              
+   \ assumes AREA points to control and EVENT contains          
+   \ the initial press event in AREA returns on EVTNUM + 1      
+   1 TO TRACKING?                                               
+   @@ AR-TYPE 14 = \ special control exits immed                
+( CT-WATCH                                       <12/ 8/88> 36) 
+ROOT -CTRUN- FORTH                                              
+: CT-WATCH \ -- t/f, was mouse movement in current control/part 
+   \ return T if item was selected, F if not selected           
+════════════════════════════════════════════════════════════════   SCREEN 106
+   IF 3 CT-DO-FUNC# ELSE 0 TO CT-PART THEN                      
+   4 CT-DO-FUNC# R> DROP ;    \ cleanup                         
+                                                                
+                                                                
+   BEGIN DO-DIAL @EVTNUM R@ = NOT                               
+   WHILE R@ GET-TRACK-EVENT                                     
+   REPEAT                                                       
+   CT-VALID DUP               \ still in part?                  
+: CT-DIAL \ -- t/f, track dial t=release in part                
+   @EVTNUM 1+ >R            \ exit event                        
+   0 CT-DO-FUNC#              \ run init function               
+   2 TO CT-FUNC 1 TO CT-VALID \ next functon is move            
+( CT-DIAL                                        <11/23/88> 35) 
+-CTRUN-                                                         
+  \ CT-FUNC: 0=1st in 1=2nd in 2=move 3=out 4=cleanup           
+                                                                
+════════════════════════════════════════════════════════════════   SCREEN 107
+;                                                               
+                                                                
+                                                                
+                                                                
+   ELSE CT-FUNC 2 =          \ no, were we moving?              
+    IF 3 CT-DO-FUNC# THEN    \ yes, move out                    
+    1 TO CT-FUNC             \ next func is reenter             
+   THEN                                                         
+: DO-DIAL \ -- handle mouse info for dial                       
+   CT-FIND-DIAL CT-VALID     \ still inside dial?               
+   IF CT-DO-FUNC             \ yes, init or move                
+    2 TO CT-FUNC             \ next func is move                
+                                                                
+                                                                
+                                                                
+                                                                
+════════════════════════════════════════════════════════════════   SCREEN 108
+( WF1 WF2                                        <12/ 2/88> 38) 
+-CTRUN-                                                         
+                                                                
+: WF1 ( --, single border inside window )                       
+                                                                
+                                                                
+                                                                
+                                                                
+   CALC-WID @@ AR-FLAG \ compute area width?                    
+   IF @@ WN-WID @@ AR-XPOS @@ WN-XPOS - 2* - !! AR-WID THEN     
+;                                                               
+                                                                
+( DISP-INIT                                      <12/ 2/88> 41) 
+ROOT -CTRUN- FORTH                                              
+                                                                
+: DISP-INIT ( -- called when drawing window  )                  
+════════════════════════════════════════════════════════════════   SCREEN 109
+                                                                
+                                                                
+                                                                
+                                                                
+   @@ WN-FRAME 1 5 WITHIN                                       
+   IF @@ WN-FRAME <DRAW-WN-FRAME> THEN                          
+   SHOW-MOUSE                                                   
+;                                                               
+  NOOP WF1 WF2 WF3 WF4 WF5 ;                                    
+                                                                
+: DRAW-WN-FRAME                                                 
+   HIDE-MOUSE                                                   
+( DRAW-WN-FRAME                                  <12/ 2/88> 40) 
+-CTRUN-                                                         
+                                                                
+CASE: <DRAW-WN-FRAME>                                           
+════════════════════════════════════════════════════════════════   SCREEN 110
+: WF5 ( preserve buffer, nothing to do )                        
+   NOOP ;                                                       
+                                                                
+                                                                
+                                                                
+: WF4 ( preserve whats on the screen )                          
+   0 DISP-HT SAVE-SCR ;                                         
+                                                                
+   DRAW                                                         
+   @@ WN-XPOS 3 + @@ WN-YPOS 3 +                                
+   @@ WN-XPOS @@ WN-WID + 5 -                                   
+   @@ WN-YPOS @@ WN-HT + 5 - 2 FRAME ;                          
+( WF3 WF4 WF5                                    < 3/20/89> 39) 
+                                                                
+: WF3 ( double wide frame )                                     
+   ERASE WN-FILL                                                
+════════════════════════════════════════════════════════════════   SCREEN 111
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+: WF2 ( --, erase window )                                      
+   ERASE WN-FILL ;                                              
+                                                                
+   ERASE WN-FILL                                                
+   DRAW @@ WN-XPOS 1+ @@ WN-YPOS 1+                             
+   @@ WN-XPOS @@ WN-WID + 2-                                    
+   @@ WN-YPOS @@ WN-HT + 2- 1 FRAME ;                           
+                                                                
+                                                                
+                                                                
+                                                                
+════════════════════════════════════════════════════════════════   SCREEN 112
+( CT-REDISP                                      < 4/22/89> 42) 
+FORTH                                                           
+: ?ONTIME ( --, clear visible if it has ontime )                
+   INIT @@ WN-FLAG @@ AR-ON 0> AND ( has on time )              
+   @@ WN-XPOS R@ 12 + @ +   \ x pos                             
+   @@ WN-YPOS R@ 10 + @ +   \ y pos                             
+   R@ 8 + @ R@ 6 + @ AR-LOC \ width ht                          
+   R@ 4 + @ !! AR-TYPE      \ control type                      
+   >R \ 0=num 2=flag 4=type 6=h 8=w 10=y 12=x 14=str            
+   AR-ALLOC 0= ABORT" DEFALLOC: mem err"                        
+   R@ @ AR-NUM-CA           \ reserve space for list            
+   R@ 14 + COUNT CT-TITLE   \ set title                         
+( DEFALLOC                                       <11/28/88> 45) 
+ROOT -CTRUN- FORTH                                              
+                                                                
+: DEFALLOC ( pfa -- )                                           
+════════════════════════════════════════════════════════════════   SCREEN 113
+                                                                
+                                                                
+                                                                
+                                                                
+;                                                               
+                                                                
+                                                                
+                                                                
+   0 !! WN-TED       \ recompute first text edit field          
+   1 INIT !! WN-FLAG                                            
+   CT-REDISP                                                    
+   0 INIT !! WN-FLAG \ clear init flag                          
+( CT-DISP                                        <12/ 2/88> 44) 
+FORTH                                                           
+                                                                
+: CT-DISP \ draw controls, point to first text field            
+════════════════════════════════════════════════════════════════   SCREEN 114
+   0 TO DRAW-WIN? ;                                             
+                                                                
+                                                                
+                                                                
+   @@ WN-AREAS                                                  
+   BEGIN ?DUP                                                   
+   WHILE SETHAN AREA ?ONTIME <CT-REDISP> @@ AR-NEXT             
+   REPEAT                                                       
+                                                                
+: CT-REDISP \ redraw window/controls without initing fields     
+   <CT-REDISP-INIT>                                             
+   DRAW-WN-FRAME                                                
+( CT-RESISP                                      < 6/17/89> 43) 
+                                                                
+: <CT-REDISP-INIT>                                              
+   0 TO CT-PART 0 TO ELAPSED 1 TO DRAW-WIN? ;                   
+════════════════════════════════════════════════════════════════   SCREEN 115
+   IF @@ WN-TFONT TX-FONT CT-DRAW ?TAREA THEN                   
+;                                                               
+                                                                
+                                                                
+   DRAW-WIN?                                                    
+   IF DISP-INIT THEN \ resize controls if drawing and bits set  
+   AR-ACTION \ allow controls to change before we draw          
+   VISIBLE @@ AR-FLAG                                           
+   IF CT-DISAB  ( turn it off now )                             
+   THEN ;                                                       
+                                                                
+: <CT-REDISP> \ -- , redraw a control                           
+   R> 2+ @ ^^ AR-FLAG C!L   \ set flag to value                 
+;                                                               
+                                                                
+                                                                
+════════════════════════════════════════════════════════════════   SCREEN 116
+( DO-WN-RUN                                      < 1/24/89> 46) 
+ROOT FORTH -CTRUN-                                              
+                                                                
+: DO-WN-RUN ( --, exits on left-up )                            
+   HIDE-MOUSE                                                   
+   @@ WN-DATA WN-RESTORE 0 !! WN-DATA                           
+   SHOW-MOUSE ;                                                 
+: WN-RUN                                                        
+   ( run WINDOW until EXIT-WN-RUN? set to true )                
+   BEGIN POINTER DO-WN-RUN EXIT-WN-RUN? UNTIL                   
+   0 TO CUR/ALL?            \ restore to default                
+   0 ^^ WN-FLAG C!L         \ restore original flags            
+( FINISH-WN-RUN WN-RUN                           < 3/30/89> 49) 
+FORTH                                                           
+                                                                
+: FINISH-WN-RUN ( -- , run window, put it away )                
+════════════════════════════════════════════════════════════════   SCREEN 117
+                                                                
+                                                                
+                                                                
+                                                                
+   WN-SAVE-UNDER !! WN-DATA \ save under window                 
+   SHOW-MOUSE                                                   
+   WR-INIT ;                                                    
+                                                                
+ROOT -CTRUN- FORTH                                              
+                                                                
+: START-WN-RUN ( -- draw window  and init for FINISH )          
+   HIDE-MOUSE POINTER                                           
+( START-WN-RUN                                   < 3/30/89> 48) 
+-CTRUN-                                                         
+VARIABLE OLD-WRFLAGS                                            
+                                                                
+════════════════════════════════════════════════════════════════   SCREEN 118
+;                                                               
+                                                                
+                                                                
+                                                                
+  1 KEYENAB !! WN-FLAG   1 ENABLE !! WN-FLAG                    
+  1 INIT !! WN-FLAG      1 VISIBLE !! WN-FLAG                   
+\ 1 SCANWIN !! WN-FLAG                                          
+  CT-DISP             \ draw the window                         
+                                                                
+: WR-INIT \ --, WN-RUN inits                                    
+  1 TO CUR/ALL?       \ only scan the current window            
+  0 TO EXIT-WN-RUN?   \ clear flag                              
+( WR-INIT                                        < 3/ 3/89> 47) 
+ROOT FORTH                                                      
+0 CONSTANT EXIT-WN-RUN?                                         
+-CTRUN-                                                         
+════════════════════════════════════════════════════════════════   SCREEN 119
+   ELSE @EVT-XY IN-WINDOW? NOT IF 3333 1 TONE THEN              
+   THEN                                                         
+  THEN ;                                                        
+                                                                
+    IF GETHAN WINDOW >R CT-WATCH                                
+     IF AR-ACTION THEN                                          
+     R> SETHAN WINDOW                                           
+    THEN                                                        
+  GET-EVENT KEY-EVENT? NULL-EVENT? OR                           
+  IF ACTIONS ( only look in my window for actions )             
+  ELSE MOUSE-EVENT? L-DOWN-EVENT? AND                           
+   IF FIND-AREA                                                 
+   DEC-DEATH-COUNT \ of resources                               
+   START-WN-RUN                                                 
+   FINISH-WN-RUN ;                                              
+                                                                
+════════════════════════════════════════════════════════════════   SCREEN 120
+( ?PART: ?CONDKEY ?ALT:                          <11/28/88> 50) 
+FORTH                                                           
+: ?PART: \ create arg is part number                            
+   CREATE C,                                                    
+         4 ?FKEY: F4?                                           
+         5 ?FKEY: F5?                                           
+         6 ?FKEY: F6?                                           
+         7 ?FKEY: F7?                                           
+        27  ?KEY: ESC?                                          
+         1 ?FKEY: F1?                                           
+         2 ?FKEY: F2?                                           
+         3 ?FKEY: F3?                                           
+( ALTQ? CR? ESC? F1? - F10?                      < 1/25/89> 53) 
+FORTH                                                           
+   ASCII Q  ?ALT: ALTQ?                                         
+        13  ?KEY: CR?                                           
+════════════════════════════════════════════════════════════════   SCREEN 121
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+     3 ?PART: PART3?                                            
+     4 ?PART: PART4?                                            
+   128 ?PART: PART128?                                          
+                                                                
+( PART1? PART2? PART3? PART4? PART128?           < 1/25/89> 52) 
+FORTH                                                           
+     1 ?PART: PART1?                                            
+     2 ?PART: PART2?                                            
+════════════════════════════════════════════════════════════════   SCREEN 123
+   DOES> C@ ?KEYCODE ALT? AND ?CONDKEY AND ;                    
+                                                                
+                                                                
+                                                                
+   KEYENAB @@ WN-FLAG AND ;                                     
+                                                                
+: ?ALT: \ create arg is ascii value                             
+   CREATE C,  ( case is ignored becuase of ?KEYCODE)            
+   DOES> C@ CT-PART = ;                                         
+                                                                
+: ?CONDKEY ( -- T/F, T=should we check for keys )               
+   KEYENAB @@ AR-FLAG                                           
+         8 ?FKEY: F8?                                           
+         9 ?FKEY: F9?                                           
+        10 ?FKEY: F10?                                          
+                                                       ( 11:16) 
+════════════════════════════════════════════════════════════════   SCREEN 126
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+( LAST SCREEN                                    < 8/14/89> 55) 
+                                                                
+                                                                
+                                                                

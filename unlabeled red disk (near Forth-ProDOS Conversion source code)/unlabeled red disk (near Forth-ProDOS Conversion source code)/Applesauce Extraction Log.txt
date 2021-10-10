@@ -1,0 +1,54 @@
+DISK CONTENT EXTRACTION LOG
+Performed by Applesauce v1.48.1
+www.applesaucefdc.com
+
+Timestamp: Aug 26, 2021, 12:03
+
+    Media: 5.25" Floppy Disk
+   Format: Apple ProDOS
+
+== STATUS ======================================================================
+
+3 files were detected on the disk.
+No issues were encountered with the extraction process.
+
+== CATALOG =====================================================================
+
+A
+
+ NAME           TYPE  BLOCKS  MODIFIED          CREATED          ENDFILE SUBTYPE
+
+ FORTH           BIN      38  <NO DATE>         <NO DATE>          18603 A=$0800
+ F2              BIN      38  <NO DATE>         <NO DATE>          18605 A=$0800
+ GARY            $F8       1  <NO DATE>         <NO DATE>          10240 
+
+
+== FILE DETAILS ================================================================
+
+FORTH
+BIN - Binary File ($06)                    MD5: 88079a6e9f6b2486688f878d5a4237f8
+
+File Type: $06       Aux Type: $0800      Storage: Sapling ($2)                 
+   Sparse: No       Block Qty: 38       File Size: 18603    Index Qty: 1        
+Data Size: 18603    Data Blks: 37       
+
+--------------------------------------------------------------------------------
+
+F2
+BIN - Binary File ($06)                    MD5: fe20e595dff678e9bba974ec4765dadb
+
+File Type: $06       Aux Type: $0800      Storage: Sapling ($2)                 
+   Sparse: No       Block Qty: 38       File Size: 18605    Index Qty: 1        
+Data Size: 18605    Data Blks: 37       
+
+--------------------------------------------------------------------------------
+
+GARY
+Other File ($F8)                           MD5: 1276481102f218c981e0324180bafd9f
+
+File Type: $F8       Aux Type: $0000      Storage: Seedling ($1)                
+   Sparse: Yes      Block Qty: 1        File Size: 10240    Index Qty: 0        
+Data Size: 10240    Data Blks: 1        
+
+--------------------------------------------------------------------------------
+

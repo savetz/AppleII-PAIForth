@@ -1,0 +1,425 @@
+════════════════════════════════════════   SCREEN 080
+( INSTRUCTIONS FOR APPLE-IBM LINK       
+         < 3/14/84>100)                 
+                                        
+        TO TRANSFER FROM IBM TO APPLE   
+                                - BOOT T
+HE PROPER DISK ON EACH MACHINE (SCREENS 
+ALREADY LOADED) - ON THE IBM TYPE "S N S
+END-BLOCKS" WHERE S IS THE STARTING     
+  BLOCK AND N IS THE NUBER OF BLOCKS TO 
+SEND                    - ON THE APPLE T
+YPE "S N RECV-BLOCKS" WHERE S IS THE STA
+RTING     BLOCK TO WRITE AND N IS THE NU
+MBER OF BLOCKS TO RECIEVE       - BOTH M
+ACHINES WILL TELL YOU WHAT IS HAPPENING 
+AS THE TRANSFER   OCCURS                
+                                        
+                                        
+                        TO TRANSFER FROM
+ APPLE TO IBM                           
+        - DO THE SAME AS ABOVE BUT TYPE 
+(ON THE APPLE) "S N SEND-BLOCKS"  THEN (
+ON THE IBM) "S N RCV-BLOCKS"            
+                                        
+                                        
+════════════════════════════════════════   SCREEN 081
+( APPLE-IBM LINK PAGE 1 - SET COM PORT  
+         < 3/14/84>101) ( SEE IBM TECH. 
+REF. MANUAL P 2-137 FOR OTHER BAUD RATES
+ )                                      
+                                HEX     
+                                        
+                : 9600BAUD  3FB P@ 80 3F
+B P! 0C 3F8 P! 00 3F9 P! 3FB P! ;       
+: 8BITS  3FB P@ 1C AND 03 OR 3FB P! ;   
+                        : 1STOP  3FB P@ 
+1B AND 3FB P! ;                         
+        : MPARITY  3FB P@ 7 AND 3FB P! ;
+                                : CLEARP
+ORT 3FD P@ 1 AND IF 3F8 P@ DROP THEN ;  
+                                        
+                                        
+: SET-I/O 9600BAUD 8BITS 1STOP MPARITY C
+LEARPORT ;              DECIMAL         
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 082
+( APPPLE-IBM LINK PAGE 2 -  LOW LEVEL   
+         < 3/14/84>102)                 
+                                        
+        HEX FORTH DEFINITIONS           
+                                : WAITOU
+T    BEGIN  3FD P@ 20 AND UNTIL ;       
+                : WAITIN    BEGIN  3FD P
+@ 1 AND UNTIL ;                         
+: XIN ( - N)   WAITIN 3F8 P@ ;          
+                        : XOUT ( N)   WA
+ITOUT 3F8 P! ;                          
+        : COMFF 0C XOUT ;               
+                                DECIMAL 
+                                        
+                                        
+                                        
+: TO-UC  ( C -- C : CONVERT C TO AN UPPE
+RCASE LETTER )            DUP 97 < NOT O
+VER 123 > NOT AND IF ( ITS A..Z )       
+            32 -  ( SUBTRACT BIAS BETWEE
+N UC AND LC )                     THEN  
+                                        
+                ;                       
+                                        
+════════════════════════════════════════   SCREEN 090
+( 05/22/89DJL  6821 I/O 32 DRIVER ) HEX 
+                                        
+\ ADRESSES FOR I/O 32 BOARD IN SLOT 2   
+                                        
+C0A4 CONSTANT PA \ PORT A, 6821 #1,A    
+C0A5 CONSTANT CA \ CONTROL A, 6821 #1,A 
+C0A8 CONSTANT PC \ PORT C, 6821 #2,A    
+C0A9 CONSTANT CC \ CONTROL C, 6821 #2,A 
+                                        
+: SETUP  ( -- )                         
+   0 CA C!  0 CC C!  \ ACCESS DDA       
+   0 PA C!  0 PC C!  \ ALL BITS INPUT   
+  2C CA C! 2C CC C!  \ SET PULSE MODE   
+  CA C@ 80 AND       \ TEST FOR READY   
+  IF  PA C@  PC C@  THEN ; \ DUMMY READ 
+                                        
+\ : TEST ( -- )                         
+\   BEGIN                               
+\     BEGIN  CA C@ 80 AND  UNTIL        
+\     PA C@ U.  PC C@ U.                
+\   0 UNTIL ;                           
+                                        
+                                        
+                                  -->   
+════════════════════════════════════════   SCREEN 091
+( 05/22/89DJL  6821 RECEIVE 1 OF 2 )    
+                                        
+\ count MUST be even or won't terminate 
+CODE RECEIVE  ( address count -- )      
+  0 ,X LDA, \ GET LSB OF COUNT          
+  N    STA, \ SAVE IT                   
+  0 #  LDA, \ GET 0                     
+       SEC, \ SET CARRY FLAG FOR SBC    
+  N    SBC, \ COMPUTE (0 - LSB_COUNT)   
+       TAY, \ INTO Y, TO BE ADDR OFFSET 
+  N    STA, \ SAVE IT, TOO              
+  1 ,X LDA, \ GET COUNT MSB             
+  N 1+ STA, \ SAVE COUNT MSB FOR X REG  
+  CS NOT IF, \ INCREMENT MSB ONLY IF    
+    N 1+ INC, \ LSB <> 0                
+  THEN,                                 
+  2 ,X LDA, \ GET ADDRESS LSB           
+       SEC, \ SET CARRY FOR SUBTRACT    
+  N    SBC, \ BACK OFF ADDR BY OFFSET   
+  N    STA, \ SAVE ADDRESS LSB AT N     
+  3 ,X LDA, \ GET ADDRESS MSB           
+  0 #  SBC, \ CARRY SUBTRACT TO MSB     
+  INX, INX, INX, INX, \ 2DROP           
+                                   -->  
+════════════════════════════════════════   SCREEN 092
+( 05/22/89DJL  6821 RECEIVE 2 OF 2 )    
+                                        
+  XSAVE STX, \ SAVE X                   
+  N 1+ LDX, \ GET COUNT OF PAGES IN X   
+  N 1+ STA, \ SAVE MSB OF ADDRESS       
+  BEGIN,    \ RECEIVE LOOP              
+  CA   BIT, \ TEST CA1 LEAD             
+  DDUP 0< UNTIL, \ TILL IT GOES HIGH    
+                                        
+  PA   LDA, \ GET LSB OF INPUT WORD     
+  N )Y STA, \ STORE AT ADDR + Y         
+       INY, \ BUMP TO NEXT ADDR         
+  PC   LDA, \ GET MSB OF INPUT WORD     
+  N )Y STA, \ STORE IT, TOO             
+       INY, \ BUMP Y AGAIN              
+  DDUP 0= UNTIL, \ TILL Y = 256         
+                                        
+  N 1+ INC, \ BUMP MSB OF ADDR          
+       DEX, \ DECREMENT PAGE COUNT      
+  0= UNTIL, \ TILL NO MORE PAGES        
+                                        
+  XSAVE LDX, \ RESTORE X                
+  NEXT JMP, \ JUMP TO NEXT              
+  END-CODE FORTH -->                    
+════════════════════════════════════════   SCREEN 093
+( REFRESH                < 4/26/85> 93) 
+DECIMAL                                 
+\ THIS IS ALL IN PAGE2 SO IT WON'T      
+\ CONFLICT WITH THE MVP FORTH MAP.      
+                                        
+: REFRESH  ( -- )                       
+  SETUP  HGR                            
+  BEGIN 8192 8192 RECEIVE  0 UNTIL ;    
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 099
+                                        
+                                        
+                                        
+FORGET SLOT                             
+                                        
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 100
+( DIRECTORY              < 4/26/85>100) 
+                                        
+VARIABLE SLOT  4 SLOT !                 
+                                        
+VARIABLE SLOT16                         
+                                        
+: SET-I/O                               
+   SLOT @ 16 * SLOT16 !                 
+   SLOT @ PR# BL EMIT 0 PR# ;           
+                                        
+-->                                     
+EXIT                                    
+BLOCK 101   APPLE COMLINK ROUTINES      
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               (  0:00) 
+════════════════════════════════════════   SCREEN 101
+( XOUT                   < 4/26/85>101) 
+HEX                                     
+C088 CONSTANT TDREG                     
+C088 CONSTANT RDREG                     
+C089 CONSTANT STREG                     
+                                        
+                                        
+CODE XOUT   ( BYTE -- )                 
+  SLOT16 LDY,                           
+  BEGIN,                                
+    STREG ,Y LDA,                       
+    # 70 AND,                           
+    # 10 CMP,                           
+  0= UNTIL,                             
+  BOT LDA,                              
+  TDREG ,Y STA,                         
+  POP JMP, C;                           
+                                        
+DECIMAL                                 
+-->                                     
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 102
+( XIN                    < 4/26/85>102) 
+                                        
+HEX                                     
+CODE XIN   ( -- BYTE )                  
+  SLOT16 LDY,                           
+  BEGIN,                                
+    STREG ,Y LDA,                       
+    # 0F AND,                           
+    # 08 CMP,                           
+  CS UNTIL,                             
+  RDREG ,Y LDA,                         
+  PHA,                                  
+  # 0 LDA,                              
+PUSH JMP, C;                            
+DECIMAL                                 
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               (  RLP ) 
+════════════════════════════════════════   SCREEN 103
+( RCV SEND SERIALIZE     < 4/26/85>103) 
+                                        
+: RCV    ( ADDR N -- )                  
+  OVER + SWAP                           
+  DO XIN I C! 1 /LOOP ;                 
+                                        
+: SEND   ( ADDR N -- )                  
+  OVER + SWAP                           
+  DO I C@ XOUT 1 /LOOP ;                
+                                        
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 104
+( RECV-BLOCKS            < 4/26/85>104) 
+                                        
+VARIABLE #RCVD                          
+                                        
+: RECV-BLOCKS  ( START NUM -- )         
+   CR ." RECEIVE " DUP .                
+      ." BLOCKS FROM BLK " OVER .       
+   (Y/N)? NOT IF QUIT THEN              
+   100 BUFFERS 0 #RCVD !                
+   SET-I/O CR CR                        
+   OVER + SWAP                          
+   DO ." BLOCK #" I . ." ..."           
+     I BUFFER 5 XOUT                    
+     1024 RCV UPDATE                    
+     ." RECIEVED" CR                    
+     #RCVD @ 1+ DUP #BUFF =             
+     IF DROP 0 FLUSH THEN #RCVD !       
+   LOOP FLUSH ;                         
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                               (  RLP ) 
+════════════════════════════════════════   SCREEN 105
+( SEND-BLOCKS            < 4/26/85>105) 
+                                        
+: SEND-BLOCKS   ( START NUM -- )        
+   CR ." SEND " DUP .                   
+      ." BLOCKS FROM " OVER .           
+   (Y/N)? NOT IF QUIT THEN              
+   2 BUFFERS SET-I/O CR CR              
+   ." START THE RECIEVE PROGRAM NOW"    
+   CR CR                                
+   OVER + SWAP                          
+   DO                                   
+    I BLOCK                             
+    BEGIN XIN 127 AND 5 = UNTIL         
+    ." WRITING BLOCK " I . ." ..."      
+    1024 SEND                           
+    ." WRITTEN" CR                      
+   LOOP ;                               
+                                        
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                               (  RLP ) 
+════════════════════════════════════════   SCREEN 106
+( RECV-HGR               < 4/26/85>106) 
+                                        
+                                        
+: RECV-HGR     ( START NUM -- )         
+   CR ." RECEIVE HGR BUFFERS FOREVER? " 
+   (Y/N)? NOT IF QUIT THEN              
+   SET-I/O HGR                          
+   BEGIN                                
+    BEGIN XIN 25 = UNTIL                
+    3000 5 TONE                         
+    5 XOUT        \ say I am ready      
+    8192 8192 RCV \ get the buffer      
+   AGAIN ;                              
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 107
+( RECV-HGR               < 4/26/85>107) 
+                                        
+                                        
+: RHGR                                  
+   CR ." RECEIVE 8 BLOCKS TO HIRES? "   
+   (Y/N)? NOT IF QUIT THEN              
+   HGR 2 IN# 2 PR#                      
+   BEGIN                                
+    BEGIN KEY 25 = UNTIL                
+    3000 5 TONE                         
+    5 EMIT        \ say I am ready      
+    16384 8192                          
+    DO KEY I C! LOOP                    
+   AGAIN ;                              
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+════════════════════════════════════════   SCREEN 108
+(                        < 4/26/85>108) 
+                                        
+CODE <KEYIN> ( -- C, )                  
+  64780 JSR,                            
+  PHA,                                  
+  # 0 LDA,                              
+PUSH JMP, C;                            
+                                        
+: KEYIN RM-W2 <KEYIN> R2-W2 ;           
+                                        
+                                        
+: IT                                    
+  2 IN#                                 
+  BEGIN KEYIN . ?TERMINAL               
+  UNTIL                                 
+  0 IN# ;                               
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
