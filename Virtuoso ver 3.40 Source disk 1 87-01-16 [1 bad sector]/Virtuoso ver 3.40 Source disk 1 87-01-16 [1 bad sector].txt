@@ -1,0 +1,2600 @@
+-------------------------------------------- SCREEN 000
+( RELOADBLOCK            < 5/13/86>140) 
+                                        
+                                        
+FORGET WARNOFF                          
+FORGET BLK-START                        
+                                        
+                                        
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 002
+( Loadblock: OpDB vocabs < 1/16/87>142) 
+CR CR                                   
+." Loading OpDB vocabularies" CR CR     
+                                        
+  240 247 THRU \ LOADER and sys patches 
+  250 259 THRU \ OpDB vocabularies      
+                                        
+                                        
+-->                                     
+EXIT                                    
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 003
+( Loadblock:             < 2/12/86>143) 
+\ you must load from here to change     
+\ disk area defintions (scr 163-4)      
+                                        
+                                        
+  163 164 THRU \ define disk areas      
+  185 192 THRU \ Picture unpacker       
+ FORGET STARTX \ remove heads           
+  195 199 THRU \ Picture dirctory words 
+ FORGET P#     \ remove heads           
+                                        
+                                        
+\ 172 173 THRU \ deleted                
+\ 174 179 THRU \ VIEW WORDS             
+\ VIEW-ON                               
+                                        
+EXIT ------------------                 
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+-------------------------------------------- SCREEN 004
+( Loadblock: Pic. Packer < 2/12/86>144) 
+CR CR                                   
+." Loading picture packer code" CR CR   
+                                        
+\ load this screen on any system disk   
+                                        
+FORGET WARNOFF                          
+FORGET BLK-START                        
+                                        
+' <LOGO> CFA ' LOGO !                   
+                                        
+                                        
+\     260 LOAD \ load yaddr words       
+  150 164 THRU \ disk words             
+  165 169 THRU \ string words           
+  185 192 THRU \ Picture unpacker       
+  195 199 THRU \ Picture dirctory words 
+  200 208 THRU \ Picture packer words   
+  209 237 THRU \ Read disk, main loop   
+                                        
+ FORGET STARTX \ remove excess heads    
+                                        
+                                        
+                                        
+-------------------------------------------- SCREEN 005
+( <<FORGET>>             < 9/ 9/85>145) 
+                                        
+[FORTH] APPENDIX                        
+\ given the pfa of a word forget all    
+\ occurances above it                   
+                                        
+: <<FORGET>> \ PFA -- ;                 
+  ' <FORGET> 48 + >R ;                  
+                                        
+MAIN EXIT                               
+                                        
+creates a word which when executed      
+will forget itself and all words        
+defined after it in both the            
+appendix and the main dicitionary       
+If you attempt to DMARK the same        
+name twice the original will be         
+executed, which will forget the         
+first copy                              
+                                        
+                                        
+always forces MAIN dictionary           
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 006
+( DMARK                  < 9/ 9/85>146) 
+                                        
+APPENDIX                                
+                                        
+: <DMARK>                               
+  CREATE                                
+    [MAIN] LATEST PFA ,                 
+    APP-LATEST @ 2+ PFA ,               
+  DOES>                                 
+    [APPN] DUP 2+ @ <<FORGET>>          
+    [MAIN]        @ <<FORGET>> ;        
+                                        
+: DMARK \ -- ;                          
+    >IN @ >R -FIND                      
+    IF DROP CFA EXECUTE THEN            
+    0 WARNING !   ( no dup defined )    
+    R@ >IN ! [APPN] <DMARK>             
+    R> >IN ! [MAIN] <DMARK>             
+    1 WARNING !                         
+;                                       
+                                        
+MAIN                                    
+                                        
+                                        
+-------------------------------------------- SCREEN 010
+( WARNON WARNOFF         < 2/13/86>150) 
+                                        
+FORTH DEFINITIONS                       
+APPENDIX                                
+                                        
+: WARNOFF \ -- ; turn off warning msgs  
+   0 FWARNING ! ; IMMEDIATE             
+                                        
+: WARNON \ -- ; turn on warning msgs    
+   -1 FWARNING ! ; IMMEDIATE            
+                                        
+MAIN                                    
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 012
+( VLBLK ?BLK#            < 2/13/86>152) 
+FORTH DEFINITIONS                       
+                                        
+   ( first block for area )             
+0 CONSTANT BLK-START                    
+                                        
+   ( last valid blk # for area )        
+0 CONSTANT VLBLK                        
+                                        
+   ( disk wide offset for virtual )     
+0 CONSTANT DSK-START                    
+                                        
+\ Error if out of current vir area      
+X: ?BLK# \ N -- N ;                     
+  DUP DSK-START -                       
+  VLBLK >                               
+  IF -1 DISK-ERROR ! ( flag )           
+    DISKERR                             
+     ( Can't allow continue )           
+    1 ABORT" STOP in ?BLK#"             
+  THEN X;                               
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 013
+( BLK-START BLK#         < 2/13/86>153) 
+FORTH DEFINITIONS                       
+                                        
+\ BLK-START is the block number which   
+\ all disk-ram operations are relative  
+\ to DSK-START is added to all block    
+\ numbers                               
+                                        
+\ use: addr BLK#                        
+\ returns offset and block number of    
+\ addr relative to BLK-START            
+                                        
+X: BLK# \ addr -- offset blk# ;         
+  0 1024 U/MOD                          
+  BLK-START + DSK-START +               
+  ?BLK# X;                              
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 014
+( VAREA                  < 9/ 6/85>154) 
+\ use: blk VAREA name                   
+\ creates a word, name, which when      
+\ executed will set BLK-START to blk    
+                                        
+WARNOFF                                 
+                                        
+: VAREA  \ blk# -- * ;                  
+  CREATE                                
+    ,                                   
+  DOES>                                 
+    @ DUP ' BLK-START !                 
+    64 + ' VLBLK !                      
+;                                       
+                                        
+WARNON                                  
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 015
+( VBLK VLAST VLEFT?      < 5/13/86>155) 
+                                        
+  VARIABLE VBLK \ next block avail      
+0 CONSTANT VLAST                        
+                                        
+: VLEFT? \ prints blocks left           
+  VLAST VBLK @ - CR CR                  
+  . ." Blocks left in area" CR CR ;     
+                                        
+WARNOFF                                 
+: VSTART ( blk -- ) ?NUM VBLK ! ;       
+: VEND ( blk -- ) ?NUM ' VLAST ! ;      
+WARNON                                  
+EXIT ----- USAGE ----------------       
+                                        
+ 40 VSTART                              
+109 VEND                                
+                                        
+ 10 VSIZE area1                         
+ 20 VSIZE area2                         
+                                        
+VLEFT? \ Prints blocks left             
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 016
+( VSTART VEND VSIZE      < 5/13/86>156) 
+WARNOFF                                 
+                                        
+: <VSIZE> \ LEN ADR -- ;                
+  >R DUP 1 64 UWITHIN NOT               
+  ABORT" LEN must be 1-64 blocks"       
+  VBLK @ R@ !  DUP 1- R> 2+ !           
+  VBLK @ + DUP VBLK ! VLAST >           
+  ABORT" Not enough room" ;             
+                                        
+0 CONSTANT 'VSIZE \ cfa for VSIZE word  
+: VSIZE \ len -- ;                      
+  ?NUM CREATE HERE 4 ALLOT <VSIZE>      
+  DOES> [ HERE 3 - ' 'VSIZE ! ]         
+    DUP @ DUP ' BLK-START !             
+    SWAP 2+ @ + ' VLBLK ! ;             
+                                        
+\ USE: len REVSIZE name                 
+: REVSIZE ( LEN -- ) ?NUM               
+  [COMPILE] ' DUP CFA @ 'VSIZE = NOT    
+  ABORT" Not a VSIZE word"              
+  <VSIZE> ;                             
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 017
+( @DISK                  < 9/ 6/85>157) 
+\ use: adr @DISK                        
+\ fetches a value from disk relative to 
+\ the value of BLK-START                
+                                        
+: @DISK \ adr -- val                    
+  BLK#                                  
+  OVER 1023 =  \ last byte of block?    
+  IF DUP ROT ROT BLOCK + C@             
+   SWAP 1+ ?BLK# BLOCK C@ 256 * +       
+  ELSE BLOCK + @                        
+  THEN ;                                
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 018
+( !DISK                  < 2/14/86>158) 
+\ use: val adr @DISK                    
+\ Stores val at disk address adr        
+\ relative to BLK-START.                
+\ Fixed 2-14-86:                        
+\  rare bug in which a negative value   
+\  being stored across block boundaries 
+\  would have high byte set to 0        
+                                        
+: !DISK \ val addr -- ;                 
+  BLK#                                  
+  OVER 1023 =  \ last byte of block?    
+  IF ROT 0 256 U/MOD >R >R              
+     DUP ROT ROT BLOCK +                
+     R> SWAP C! UPDATE                  
+     1+ ?BLK# BLOCK                     
+     R> SWAP C! UPDATE                  
+  ELSE BLOCK + ! UPDATE                 
+  THEN ;                                
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 019
+( C@DISK C!DISK          < 9/ 6/85>159) 
+\ C@ and C! to DISK relative to         
+\ BLK-START                             
+                                        
+: C@DISK \ adr -- val ;                 
+   BLK# BLOCK + C@ ;                    
+                                        
+: C!DISK \ val adr -- * ;               
+   BLK# BLOCK + C! UPDATE ;             
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 020
+( >DISK DISK< notes      < 9/ 6/85>160) 
+                                        
+EXIT -------                            
+                                        
+ use: mem-adr disk-adr cnt >DISK        
+  moves cnt bytes from memory address   
+  mem-adr to disk address disk-adr      
+  (disk-adr is relative to BLK-START)   
+                                        
+ use: disk-adr mem-adr cnt DISK>        
+  reads count bytes from disk-adr       
+  ( relative to BLK-START ) to          
+  mem-adr, same restrictions as >DISK   
+                                        
+ >DISK1 & DISK>1 are primitives for     
+ >DISK & DISK>                          
+                                        
+ Both words can move up to 64K          
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 021
+( >DISK1 >DISK           < 2/13/86> 21) 
+FORTH DEFINITIONS                       
+                                        
+X: >DISK1 \ ^mem ofs blk# cnt -- ^mem   
+  \ update ^mem to point to the next    
+  >R ?BLK# BLOCK + \ dest addr          
+  OVER \ source addr                    
+  SWAP I BMOVE UPDATE                   
+  R> + X; \ inc the ^mem                
+                                        
+: >DISK \ ^mem ^disk cnt -- * ;         
+  >R BLK#                               
+  BEGIN                                 
+  OVER I + 1023 > \ cross blks?         
+  WHILE \ ^mem bofs blk# || cnt         
+    1024 3 PICK - \ partial count       
+    R> OVER - >R  \ remaining count     
+    OVER >R \ save block #              
+    >DISK1 \ first half                 
+    0 R> 1+ \ ^mem bofs blk# ||cnt      
+  REPEAT R> >DISK1                      
+  DROP ( ^mem)                          
+;                                       
+                               ( bobp ) 
+-------------------------------------------- SCREEN 022
+( DISK>1 DISK>           < 2/13/86> 22) 
+FORTH DEFINITIONS                       
+                                        
+X: DISK>1 \ ^mem ofs blk# cnt -- ^mem   
+  \ update ^mem to point to the next    
+  >R ?BLK# BLOCK + \ source addr        
+  OVER \ dest addr                      
+  I BMOVE                               
+  R> + X; \ inc the ^mem                
+                                        
+: DISK> \ ^disk ^mem cnt -- * ;         
+  >R SWAP BLK#                          
+  BEGIN                                 
+  OVER I + 1023 > \ cross blks?         
+  WHILE      \ ^mem bofs blk# || cnt    
+    1024 3 PICK - \ partial count       
+    R> OVER - >R  \ remaining count     
+    OVER >R       \ get block #         
+    DISK>1        \ first half          
+    0 R> 1+ \  ^mem bofs blk# || cnt    
+  REPEAT R> DISK>1                      
+  DROP ( ^mem)                          
+;                                       
+                               ( bobp ) 
+-------------------------------------------- SCREEN 023
+( DISK DATA AREAS        < 5/13/86>163) 
+                                        
+ 45 VSTART                              
+139 VEND ( virtuals start at 107 )      
+                                        
+  4 VSIZE MSG-PTRS                      
+ 23 VSIZE MSG-TEXT                      
+ 22 VSIZE OPDB                          
+ 45 VSIZE PICS                          
+                                        
+CR CR ." Disk areas now defined. " CR   
+                                        
+VLEFT?                                  
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 024
+( EMPTY                  < 9/16/85>164) 
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 025
+( CAPS UPC ?CHAR TOUC    <12/21/85>165) 
+\ characters are converted              
+\ to upper case if CAPS is set          
+                                        
+VARIABLE CAPS  CAPS ON                  
+                                        
+\ convert LC letters to UC              
+                                        
+: UPC ( ch -- ch' )                     
+  DUP 97 122 WITHIN IF 32 - THEN ;      
+                                        
+: ?CHAR ( ch -- ch' )                   
+   CAPS @ IF UPC THEN ;                 
+                                        
+: TOUC UPC ;                            
+                                        
+\ compares to characters, ignoring case 
+: UC= ( ch1 ch2 -- t/f )                
+  UPC SWAP UPC = ;                      
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 026
+( -TEXT                  < 2/14/86>166) 
+\ differs from "Starting Forth"         
+\ in that address and count are         
+\ required for both strings             
+                                        
+: -TEXT \ adr1 cnt1 adr2 cnt2 -- 1/0/-1 
+   ROT SWAP DDUP - >R   \ a a c c |diff 
+   MIN 0 MAX            \ a a cnt |diff 
+   DUP                                  
+   IF DUP 0             \ a a cnt dummy 
+      DO DROP                \ a a      
+         OVER I + C@ ?CHAR   \ a a c    
+         OVER I + C@ ?CHAR   \ a a c c  
+         - DUP IF LEAVE THEN \ a a dif  
+      LOOP                              
+   THEN                 \ a a dif       
+   SWAP DROP SWAP DROP  \ dif           
+   R> OVER 0=           \ dif diff      
+   IF SWAP THEN DROP    \ difference    
+   DUP IF 1 SWAP +- THEN \ sign         
+   ;                                    
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 027
+( =TEXT $< $<= $> $>=    <12/21/85>167) 
+                                        
+: =TEXT ( adr1 cnt1 adr2 cnt2 -- t/f )  
+   -TEXT 0= ;                           
+                                        
+: $-  ( ^str1 ^str2 -- 1/0/-1 )         
+   >R COUNT R> COUNT -TEXT ;            
+                                        
+: $=  $- 0= ;                           
+: $<  $- 0< ;                           
+: $>  $- 0> ;                           
+                                        
+: $<= $> NOT ;                          
+: $>= $< NOT ;                          
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 028
+( STRING <"> "           <12/21/85>168) 
+                                        
+: STRING                                
+   CREATE  DOES> COUNT ;                
+                                        
+: <">  R> DUP COUNT + >R ;              
+                                        
+APPENDIX                                
+                                        
+: " ( compile a string )                
+   STATE @ IF COMPILE <"> THEN          
+   34 WORD C@ 1+ ALLOT ; IMMEDIATE      
+                                        
+MAIN                                    
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 030
+( MOVE                   < 2/13/86> 30) 
+                                        
+\ like copy but it erases the source    
+\ screen after it has been copied       
+                                        
+APPENDIX WARNOFF                        
+                                        
+: MOVE \ source dest -- ;               
+  DEPTH 2 <                             
+  ABORT" USE: source dest MOVE"         
+  OVER SWAP COPY                        
+  BUFFER 1024 32 FILL UPDATE            
+  SAVE-BUFFERS ;                        
+                                        
+MAIN WARNON                             
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 031
+( SCRNUMS                < 2/13/86> 31) 
+\ like SCRHDS, but only updates the     
+\ screen number                         
+                                        
+FORTH DEFINITIONS APPENDIX              
+  \ updates number if open paren exists 
+: SCRNUM \ N -- ;                       
+  DUP BLOCK DUP C@ 40 = OVER C/L + 2-   
+  C@ 41 = AND >R DUP C@ 92 =            
+  OVER C/L + 2- C@ BL = AND R> OR       
+  IF SWAP 0 <# #S BL HOLD BL HOLD #>    
+    3 - +  \ adr of data                
+    SWAP C/L + 5 - 3 CMOVE UPDATE       
+  ELSE DDROP THEN ;                     
+                                        
+: SCRNUMS \ S E -- ;                    
+  DEPTH 2 <                             
+  ABORT" USE: start end SCRNUMS"        
+  CR 1+ SWAP                            
+  DO I 3 .R SPACE I SCRNUM LOOP         
+  FLUSH ;                               
+                                        
+MAIN                                    
+                               ( bobp ) 
+-------------------------------------------- SCREEN 032
+( <<VL>>                 < 2/13/86>172) 
+EXIT [FORTH] APPENDIX                   
+: VV \ N -- ; print dividing line       
+  43 EMIT C/L 4 - 0                     
+  DO 45 EMIT LOOP                       
+  43 EMIT CR ;                          
+                                        
+: VLHEAD ( 'VOCAB -- 'VOCAB )           
+  CR VV 124 EMIT SPACE DUP NFA ID.      
+  BEGIN SPACE OUT @ C/L 4 - > UNTIL     
+  124 EMIT CR VV ;                      
+                                        
+: <<VL>> \ 'VOCAB -- ; list only VOCAB  
+  VLHEAD @ \ get top of vocab           
+  BEGIN DUP ' FORTH =                   
+    OVER @ NOT OR                       
+    PAUSE QTERM OR NOT                  
+  WHILE                                 
+    C/L OUT @ - OVER 2+ C@ 31 AND 4 + < 
+    IF CR THEN 2 SPACES                 
+    DUP 2+ ID. @ REPEAT                 
+  DROP ;                                
+MAIN                                    
+                               ( bobp ) 
+-------------------------------------------- SCREEN 033
+( <VL-ARDS>              < 2/13/86>173) 
+EXIT [FORTH] APPENDIX                   
+VARIABLE LASTPFA                        
+: <VL-ADRS> \ 'VOCAB -- ; list only     
+  VLHEAD @ \ get top of vocab           
+  HERE LASTPFA !                        
+  BEGIN DUP ' FORTH =                   
+    OVER @ NOT OR                       
+    PAUSE QTERM OR NOT                  
+  WHILE 2 SPACES DUP 0                  
+    <# 41 HOLD #S 40 HOLD #> TYPE       
+    SPACE DUP 2+ ID. SPACE              
+    LASTPFA @ OVER - . ." bytes"        
+    CR DUP LASTPFA ! @                  
+  REPEAT DROP ;                         
+                                        
+: <VL> <<VL>> ;                         
+                                        
+: VADDRS? ?NUM                          
+  IF ' <VL-ADRS> ELSE ' <<VL>> THEN     
+  CFA ' <VL> ! ;                        
+MAIN                                    
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 034
+( VL VLALL               < 2/13/86>174) 
+EXIT \ List all vocabularies up to      
+\ but not including FORTH               
+[FORTH] APPENDIX                        
+: VL                                    
+  [COMPILE] ' DUP 'X =                  
+  IF DROP CONTEXT @ THEN                
+  DUP 2+ @ 41089 = NOT                  
+  ABORT" Not a vocabulary"              
+  <VL> CR CR ;                          
+                                        
+EXIT *******************                
+: VLALL                                 
+  CR CR VOC-LINK @                      
+  BEGIN                                 
+    DUP ' VIRTUAL 4 + > \ user vocabs   
+    ?TERMINAL NOT AND                   
+  WHILE                                 
+    DUP 4 - <VL>  CR \ list it          
+    @ \ on to the next one              
+  REPEAT                                
+  DROP CR CR ;                          
+MAIN                                    
+                               ( bobp ) 
+-------------------------------------------- SCREEN 035
+\ VIEW VED               <12/17/85>175  
+FORTH DEFINITIONS                       
+EXIT ******************************     
+[FORTH] APPENDIX                        
+                                        
+: VCREATE                               
+   BLK @ C, ( for view )                
+   ?CLOSE ( for create ) ;              
+                                        
+: VIEW-ON \ turns on the view           
+   ' VCREATE CFA ' CREATE ! ;           
+                                        
+: VIEW-OFF \ turns off the view         
+   ' ?CLOSE CFA ' CREATE ! ;            
+                                        
+: VIEW \ view a screen                  
+   [COMPILE] ' DUP 'X =                 
+   ABORT" USE: VIEW name"               
+   LFA 1- C@ L ;                        
+                                        
+: VED VIEW EL ;                         
+                                        
+MAIN                                    
+                                        
+-------------------------------------------- SCREEN 036
+( SET-EDIT               < 2/13/86>176) 
+FORTH DEFINITIONS APPENDIX              
+27 CONSTANT ESKEY                       
+GET-A&E                                 
+: SET-EDIT                              
+  CR GET-A&E                            
+  ." Parenthesis or backslash (P/B)? "  
+  BEGIN KEY DUP 80 = OVER 66 = OR NOT   
+  WHILE DROP BEEP REPEAT                
+  CR 66 = ( Back slash? )               
+  IF 32 92 ELSE 41 40 THEN EDITOR       
+  DUP ' SCRHD 15 + C! ' SCRHD 69 + C!   
+  DUP ' SCRHD 51 + C! ' SCRHD 76 + C!   
+  ." done" CR CR                        
+  ." Press the escape key now:"         
+  ?TERMINAL KEY ' ESKEY ! CR            
+  ' ESKEY CFA ' ESCAPESCR !             
+  ." done" CR CR                        
+  ." Record change to disk" (Y/N)?      
+  IF                                    
+    VIRTUAL A&E V!AUX <PUT-VIR>         
+    CR ." Written" CR                   
+  THEN ;                                
+MAIN                           ( bobp ) 
+-------------------------------------------- SCREEN 045
+( PACK/UNPACK            < 2/13/86>185) 
+EXIT                                    
+                                        
+                                        
+                                        
+  APPLE figure PACK/UNPACK routines     
+          written 11-7-84               
+                                        
+            by Ken Yee                  
+                                        
+                                        
+                                        
+    Modified for OpDB ver 3.00A         
+              9-9-85                    
+                                        
+           by Fred Haer                 
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 046
+( VARS FOR UNPACK        < 2/13/86>186) 
+FORTH DEFINITIONS                       
+                                        
+XVAR STARTX   ( TOPMOST   X )           
+XVAR STARTY   ( LEFTMOST  Y )           
+XVAR ENDX     ( BOTMOST   X )           
+XVAR ENDY     ( RIGHTMOST Y )           
+XVAR CURX     ( TEMPORARY   )           
+XVAR CURY     ( STORAGE     )           
+XVAR BVAL     ( BYTE VALUE  )           
+XVAR COUNTER  ( #REPEATS    )           
+XVAR ODD      ( ODD LINES?  )           
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 047
+( NEXT-BYTE              < 2/13/86>187) 
+                                        
+CODE NEXT-BYTE                          
+  CURY LDY, INY, INY,         ( Y=Y+2 ) 
+  ENDY CPY, CS              ( > ENDY? ) 
+  IF, 0= NOT                            
+   IF, STARTY LDY,     ( YES, Y=START ) 
+    ODD LDA, 0= NOT                     
+    IF, INY, THEN,                      
+    CURX LDX, INX, INX,       ( X=X+2 ) 
+    ENDX CPX, CS            ( > ENDX? ) 
+    IF, 0= NOT ( YES, CARRY SET=ERROR ) 
+     IF, SEC, RTS, THEN,                
+    THEN,                               
+    CURX STX,                ( SAVE X ) 
+  THEN, THEN,                           
+  CURY STY,                  ( SAVE Y ) 
+  CURY LDX,    ( GET NEW SCR POSITION ) 
+  ' $YADDR JSR,                         
+  CLC,       ( WENT TO NEXT LINE O.K. ) 
+  RTS,                                  
+C;                                      
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 048
+( GET-BYTE               < 2/13/86>188) 
+FORTH DEFINITIONS                       
+( VALUE IS PULLED INTO A FROM N )       
+                                        
+XCODE GET-BYTE                          
+  # 0 LDY,                              
+  N )Y LDA,                             
+  N INC, 0=                             
+  IF, N 1+ INC, THEN,                   
+  RTS,                                  
+  XC;                                   
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 049
+( <<UNPACK>>             < 2/13/86>189) 
+FORTH DEFINITIONS HEX                   
+XCODE <<UNPACK>>                        
+  BEGIN, # 1 LDX,                       
+   X' GET-BYTE JSR, # 0 CMP, 0= \       
+   IF, X' GET-BYTE JSR,                 
+    TAX, # 0 CPX, 0=    ( BYTE=0 )      
+    IF, X' GET-BYTE JSR,                
+     TAX, # 0 LDA,                      
+    ELSE, X' GET-BYTE JSR, THEN,        
+   THEN,                                
+   BVAL STA, COUNTER STX,               
+   ( LOOP X BYTES )                     
+   BEGIN, BVAL LDA,                     
+    CURX LDY, GBASE )Y STA,             
+    ' NEXT-BYTE JSR, CS                 
+    IF, RTS, THEN,                      
+    COUNTER DEC, 0=                     
+   UNTIL,                               
+   0= NOT                               
+  UNTIL, ( FORCED JUMP )                
+XC; DECIMAL                             
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 050
+( <TUNPACK>              < 2/13/86>190) 
+FORTH DEFINITIONS                       
+                                        
+( Y IN X REG, X IN Y REG )              
+XCODE <TUNPACK>                         
+  ENDX CPY, CS                          
+  IF, 0= NOT                            
+    IF, RTS, THEN,                      
+  THEN,                                 
+  ENDY CPX, CS                          
+  IF, 0= NOT                            
+    IF, RTS, THEN,                      
+  THEN,                                 
+  CURX STY,                             
+  CURY STX,                             
+  ' $YADDR JSR,                         
+  X' <<UNPACK>> JSR,                    
+  RTS,                                  
+XC;                                     
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 051
+( <UNPACK>               < 2/13/86>191) 
+FORTH DEFINITIONS                       
+                                        
+XCODE <UNPACK>                          
+  XSAVE STX,                            
+  # 0 LDA, ODD STA,                     
+  STARTX LDY,                           
+  STARTY LDX,                           
+  X' <TUNPACK> JSR, ( ELINES ECOLS )    
+  STARTX LDY, INY,                      
+  STARTY LDX,                           
+  X' <TUNPACK> JSR, ( ELINES OCOLS )    
+  # 1 LDA, ODD STA,                     
+  STARTX LDY,                           
+  STARTY LDX, INX,                      
+  X' <TUNPACK> JSR,  ( OLINES ECOLS )   
+  STARTX LDY, INY,                      
+  STARTY LDX, INX,                      
+  X' <TUNPACK> JSR,  ( OLINES OCOLS )   
+  XSAVE LDX,                            
+  NEXT JMP,                             
+XC;                                     
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 052
+( UNPACK                 < 2/14/86>192) 
+                                        
+: UNPACK ( ADDR X Y -- )                
+   ROT                                  
+   DUP    C@ 127 AND >R ( xdiff )       
+   DUP 1+ C@         >R ( ydiff )       
+   2+ 240 !             ( assembler N ) 
+   R> OVER STARTY C!                    
+      + ENDY C!                         
+   R> OVER STARTX C!                    
+      + ENDX C!                         
+   <UNPACK> ;                           
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 055
+( PICS format            < 1/20/87>195) 
+                                        
+100 CONSTANT  MAXPICS                   
+                                        
+: <PACKBUF> ( -- ADR )                  
+  PAD 100 + ;                           
+                                        
+\ to allow vectoring to an area that    
+\ must be switched first                
+: PACKBUF ( -- ADR ) <PACKBUF> ;        
+                                        
+\ called after user is done with        
+\ packbuf area                          
+: PACK-DONE ( -- ; switch back to norm) 
+  NOOP ;                                
+                                        
+EXIT                                    
+                                        
+   0     # of pics                      
+   2     next available disk addr       
+ n+0     start addr of pic              
+ n+2     #bytes                         
+                                        
+                               (  PAI ) 
+-------------------------------------------- SCREEN 056
+( DIRECTORY WORDS        < 2/13/86>196) 
+FORTH DEFINITIONS                       
+                                        
+X: P#       \ -- ^dsk ; # pics saved    
+   PICS 0 X;                            
+X: PNEXT    \ -- ^dsk ; next free byte  
+   PICS 2 X;                            
+                                        
+X: P-START  \ p -- ^dsk ; start of p    
+   PICS 4 * X;                          
+X: P-SIZE   \ p -- ^dsk ; size of pic p 
+   PICS 4 * 2+ X;                       
+                                        
+X: @P# ( -- n )                         
+   P# @DISK X;                          
+X: @PNEXT   \ pic# -- n                 
+   PNEXT @DISK X;                       
+: @P-START \ pic# -- n                  
+   P-START @DISK ;                      
+: @P-SIZE  \ pic# -- n                  
+    P-SIZE  @DISK ;                     
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 057
+( GETPIC ?GETPIC         < 9/ 6/85>197) 
+                                        
+( moves picture to HOLDBUF )            
+                                        
+: GETPIC ( pic# -- )                    
+   >R                                   
+   R@ @P-START    \ get start location  
+   PACKBUF        \ destination         
+   R> @P-SIZE     \ size in bytes       
+   DISK>          \ move to HOLDBUF     
+   PACK-DONE                            
+;                                       
+                                        
+: ?GETPIC ( pic# -- 0/1 )               
+   0                 \ assume failure   
+   OVER 1 @P# WITHIN \ valid pic# ?     
+   IF OVER @P-START  \ does it exist?   
+     IF OVER GETPIC  \ get picture      
+        1+           \ success          
+     THEN                               
+  THEN                                  
+  SWAP DROP ;        \ return flag      
+                                        
+                                        
+-------------------------------------------- SCREEN 058
+\ <DRAW>                 < 1/20/87>198  
+                                        
+: <DRAW> ( pic# x y -- )                
+   >R >R ?GETPIC                        
+   IF PACKBUF R> R> UNPACK PACK-DONE    
+   ELSE R> R> DDROP                     
+   THEN ;                               
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               \ FAH    
+-------------------------------------------- SCREEN 060
+( PACK/UNPACK            < 9/ 6/85>200) 
+EXIT                                    
+                                        
+                                        
+                                        
+  APPLE figure PACK/UNPACK routines     
+          written 11-7-84               
+                                        
+                by                      
+              Ken Yee                   
+                                        
+                                        
+  New directory words add 9-6-85        
+    By Bob Pyron and Fred Haer          
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 061
+( VARS FOR PACK          < 9/ 6/85>201) 
+                                        
+EXIT \ same variables as PACK           
+                                        
+XVAR STARTX   ( TOPMOST   X )           
+XVAR STARTY   ( LEFTMOST  Y )           
+XVAR ENDX     ( BOTMOST   X )           
+XVAR ENDY     ( RIGHTMOST Y )           
+XVAR CURX     ( TEMPORARY   )           
+XVAR CURY     ( STORAGE     )           
+XVAR BVAL     ( BYTE VALUE  )           
+XVAR COUNTER  ( #REPEATS    )           
+XVAR ODD      ( ODD LINES?  )           
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+-------------------------------------------- SCREEN 062
+( PUTBYTE PUTONE         < 9/ 6/85>202) 
+                                        
+ ( VALUE IN A, BUFFER IN N )            
+XCODE PUTBYTE                           
+  # 0 LDY,                              
+  N )Y STA,                             
+  N INC, ( INC BUF AREA )               
+  0= IF, N 1+ INC, THEN,                
+  RTS,                                  
+XC;                                     
+                                        
+XCODE PUTONE                            
+  BVAL LDA,                             
+  0= IF,   ( 0=SPECIAL CASE )           
+   X' PUTBYTE JSR,                      
+   X' PUTBYTE JSR,                      
+   # 1 LDA,                             
+  THEN,                                 
+  X' PUTBYTE JSR,                       
+  RTS,                                  
+XC;                                     
+                                        
+EXIT                                    
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 063
+( PUTPACKED              < 9/ 6/85>203) 
+                                        
+XCODE PUTPACKED                         
+  # 0 LDA,         ( REPEATERS )        
+  X' PUTBYTE JSR,                       
+  BVAL LDA,                             
+  0= IF,           ( 0=SPECIAL CASE )   
+   # 0 LDA,        ( BYTE=0 )           
+   X' PUTBYTE JSR,                      
+   COUNTER LDA,    ( #REPEATS )         
+   X' PUTBYTE JSR,                      
+  ELSE,            ( ALL OTHERS )       
+   COUNTER LDA,    ( #REPEATS )         
+   X' PUTBYTE JSR,                      
+   BVAL LDA,       ( BYTE )             
+   X' PUTBYTE JSR,                      
+  THEN,                                 
+  RTS,                                  
+XC;                                     
+                                        
+XVAR JUMPADDR                           
+                                        
+EXIT                                    
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 064
+( <<PACK>>               < 9/ 6/85>204) 
+                                        
+XCODE <<PACK>>                          
+  CURX LDY,                             
+  GBASE )Y LDA,                         
+  HERE JUMPADDR ! ( ************** )    
+  BVAL  STA,      ( SAVE LAST BYTE )    
+  # 1 LDA,   COUNTER STA,  ( DEF=1 )    
+  ' NEXT-BYTE JSR,                      
+  CS IF, X' PUTONE JSR, RTS,  THEN,     
+  CURX LDY, GBASE )Y LDA,               
+  BVAL CMP,                             
+  0= NOT IF,                            
+   PHA,                                 
+   BVAL LDA,    X' PUTONE JSR,          
+   PLA,  JUMPADDR @ JMP,                
+  THEN,                                 
+                                        
+                                        
+EXIT ( more ... )                       
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 065
+( <<PACK>> CON'T         < 9/ 6/85>205) 
+                                        
+                                        
+  BEGIN,                                
+   COUNTER INC, ' NEXT-BYTE JSR, CS     
+   IF, X' PUTPACKED JSR, RTS, THEN,     
+   CURX LDY, GBASE )Y LDA,              
+   # 255 LDX,   ( MAX. COUNTER VALUE )  
+   COUNTER CPX, 0= NOT                  
+   IF, BVAL CMP,                        
+   ELSE, # 1 CPX, ( FORCE NE FLAG )     
+   THEN,                                
+  0= NOT UNTIL,                         
+  PHA,                                  
+  X' PUTPACKED JSR,                     
+  PLA,                                  
+  JUMPADDR @ JMP,                       
+XC;                                     
+                                        
+EXIT                                    
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 066
+( <TPACK>                < 9/ 6/85>206) 
+                                        
+   ( X IN Y REG, Y IN X REG )           
+XCODE <TPACK>                           
+  ENDX CPY, CS ( X TOO LARGE? )         
+  IF, 0= NOT                            
+   IF, RTS, THEN,                       
+  THEN,                                 
+  ENDY CPX, CS ( Y TOO LARGE? )         
+  IF, 0= NOT                            
+   IF,  RTS, THEN,                      
+  THEN,                                 
+  CURX STY, CURY STX,                   
+  ' $YADDR JSR,                         
+  X' <<PACK>> JSR,                      
+  RTS,                                  
+XC;                                     
+                                        
+EXIT                                    
+                                        
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 067
+( <PACK>                 < 9/ 6/85>207) 
+                                        
+XCODE <PACK> ( -- BUFPTR )              
+  XSAVE STX,                            
+  # 0 LDA, ODD STA,                     
+  STARTX LDY,                           
+  STARTY LDX,                           
+  X' <TPACK> JSR,  ( ELINES ECOLS )     
+  STARTX LDY, INY,                      
+  STARTY LDX,                           
+  X' <TPACK> JSR,  ( ELINES OCOLS )     
+  # 1 LDA, ODD STA,                     
+  STARTX LDY,                           
+  STARTY LDX, INX,                      
+  X' <TPACK> JSR,  ( OLINES ECOLS )     
+  STARTX LDY, INY,                      
+  STARTY LDX, INX,                      
+  X' <TPACK> JSR,  ( OLINES OCOLS )     
+  N LDA, PHA, N 1+ LDA,                 
+  XSAVE LDX,                            
+  PUSH JMP,                             
+XC;                                     
+                                        
+EXIT                           ( FAH  ) 
+-------------------------------------------- SCREEN 068
+( PACK                   < 9/ 6/85>208) 
+                                        
+   GET-A&E                              
+                                        
+( STARTX ENDX STARTY ENDY -- #BYTES )   
+: PACK                                  
+ ( PACKBUF MAXPACK 0 FILL )             
+   DOVER SWAP - PACKBUF   C!  ( WIDTH ) 
+   DDUP SWAP - PACKBUF 1+ C! ( HEIGHT ) 
+   ENDY   C!  STARTY C!                 
+   ENDX   C!  STARTX C!                 
+   STARTX C@ 1 AND IF                   
+     PACKBUF C@ 128 OR PACKBUF C!       
+   THEN                                 
+   PACKBUF 2 +                          
+     [ ASSEMBLER N ] LITERAL !          
+   <PACK>                               
+   PACKBUF - ;                          
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 069
+( VXMIN ETC.             < 9/ 6/85>209) 
+                                        
+  0 CONSTANT VXMIN                      
+279 CONSTANT VXMAX                      
+  0 CONSTANT VYMIN                      
+191 CONSTANT VYMAX                      
+                                        
+: UHOH                                  
+  1200 10 TONE                          
+  1000 0 DO LOOP                        
+  1000 25 TONE ;                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 070
+( @WIDTH @HEIGHT ETC     < 9/11/85>210) 
+                                        
+: !WIDTH ( N -- ) PACKBUF ! ;           
+: @WIDTH ( -- N ; in even bytes )       
+   PACKBUF @ 13 + 14 / 2* ;             
+                                        
+: !HEIGHT ( N -- ) PACKBUF 2+ ! ;       
+: @HEIGHT ( -- N ) PACKBUF 2+ @ ;       
+                                        
+: VPWIDTH  VXMAX 1+ VXMIN - ;           
+: VPHEIGHT VYMAX 1+ VYMIN - ;           
+                                        
+: ^HOLD   ( I -- ADDR )                 
+    @WIDTH * PACKBUF + 4 + ;            
+                                        
+: ^HIRES  ( XORG YORG -- ADDR )         
+    YADDR SWAP 7 / + ;                  
+                                        
+EXIT                                    
+                                        
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 071
+( SET.VP                 < 9/11/85>211) 
+                                        
+: SET.VP ( X1 Y1 X2 Y2 -- )             
+   ROT DDUP                             
+   MIN 0 MAX 191 MIN ' VYMIN !          
+   MAX 0 MAX 191 MIN ' VYMAX !          
+   DDUP                                 
+   MIN 0 MAX 279 MIN                    
+      7 / 7 *        ' VXMIN !          
+   MAX 0 MAX 279 MIN                    
+      7 / 7 * 6 +    ' VXMAX !          
+   ;                                    
+                                        
+EXIT                                    
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 072
+( REST.VP                < 9/11/85>212) 
+                                        
+: REST.VP ( X Y -- )                    
+   VXMAX 13 + 14 / 2* 3 PICK 7 / -      
+   @WIDTH MIN                           
+                                        
+   VYMAX 1+ 3 PICK -                    
+   @HEIGHT MIN                          
+                                        
+   0 DO                                 
+         3 PICK 3 PICK I + ^HIRES       
+         I ^HOLD                        
+         SWAP 3 PICK CMOVE              
+   LOOP DDROP DROP ;                    
+                                        
+EXIT                                    
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 073
+( NAME-BUFFER DELAY      < 9/11/85>213) 
+                                        
+ CREATE NAME-BUFFER 14 ALLOT            
+                                        
+: DELAY                                 
+   0 DO 74 0 DO LOOP LOOP ;             
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 074
+( RING BUFFER FORMAT     < 9/11/85>214) 
+                                        
+                                        
+EXIT                                    
+                                        
+ BUFFER + 0 : SIZE IN BYTES OF EACH     
+              ENTRY                     
+ BUFFER + 2 : CURRENT NUMBER OF ENTRIES 
+                                        
+ BUFFER + 4 : CURRENT ENTRY             
+ BUFFER + 6 : FIRST ENTRY STARTS HERE   
+                                        
+ ENTRY +  0 : NAME OF OBJECT            
+               ( 1 BYTE COUNT, )        
+               ( 12 BYTES ALFA )        
+ ENTRY + 13 : ADDITIONAL DATA,          
+              DEPENDING ON ENTRY SIZE   
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 075
+( >BLK +BLK              < 9/11/85>215) 
+                                        
+: >BLK ( ^RING-BUFFER -- ^CURRENT )     
+    DUP @                ( FETCH SIZE ) 
+    OVER 4 + @ *                        
+              ( FETCH CURRENT ENTRY # ) 
+    6 +              ( COMPUTE OFFSET ) 
+    + ;                    ( ^CURRENT ) 
+                                        
+: +BLK ( ^RING-BUFFER -- )              
+    1 OVER 4 + +! ( INCREMENT CURRENT ) 
+    DUP 2+ @                            
+           ( FETCH TOTAL # OF ENTRIES ) 
+    OVER 4 + @                          
+               ( FETCH CURRENT BLOCK# ) 
+    < IF 0 SWAP 4 + !                   
+    ELSE DROP THEN ;                    
+                                        
+EXIT                                    
+                                        
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 076
+( !BLK# @BLK#            < 9/11/85>216) 
+                                        
+: !BLK# ( N ^RING-BUFFER -- )           
+      DDUP 2+ @ >                       
+      IF DDROP ELSE 4 + ! THEN ;        
+                                        
+: @BLK# ( ^RING-BUFFER -- N )           
+      4 + @ ;                           
+                                        
+EXIT                                    
+                                        
+: -BLK -1 OVER 4 + +!                   
+      DUP 4 + @                         
+      0< IF DUP 2+ @ SWAP 4 + !         
+      ELSE  DROP THEN ;                 
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 077
+( @MAX-BLK# +MAX-BLK#    < 9/11/85>217) 
+                                        
+( buffer_addr -- max_blk_number )       
+: @MAX-BLK# 2+ @ ;                      
+                                        
+( n buffer_addr -- )                    
+: +MAX-BLK# 2+ +! ;                     
+                                        
+                                        
+EXIT                                    
+                                        
+( n buffer_addr -- )                    
+: !MAX-BLK# 2+ ! ;                      
+                                        
+( n buffer_addr -- blk_addr )           
+: >BLKN SWAP OVER @ * + 6 + ;           
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 078
+( GRAPHIC DIRECTORY FORMA< 9/11/85>218) 
+EXIT                                    
+ THE DIRECTORY OCCUPIES                 
+ BLOCK ZERO OF THE DATA DISK,           
+ WHICH MUST BE IN DRIVE B.              
+                                        
+DIRECTORY + 0 : NEXT AVAILABLE SCREEN   
+                FOR PICTURE STORAGE     
+DIRECTORY + 2 : NEXT AVAILABLE BYTE     
+                ( CURRENTLY, ALWAYS 0 ) 
+DIRECTORY + 4 : START OF RING BUFFER    
+                                        
+ENTRY +  0 : NAME OF OBJECT             
+             ( 1 BYTE COUNT, )          
+             ( 12 BYTES ALFA )          
+ENTRY + 13 : SCREEN #                   
+ENTRY + 15 : LENGTH IN SCREENS OF DATA  
+ENTRY + 17 : VXMIN                      
+ENTRY + 19 : VYMIN                      
+ENTRY + 21 : VXMAX                      
+ENTRY + 23 : VYMAX                      
+ENTRY + 25 : FORMAT ( 1 BYTE )          
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 079
+( GET-DIR                < 9/11/85>219) 
+                                        
+ 1024  CONSTANT  DIR-SIZE               
+   26  CONSTANT  FIG-SIZE               
+                                        
+CREATE DIRECTORY 1K ALLOT               
+                                        
+DIRECTORY 4 +                           
+       CONSTANT  FIG-LIST               
+                                        
+: GET-DIR                               
+   EMPTY-BUFFERS                        
+   0 ONB BLOCK DIRECTORY 1K BMOVE ;     
+                                        
+EXIT                                    
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 080
+( FIG-LIST ACCESS        < 9/11/85>220) 
+                                        
+: ^ENTRY    FIG-LIST >BLK ;             
+: ^NAME     ^ENTRY   0 + ;              
+: ^BLOCK#   ^ENTRY  13 + ;              
+: ^VXMIN    ^ENTRY  15 + ;              
+: ^VYMIN    ^ENTRY  17 + ;              
+: ^VXMAX    ^ENTRY  19 + ;              
+: ^VYMAX    ^ENTRY  21 + ;              
+: ^SIZE     ^ENTRY  23 + ;              
+: ^FORMAT   ^ENTRY  25 + ; ( 1 BYTE )   
+                                        
+EXIT                                    
+                                        
+: ^ENTRYN ( N -- ADDR )                 
+            FIG-LIST >BLKN ;            
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 081
+( FIG-LIST ACCESS        < 9/11/85>221) 
+                                        
+: @XYMIN ^VXMIN @ ^VYMIN @ ;            
+: @XYMAX ^VXMAX @ ^VYMAX @ ;            
+                                        
+: @FIG# ( -- N )  FIG-LIST @BLK# ;      
+: !FIG# ( -- N )  FIG-LIST !BLK# ;      
+: +FIG   ( -- )   FIG-LIST +BLK ;       
+: @NFIGS ( -- N ) FIG-LIST @MAX-BLK# ;  
+                                        
+EXIT                                    
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 082
+( @FORMAT                < 9/11/85>222) 
+                                        
+: @FORMAT ( -- N )                      
+   FIG-LIST @ FIG-SIZE =                
+   IF   ^FORMAT C@                      
+   ELSE 0 THEN ;                        
+                                        
+EXIT                                    
+FORMATS:                                
+   0 = DISK CREATED UNDER PREVIOUS      
+       VERSIONS OF PROGRAM.             
+       PICTURE IN STANDARD FORMAT.      
+                                        
+   1 = PICTURE IN STANDARD FORMAT.      
+   3 = FONT, NOT PICTURE.               
+                                        
+   OTHER FORMATS NOT YET DEFINED.       
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 083
+( FIND-NAME              < 9/11/85>223) 
+( THE RING BUFFER POINTS TO NAME      ) 
+( IF FOUND.                           ) 
+( @FIG# RETURNS THE ADDRESS OF THE    ) 
+( BLOCK CONTAINING THE STRING.        ) 
+( ^NAME COUNT TYPE WILL PRINT IT.     ) 
+                                        
+: FIND-NAME ( -- TRUE IF FOUND  )       
+            ( -- 0 IF NOT FOUND )       
+   0 !FIG#                              
+   BEGIN +FIG                           
+         NAME-BUFFER ^NAME $=           
+         @FIG# 0= OR                    
+   UNTIL                                
+   @FIG# ;                              
+                                        
+EXIT                                    
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 084
+( .NAME                  < 9/11/85>224) 
+                                        
+( ASSUME ^ENTRY POINTS TO )             
+( NEXT AVAILABLE ENTRY )                
+                                        
+: .NAME  ^NAME COUNT                    
+         DUP >R TYPE                    
+         14  R> - SPACES                
+         40 EMIT  @FORMAT               
+                  64 + 127 AND EMIT     
+         41 EMIT  3 SPACES ;            
+                                        
+                                        
+EXIT                                    
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 085
+( FIG-DIR                < 9/11/85>225) 
+                                        
+XVAR FOUND                              
+                                        
+: FIG-DIR                               
+   TEXT PAGE 0 0 XYTAB GET-DIR          
+   0 !FIG# 0 FOUND C!                   
+   BEGIN +FIG @FIG# 0= NOT              
+   WHILE ^NAME C@ 0= NOT ( ENTRY? )     
+     IF .NAME 1 FOUND C! THEN           
+   REPEAT                               
+   FOUND C@ NOT                         
+   IF ." DISK EMPTY " THEN              
+   CR CR CR ;                           
+                                        
+FORGET FOUND                            
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 086
+( <FETCH-PICTURE>        < 9/11/85>226) 
+                                        
+( MOVES PICTURE FROM DISK B TO HOLD )   
+( AREA                              )   
+                                        
+: <FETCH-PICTURE> ( SCR# NBLOCKS -- )   
+   DUP 0=                               
+   IF DDROP                             
+   ELSE EMPTY-BUFFERS                   
+     ( NBLOCKS ) 0                      
+     DO DUP I + ONB  BLOCK              
+        PACKBUF I 1024 * +              
+        1024 BMOVE                      
+     LOOP DROP                          
+   THEN ;                               
+                                        
+EXIT                                    
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 087
+( GETPAR                 < 9/11/85>227) 
+                                        
+: GETPAR? ( -- 0/1 )                    
+   @FORMAT 1 =                          
+   IF @XYMIN                            
+      ' VYMIN !                         
+      7 / 7 * ' VXMIN !                 
+      @XYMAX                            
+      ' VYMAX !                         
+      6 - 7 / 7 * 6 + ' VXMAX !         
+      1                                 
+   ELSE 0                               
+   THEN ;                               
+                                        
+EXIT                                    
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 088
+( PUTPACKD               < 9/11/85>228) 
+\ write it to disk                      
+                                        
+: PUTPACKD ( #bytes -- )                
+   DUP @PNEXT +                         
+   ' PICS 2+ @ 1024 * U< NOT            
+   IF PAGE TEXT ." PICS area overflow"  
+     CR CR QUIT THEN                    
+   @P# 1+ DUP >R MAXPICS >              
+   IF PAGE TEXT ." Too many pictures"   
+     CR CR QUIT THEN                    
+                                        
+    ( write packed data to disk )       
+   PACKBUF @PNEXT 3 PICK >DISK          
+    ( set table - start loc )           
+   @PNEXT R@ P-START !DISK              
+    ( set table - number loc )          
+   DUP R> P-SIZE !DISK                  
+    ( inc free pointer )                
+   @PNEXT + PNEXT !DISK                 
+    ( inc picture number )              
+   @P# 1+ P# !DISK FLUSH                
+;                                       
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 089
+( ?PRLIST .% TAB         < 9/11/85>229) 
+                                        
+0 CONSTANT ?PRLIST                      
+                                        
+: .% ( N -- )                           
+   0 <# # 46 HOLD #S #> TYPE ;          
+                                        
+: TAB   ( N -- ; tab to col n )         
+  BEGIN SPACE                           
+   DUP OUT @ > NOT                      
+  UNTIL                                 
+  DROP ;                                
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 090
+( .STAT                  < 9/11/85>230) 
+                                        
+: .STAT ( #bytes -- )                   
+   ?PRLIST                              
+   IF 1 PR# 0 OUT !                     
+   ELSE 1HG PAGE CR 0 21 XYTAB THEN     
+   ^NAME COUNT TYPE SPACE               
+   ." is graphic # " @P# 1+ .           
+   44 TAB ." (" DUP 1000                
+   ENDX C@ STARTX C@ - 1+               
+   ENDY C@ STARTY C@ - 1+ *             
+   */ .% ." % as large, "               
+   @PNEXT + 1000 U*                     
+   ' PICS 2+ @ 1024 *                   
+   U/MOD SWAP DROP .% ." % used)"       
+   ?PRLIST                              
+   IF CR 0 PR#                          
+   ELSE 100 DELAY THEN ;                
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 091
+( .FIN-STAT              < 9/11/85>231) 
+                                        
+: .FIN-STAT                             
+  TEXT PAGE ?PRLIST                     
+  IF 54 @ >R ( save output link )       
+     1 PR# CR CR CR CR THEN             
+  ." FINAL COMPRESSION STATISTICS"      
+  CR CR CR                              
+  ." Bytes available: "                 
+  ' PICS 2+ @ 1024 * DUP U. CR          
+  ." Bytes used     : "                 
+  @PNEXT DUP U. CR                      
+  ." Bytes remaining: "                 
+  - DUP U. CR DUP 1023 >                
+  IF DUP 1024 / CR U.                   
+   ." Blocks may be removed" CR         
+   ."   from PICS area if needed"       
+   CR CR                                
+  THEN                                  
+  DROP ?PRLIST                          
+  IF CR CR R> 54 ! THEN                 
+; ( alternate to 0 PR# which )          
+  ( does not clear the screen)          
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 092
+( <COMPRESS>             < 9/11/85>232) 
+                                        
+: <COMPRESS>                            
+   HG FORGET-SYS                        
+   VXMIN 7 / 0 MAX 40 MIN ( START X )   
+   VXMAX 7 / 0 MAX 40 MIN ( END X )     
+   VYMIN 0 MAX 191 MIN ( START Y )      
+   VYMAX 0 MAX 191 MIN ( END Y )        
+   ( SX EX SY EY )                      
+   PACK ( #bytes )                      
+   DUP .STAT                            
+   PUTPACKD                             
+   HG ;                                 
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 093
+( ?COMPRESS              < 9/11/85>233) 
+                                        
+0 CONSTANT AUTO                         
+                                        
+WARNOFF                                 
+                                        
+: ?COMPRESS                             
+   1HG 0 21 XYTAB AUTO                  
+   IF 1                                 
+   ELSE CR ." SAVE " (Y/N)? THEN        
+   IF <COMPRESS> THEN                   
+;                                       
+                                        
+WARNON                                  
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 094
+( COMPRESS-DISK          < 9/11/85>234) 
+                                        
+: COMPRESS-PIC                          
+   ^NAME C@                             
+   IF GETPAR?                           
+    IF 1HG PAGE 0 20 XYTAB              
+     ^NAME COUNT TYPE                   
+     ^BLOCK# @ ^SIZE @                  
+     <FETCH-PICTURE>                    
+     HG 14 FS VXMIN VYMIN REST.VP       
+     ?COMPRESS                          
+    ELSE 0 20 XYTAB 2000 15 TONE        
+     ." UNREADABLE FORMAT"              
+     150 DELAY THEN                     
+   THEN ;                               
+                                        
+: COMPRESS-DISK                         
+   CLS FORGET-SYS GET-DIR               
+   0 !FIG#                              
+   BEGIN +FIG @FIG#                     
+   WHILE COMPRESS-PIC                   
+   REPEAT FLUSH ;                       
+                                        
+EXIT                           ( FAH  ) 
+-------------------------------------------- SCREEN 095
+( INIT-COMPRESS          < 2/13/86>235) 
+                                        
+: INIT-COMPRESS                         
+  PAD MAXPICS 4 * 0 FILL                
+  PAD 4 MAXPICS 4 * PICS >DISK          
+  ( clear table )                       
+  0 P# !DISK                            
+  MAXPICS 1+ 4 * PNEXT !DISK            
+  FLUSH ?PRLIST                         
+  IF 1 PR# CR CR CR 0 PR# THEN ;        
+                                        
+EXIT                                    
+: .NOTES                                
+  CR ." PICS starts at "                
+  ' PICS @ . CR                         
+  ." PICS is " ' PICS 2+ @ .            
+  ." blocks long" CR CR                 
+  ." MAXPICS is " MAXPICS .             
+  CR CR CR                              
+  ." Continue" (Y/N)? NOT               
+  IF ." aborted" CR CR <ABORT> THEN     
+;                                       
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 096
+( COMPRESS               < 2/13/86>236) 
+WARNOFF                                 
+: COMPRESS                              
+  TEXT PAGE PAGE 6 8 XYTAB              
+  ." Place TARGET disk in DRIVE A"      
+  3 12 XYTAB                            
+  ." Place 1ST GRAPHIC disk in DRIVE B" 
+  9 20 XYTAB                            
+  ." Press 'C' to continue"             
+  ?TERMINAL KEY 67 UC=                  
+  IF PAGE ." Print summary"             
+   (Y/N)? ' ?PRLIST !                   
+   INIT-COMPRESS                        
+   BEGIN PAGE                           
+    ." Compress entire disk"            
+    (Y/N)? CR ' AUTO !                  
+    COMPRESS-DISK PAGE TEXT             
+    ." Compress additional disk"        
+    (Y/N)? NOT                          
+   UNTIL .FIN-STAT                      
+  ELSE 0 22 XYTAB                       
+   ." Aborted...." CR CR                
+  THEN ;                                
+WARNON                         ( bobp ) 
+-------------------------------------------- SCREEN 097
+( CG                     < 9/11/85>237) 
+EXIT ------                             
+WARNOFF                                 
+\ graphic disk in B                     
+\ destination disk in A                 
+\ type INIT-COMPRESS before 1st CG      
+\ form: CG picture_name                 
+                                        
+\ YOU MUST DO A INIT-COMPRESS BEFORE /  
+\ COMPRESSING THE FIRST GRAPHIC      /  
+                                        
+: CG \ -- ;                             
+  0 WORD NAME-BUFFER                    
+  OVER C@ 1+ 13 MIN CMOVE               
+  FIND-NAME NOT                         
+  ABORT" Graphic not found"             
+  IF COMPRESS-PIC                       
+  THEN ;                                
+                                        
+WARNON                                  
+                                        
+                                        
+                                        
+                                        
+-------------------------------------------- SCREEN 100
+( IN-VIR?                <12/21/85>240) 
+APPENDIX                                
+ONLY FORTH ALSO DEFINITIONS             
+                                        
+VARIABLE FDP   \ Forth DP               
+VARIABLE VDP   \ Virtual DP             
+VARIABLE FML   \ Forth mem-limit        
+                                        
+: IN-VIR? ( -- 0/1 )                    
+   HERE 8192 16383 WITHIN ;             
+                                        
+                                        
+GET-LOADER                              
+   SAVE-VDP @ VDP ! \ set for LOAD      
+                                        
+MAIN                                    
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 101
+( LOADER                 <12/21/85>241) 
+MAIN                                    
+ONLY FORTH VIRTUAL ALSO                 
+  FORTH ALSO DEFINITIONS                
+                                        
+FWARNING OFF                            
+GET-LOADER                              
+                                        
+: LOADER                                
+   SYS-FLG @ 5 =                        
+   IF \ just switch to the vocab        
+      [COMPILE] LDR-VOC                 
+   ELSE                                 
+      GET-LOADER                        
+      [COMPILE] LDR-VOC                 
+      SAVE-VDP @ VDP !                  
+   THEN ;                               
+   IMMEDIATE                            
+                                        
+FWARNING ON                             
+                                        
+ONLY FORTH ALSO DEFINITIONS             
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 102
+( VIR-DP MAIN-DP         <12/21/85>242) 
+APPENDIX                                
+ONLY FORTH ALSO DEFINITIONS             
+                                        
+: VIR-DP \ --; set DP in virtual        
+   IN-VIR? NOT                          
+   IF SYS-FLG @ 0=                      
+      ABORT" Virtual system not active" 
+      DP @ FDP ! VDP @ DP !             
+      MEM-LIMIT FML !                   
+      16383 ' MEM-LIMIT !               
+   THEN 0 FWARNING ! ;                  
+                                        
+: MAIN-DP \ --; set DP to main dict     
+   IN-VIR?                              
+   IF DP @ VDP ! FDP @ DP !             
+      FML @ ' MEM-LIMIT !               
+   THEN 1 FWARNING ! ;                  
+                                        
+MAIN                                    
+                                        
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 103
+( PUT-LOADER             <12/21/85>243) 
+APPENDIX                                
+ONLY FORTH VIRTUAL ALSO                 
+  FORTH ALSO DEFINITIONS                
+                                        
+: PUT-LOADER                            
+   SYS-FLG @ 5 = VIR-FLG @ 5 = AND      
+   IF IN-VIR? ABORT" In vir area"       
+      VIR-BASE ?RESIDENT NOT            
+      IF 0 SYS-FLG !                    
+         SYS-LINK1 SYS-LINK2 !          
+         1 ABORT" LOADER is corrupted"  
+      THEN                              
+      VDP @ SAVE-VDP @ -                
+      IF \ system has changed size      
+         400 8 TONE                     
+         VDP @ SAVE-VDP !               
+         V!AUX                          
+   THEN THEN ;                          
+                                        
+MAIN                                    
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 104
+( WRITE-LOADER MYDEF     <12/21/85>244) 
+APPENDIX                                
+                                        
+ONLY FORTH VIRTUAL ALSO                 
+   FORTH ALSO DEFINITIONS               
+                                        
+\ to be vectored into SAVE-FORTH        
+                                        
+: WRITE-LOADER                          
+   <FORGET-SYS>                         
+   [COMPILE] LOADER                     
+   PUT-LOADER                           
+   VDP @ SAVE-VDP !                     
+   LDR <PUT-VIR> ;                      
+                                        
+                                        
+\ to be vectored into DEFINITIONS       
+                                        
+: MYDEF                                 
+   CONTEXT @ 8192 16383 WITHIN          
+   IF VIR-DP ELSE MAIN-DP THEN ;        
+                                        
+MAIN                                    
+                               ( bobp ) 
+-------------------------------------------- SCREEN 105
+( PATCH UNPATCH          <12/21/85>245) 
+: .PATCHES  CR CR                       
+  <INV> ." OPDB SYSTEM PATCHES " ;      
+                                        
+: PATCH                                 
+  REVECTOR MYDEF INTO DEFINITIONS       
+  REVECTOR WRITE-LOADER INTO SAVE-FORTH 
+  REVECTOR PUT-LOADER                   
+  DUP INTO <FORGET-SYS>                 
+  DUP INTO GET-A&E DUP INTO GET-UTIL    
+  DUP INTO GET-FPA     INTO GET-MLOADER 
+  .PATCHES ." INSTALLED." <NORM> CR CR  
+;                                       
+                                        
+: UNPATCH                               
+  REVECTOR <FORGET-SYS> INTO SAVE-FORTH 
+  REVECTOR NOOP                         
+  DUP INTO DEFINITIONS                  
+  DUP INTO <FORGET-SYS>                 
+  DUP INTO GET-A&E DUP INTO GET-UTIL    
+  DUP INTO GET-FPA     INTO GET-MLOADER 
+  .PATCHES ." REMOVED." <NORM> CR CR ;  
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 106
+( install system patches <12/21/85>246) 
+                                        
+PATCH                                   
+                                        
+CR ." MYDEF ==> DEFINITIONS "           
+CR ." WRITE-LOADER ==> SAVE-FORTH "     
+CR ." PUT-LOADER ==> <FORGET-SYS> "     
+CR ." PUT-LOADER ==> GET-UTIL "         
+CR ." PUT-LOADER ==> GET-A&E "          
+CR ." PUT-LOADER ==> GET-FPA "          
+CR ." PUT-LOADER ==> GET-MLOADER "      
+CR CR                                   
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 109
+( OpDB vocabularies      <12/21/85>249) 
+EXIT                                    
+MAIN                                    
+                                        
+ONLY FORTH ALSO DEFINITIONS             
+                                        
+VOCABULARY EXEC      IMMEDIATE          
+VOCABULARY VARIABLES IMMEDIATE          
+VOCABULARY SCR-NAMES IMMEDIATE          
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 110
+( AUXWIDTH FULLWIDTH     <12/21/85>250) 
+APPENDIX                                
+                                        
+FORTH DEFINITIONS                       
+                                        
+: AUXWIDTH ( -- )  6 TO WIDTH ;         
+                                        
+: FULLWIDTH ( -- ) 31 TO WIDTH ;        
+                                        
+MAIN                                    
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 111
+( EXEC [EXEC]            <12/21/85>251) 
+MAIN                                    
+                                        
+\ holds the execution part of the       
+\ excodes                               
+                                        
+VOCABULARY EXEC IMMEDIATE               
+                                        
+\ APPENDIX                              
+                                        
+: [EXEC]                                
+  [COMPILE] EXEC DEFINITIONS            
+  AUXWIDTH ;                            
+                                        
+MAIN                                    
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 112
+( TYPES [TYPES]          <12/21/85>252) 
+                                        
+MAIN                                    
+                                        
+\ Create a subvocabulary of EXEC        
+\ that will hold all the types of       
+\ variables that are supported          
+                                        
+[EXEC]                                  
+  VOCABULARY TYPES IMMEDIATE            
+                                        
+FORTH DEFINITIONS                       
+: TYPES \ switch from forth to          
+  EXEC [COMPILE] TYPES                  
+; IMMEDIATE                             
+                                        
+  APPENDIX                              
+: [TYPES] \ TYPES DEFINITONS            
+  EXEC [COMPILE] TYPES DEFINITIONS      
+  FULLWIDTH ;                           
+                                        
+MAIN                                    
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 113
+( VARIABLES [VAR]        <12/21/85>253) 
+                                        
+MAIN                                    
+                                        
+\ Create a subvocabulary of FORTH       
+\ that will hold all the variables      
+\ that have been defined                
+                                        
+FORTH DEFINITIONS                       
+                                        
+  VOCABULARY VARIABLES IMMEDIATE        
+                                        
+APPENDIX                                
+: [VAR] \ compile in a keyword          
+  [COMPILE] VARIABLES                   
+  DEFINITIONS FULLWIDTH ;               
+                                        
+MAIN                                    
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 114
+( SCR-NAMES [SCR]        <12/21/85>254) 
+                                        
+MAIN                                    
+                                        
+\ Create a subvocabulary of FORTH       
+\ that will hold all the names of the   
+\ screens that have been defined        
+                                        
+FORTH DEFINITIONS                       
+                                        
+  VOCABULARY SCR-NAMES IMMEDIATE        
+                                        
+APPENDIX                                
+: [SCR] \ compile in a keyword          
+  [COMPILE] SCR-NAMES                   
+  DEFINITIONS FULLWIDTH ;               
+MAIN                                    
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 115
+( [LOADER] [FORTH] ASM   <12/21/85>255) 
+\ Switch into the loader area, words    
+\ compiled here are saved in the        
+\ virtual area.  words required at      
+\ runtime should not be compiled        
+\ in the LOADER area                    
+                                        
+APPENDIX                                
+: [LOADER] \ compile in the loader      
+  [COMPILE] LOADER DEFINITIONS          
+  AUXWIDTH ;                            
+                                        
+: [FORTH] \ compile in forth            
+  [COMPILE] FORTH DEFINITIONS           
+  AUXWIDTH ;                            
+                                        
+[FORTH]                                 
+  GET-A&E                               
+: ASM \ -- ; switch to assembler        
+  GET-A&E                               
+  [COMPILE] ASSEMBLER ; IMMEDIATE       
+MAIN                                    
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 116
+( KEYWORDS [KEYWORDS]    <12/21/85>256) 
+                                        
+\ Create a subvocabulary of LOADER      
+\ that will hold all keywords that are  
+\ valid in the opdb                     
+                                        
+[LOADER]                                
+  VOCABULARY KEYWORDS IMMEDIATE         
+                                        
+[FORTH] FWARNING OFF                    
+: KEYWORDS \ switch from forth to       
+  [COMPILE] LOADER                      
+  LOADER [COMPILE] KEYWORDS             
+; IMMEDIATE                             
+                                        
+: [KEYWORDS] \ compile in a keyword     
+  [COMPILE] LOADER                      
+  LOADER [COMPILE] KEYWORDS DEFINITIONS 
+  FULLWIDTH ;                           
+                                        
+FWARNING ON                             
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 117
+( OPERS [OPERS]          <12/21/85>257) 
+                                        
+\ Create a subvocabulary of LOADER      
+\ that will hold all the operators      
+\ that have been defined                
+                                        
+[LOADER]                                
+  VOCABULARY OPERS IMMEDIATE            
+                                        
+[FORTH]  FWARNING OFF                   
+: OPER \ switch from forth to           
+  [COMPILE] LOADER                      
+  LOADER [COMPILE] OPERS                
+; IMMEDIATE                             
+                                        
+: [OPER] \ OPER DEFINITIONS             
+  [COMPILE] LOADER                      
+  LOADER [COMPILE] OPERS                
+  DEFINITIONS FULLWIDTH ;               
+                                        
+FWARNING ON                             
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 118
+( OPERATORS [OPER] OPER  <12/21/85>258) 
+                                        
+\ Create a subvocabulary of LOADER      
+\ that will hold all the operators      
+\ that have been defined                
+                                        
+[LOADER]                                
+  VOCABULARY OPERATORS IMMEDIATE        
+                                        
+[FORTH]  FWARNING OFF                   
+: OPERATORS \ switch from forth to      
+  [COMPILE] LOADER                      
+  LOADER [COMPILE] OPERATORS            
+; IMMEDIATE                             
+                                        
+: [OPERS] \ compile in a keyword        
+  [COMPILE] LOADER                      
+  LOADER [COMPILE] OPERATORS            
+  DEFINITIONS FULLWIDTH ;               
+                                        
+FWARNING ON                             
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 119
+( UNLINK VIRTUAL VOCABS  <12/21/85>259) 
+                                        
+                                        
+' SCR-NAMES 4 + VOC-LINK !              
+CR                                      
+CR ." Vocabularies in virtual area"     
+CR ." removed from VOC-LINK chain"      
+CR CR                                   
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+-------------------------------------------- SCREEN 120
+( TABLE DRIVEN YADDR     < 1/16/87>260) 
+\ COPIED FROM GRAPHICS DISK             
+                                        
+\ loading this screen will load         
+\ the table driven version of yaddr     
+\ load the next screen to use the       
+\ computed version                      
+                                        
+CREATE LYADDR 256 ALLOT                 
+CREATE HYADDR 256 ALLOT                 
+                                        
+261 262 THRU  \ to get addrs for table  
+    263 LOAD  \ word to fill table      
+FILLTAB       \ fill the table          
+FORGET $YADDR \ forget computer ver     
+    264 LOAD  \ table drive $YADDR      
+    262 LOAD  \ YADDR is same for both  
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+-------------------------------------------- SCREEN 121
+( $YADDR SUBROUTINE      < 1/16/87>261) 
+\ computes values                       
+\ entry: line# in X reg.                
+\ exit:  address in GBASE               
+\ all registers are preserved           
+HEX                                     
+CODE $YADDR                             
+   PHA, TXA, # C0  AND, GBASE STA,      
+             .A LSR, .A LSR,            
+             GBASE ORA, GBASE STA,      
+        TXA, GBASE 1+ STA, .A ASL,      
+             .A ASL, .A ASL,            
+             GBASE 1+ ROL, .A ASL,      
+             GBASE 1+ ROL, .A ASL,      
+             GBASE ROR,                 
+             GBASE 1+ LDA, # 1F AND,    
+             # 20 ORA, GBASE 1+ STA,    
+   PLA, RTS, C;                         
+                                        
+DECIMAL EXIT                            
+--------------------------------------- 
+Note: only valid for 0 <= line# <= 191  
+BOMBS FORTH when -1 or 255              
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 122
+( YADDR code version     < 1/16/87>262) 
+                                        
+CODE YADDR ( y -- yaddr )               
+     XSAVE STX, BOT LDA, TAX,           
+     ' $YADDR JSR,                      
+     XSAVE LDX,                         
+     GBASE    LDA, BOT    STA,          
+     GBASE 1+ LDA, BOT 1+ STA,          
+     NEXT JMP, C;                       
+                                        
+EXIT                                    
+--------------------------------------- 
+Algorithm in Basic:                     
+                                        
+ INPUT Y                                
+ Y1 = INT(Y /8) : YR = Y  - Y1*8        
+ Y2 = INT(Y1/8) : YS = Y1 - Y2*8        
+ L  = 8192 + 40*Y2 + 128*YS + 1024*YR   
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 123
+( CREATE YADDR TABLES    < 1/16/87>263) 
+\ this word will fill LYADDR and HYADDR 
+\ with the proper values                
+                                        
+\ all values above 191 return the       
+\ address of the last scan line         
+\ to avoid crashes                      
+                                        
+                                        
+: FILLTAB                               
+  192 0 \ do for the real values        
+  DO I YADDR DROP                       
+     GBASE C@ LYADDR I + C!             
+     GBASE 1+ C@ HYADDR I + C!          
+  LOOP                                  
+  \ fill remainder of table with adr    
+  \ scan line 191 (already in GBASE)    
+  256 192                               
+  DO GBASE C@ LYADDR I + C!             
+     GBASE 1+ C@ HYADDR I + C!          
+  LOOP                                  
+;                                       
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 124
+( $YADDR - TABLE DRIVEN  < 1/16/87>264) 
+\ entry: line# in X reg.                
+\ exit:  address in GBASE               
+\ all registers are preserved           
+HEX                                     
+CODE $YADDR                             
+  PHA,                                  
+   LYADDR ,X LDA,                       
+   GBASE STA,                           
+   HYADDR ,X LDA,                       
+   GBASE 1+ STA,                        
+  PLA,                                  
+  RTS,                                  
+C;                                      
+DECIMAL EXIT                            
+--------------------------------------- 
+Note: only valid for 0 <= line# <= 191  
+returns addr of 191 for vals >191       
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( FAH  ) 

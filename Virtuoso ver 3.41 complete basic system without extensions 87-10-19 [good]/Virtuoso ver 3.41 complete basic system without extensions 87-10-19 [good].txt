@@ -1,0 +1,1525 @@
+-------------------------------------------- SCREEN 003
+GB - BOOT SIDE OF THE DISK              
+________________________________________
+                                        
+                                        
+     HOLT RINEHART WINSTON BIOLOGY      
+                                        
+               GENETICS                 
+                                        
+                                        
+             version 1.24               
+           compiled 9-15-87             
+                                        
+_______________________________________ 
+                                        
+  Designed and developed by:            
+                                        
+     Prentice Associates, Inc.          
+     670 Centre Street                  
+     Boston, MA 02130                   
+                                        
+                                        
+                                        
+                                        
+                                        
+-------------------------------------------- SCREEN 039
+( for recompiling        <12/21/85> 39) 
+                                        
+FORGET-SYS                              
+                                        
+' <FORGET> CFA  ' FORGET !              
+' NOOP CFA      ' FORGET-SYS !          
+                                        
+' ALSO LFA      ' ROOT !                
+                                        
+APPENDIX FORGET VIR-BASE                
+MAIN     FORGET TEXT                    
+                                        
+16424 DP !                              
+                                        
+EXIT -->                                
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 040
+( LOAD BLOCK             < 1/16/87> 40) 
+                                        
+\ set up search sequence                
+ONLY FORTH ALSO DEFINITIONS             
+                                        
+31 ' WIDTH !                            
+                                        
+   50 59  THRU \ virtual stuff          
+                                        
+   41     LOAD \ create A&E             
+   42     LOAD \ create UTIL            
+   43     LOAD \ create FPA             
+   44     LOAD \ create LDR and MLDR    
+                                        
+   45     LOAD \ ORDER                  
+                                        
+   70 72  THRU \ <@APPENDIX> <!APPENDI  
+   75 76  THRU \ logo and read-vir      
+   77 78  THRU \ links to A&E and UTIL  
+                                        
+   80 99  THRU \ various extensions     
+                                        
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 041
+( load block A&E         < 9/15/86> 41) 
+FORTH   DEFINITIONS                     
+PAGE 2BEEP 2BEEP 2BEEP                  
+." Place UTIL disk in drive B " CR      
+." and press any key to continue. "     
+                                        
+?TERMINAL DROP KEY DROP                 
+                                        
+0 FWARNING !   \ disable "FWD CALL" msg 
+  60 LOAD      \ set up virtual         
+  35 ONB LOAD  \ load assembler         
+                                        
+ 5 ' WIDTH !   \ reduce width           
+  44 ONB LOAD  \ load editor            
+ 31 ' WIDTH !  \ restore width          
+                                        
+  61     LOAD  \ write A&E              
+                                        
+1 FWARNING !                            
+                                        
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 042
+( load block UTIL        <12/21/85> 42) 
+MAIN                                    
+FORTH DEFINITIONS                       
+                                        
+0 FWARNING !   \ disable "FWD CALL" msg 
+                                        
+APPENDIX                                
+                                        
+   35 ONB LOAD \ load assembler         
+                                        
+MAIN                                    
+                                        
+   62     LOAD \ set up UTIL            
+                                        
+   92 ONB LOAD \ load util              
+                                        
+   63     LOAD \ write UTIL             
+                                        
+APPENDIX                                
+                                        
+   FORGET ASSEMBLER                     
+                                        
+MAIN  1 FWARNING !                      
+                               (  PAI ) 
+-------------------------------------------- SCREEN 043
+( load block FPA         <12/20/85> 43) 
+FORTH DEFINITIONS                       
+                                        
+PAGE 2BEEP 2BEEP 2BEEP                  
+." Place FPA disk in drive B " CR       
+." and press any key to continue. "     
+?TERMINAL DROP KEY DROP                 
+                                        
+0 FWARNING !   \ disable "FWD CALL" msg 
+                                        
+   64     LOAD    \ set up virtual      
+                                        
+   10 ONB LOAD    \ load FPA            
+                                        
+   LOADTRANSLATOR                       
+   ADDDECOMPILER                        
+                                        
+   65     LOAD    \ write virtual       
+                                        
+1 FWARNING !                            
+                                        
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 044
+( load block LDR & MLDR  <12/20/85> 44) 
+FORTH DEFINITIONS                       
+                                        
+   66 67 THRU  \ create LOADER          
+                                        
+   68 69 THRU  \ create MLOADER         
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 045
+( ORDER and set DP       <12/21/85> 45) 
+MAIN                                    
+                                        
+16424 DP ! \ 42 bytes after graphics    
+                                        
+ONLY FORTH ALSO ROOT DEFINITIONS        
+                                        
+: ORDER <ORDER> ;                       
+                                        
+                                        
+ONLY FORTH ALSO DEFINITIONS             
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               (  PAI ) 
+-------------------------------------------- SCREEN 050
+( VIRTUAL SYSTEMS        <12/21/85> 50) 
+APPENDIX FORTH DEFINITIONS              
+                                        
+8192 CONSTANT VIR-BASE                  
+8196 CONSTANT SAVE-VDP                  
+   0 CONSTANT VDRIVE                    
+   0 CONSTANT SYS-LINK1                 
+            ' SYS-LINK1 DUP LFA SWAP !  
+   0 CONSTANT SYS-LINK2                 
+            ' SYS-LINK2 DUP LFA SWAP !  
+                                        
+   VARIABLE SYS-FLG                     
+                                        
+: <FORGET-SYS>                          
+   NOOP ( put-virtual )                 
+   0 SYS-FLG ! SYS-LINK1 SYS-LINK2 !    
+   CURRENT @ CONTEXT ! ;                
+                                        
+' <FORGET-SYS> CFA ' FORGET-SYS !       
+' <FORGET-SYS> CFA ' SAVE-FORTH 2+ !    
+MAIN                                    
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 051
+( VIRTUAL vocabulary     <12/21/85> 51) 
+APPENDIX                                
+FORTH DEFINITIONS                       
+                                        
+  VOCABULARY VIRTUAL IMMEDIATE          
+                                        
+\ remove VIRTUAL from voc-link chain.   
+                                        
+  VOC-LINK @ @ VOC-LINK !               
+                                        
+\ Set search order for following scrns. 
+\ FORTH and VIRTUAL will remain in      
+\ search sequence until next invocation 
+\ of ONLY.                              
+                                        
+ONLY  FORTH VIRTUAL ALSO  FORTH ALSO    
+                                        
+VIRTUAL DEFINITIONS                     
+                                        
+  VARIABLE NEXT-SECTOR                  
+  VARIABLE NEXT-AUX                     
+                                        
+MAIN                                    
+                               ( bobp ) 
+-------------------------------------------- SCREEN 052
+( VPARMS                 <12/21/85> 52) 
+APPENDIX                                
+VIRTUAL DEFINITIONS                     
+                                        
+VARIABLE VP \ points to vir parameters  
+                                        
+: VPARM:                                
+   CREATE ,  DOES>  @ VP @ + ;          
+                                        
+00 VPARM: VIR-FLG                       
+02 VPARM: VIR-TST                       
+04 VPARM: LASTLFA                       
+06 VPARM: FIRSTLFA                      
+08 VPARM: AUX-ADDR                      
+10 VPARM: VIR-SIZE                      
+12 VPARM: VIR-SECTS                     
+14 VPARM: VIR-TRK                       
+16 VPARM: VIR-SEC                       
+                                        
+FORTH DEFINITIONS MAIN                  
+                                        
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 053
+( SYSTEM:                <12/21/85> 53) 
+APPENDIX                                
+VIRTUAL DEFINITIONS                     
+                                        
+: SYSTEM:                               
+   CREATE ( vir# size -- )              
+      HERE VP !                         
+      HERE 18 0 FILL 18 ALLOT           
+      VIR-SIZE ! VIR-FLG !              
+   DOES>  ( -- ) VP ! ;                 
+                                        
+HEX ( vir# size )                       
+                                        
+1 2000 SYSTEM: A&E                      
+3 1600 SYSTEM: UTIL                     
+4 2000 SYSTEM: FPA                      
+5 2000 SYSTEM: LDR                      
+6 1200 SYSTEM: MLDR                     
+                                        
+DECIMAL                                 
+FORTH DEFINITIONS MAIN                  
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 054
+( SETPARMS               <12/21/85> 54) 
+APPENDIX                                
+FORTH DEFINITIONS                       
+\ Set everything except LFA links.      
+\ Will be forgotten in next screen.     
+                                        
+                                        
+: SETPARMS ( -- )                       
+   NEXT-AUX @ AUX-ADDR !                
+   VIR-SIZE @ DUP NEXT-AUX +!           
+     255 + 0 256 U/MOD SWAP DROP        
+   DUP VIR-SECTS !                      
+     NEGATE NEXT-SECTOR +!              
+   NEXT-SECTOR @ 1+ SECS/TRK /MOD       
+     VIR-TRK ! VIR-SEC !                
+   MONTH @ 1000 *  DAY @ 10 * +         
+     YEAR @ 10 MOD +  VIR-TST ! ;       
+                                        
+MAIN                                    
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 055
+( allocate virtuals      <12/21/85> 55) 
+FORTH DEFINITIONS                       
+                                        
+SECS/TRK TRKS/HD * 1-  NEXT-SECTOR !    
+                                        
+HEX   800  NEXT-AUX !                   
+                                        
+A&E   SETPARMS                          
+UTIL  SETPARMS                          
+FPA   SETPARMS                          
+LDR   SETPARMS                          
+MLDR  SETPARMS                          
+                                        
+                                        
+APPENDIX                                
+                                        
+FORGET SETPARMS                         
+                                        
+DECIMAL MAIN                            
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 056
+( @RWTS-PARAM ?RESIDENT  <12/21/85> 56) 
+APPENDIX                                
+VIRTUAL DEFINITIONS                     
+                                        
+\ These words assume that VP is set.    
+                                        
+: @RWTS-PARAM ( -- addr hd dr sec trk ) 
+   VIR-BASE 6 VDRIVE                    
+   VIR-SEC @ VIR-TRK @ ;                
+                                        
+: ?RESIDENT ( addr -- 0/1 )             
+   D@ VIR-FLG @ VIR-TST @ D= ;          
+                                        
+: VIR-RES? ( -- )                       
+   VIR-BASE ?RESIDENT NOT               
+   IF CR                                
+     ." WRONG DISK -- NO VIRTUAL IMAGE" 
+     <FORGET-SYS> QUIT                  
+   THEN ;                               
+                                        
+FORTH DEFINITIONS MAIN                  
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 057
+( V@AUX V!AUX <GET-VIR>  <12/21/85> 57) 
+APPENDIX                                
+                                        
+\ These words assume that VP is set.    
+                                        
+VIRTUAL DEFINITIONS                     
+                                        
+: V@AUX ( read vir from aux mem )       
+   1 AUX-ADDR @ 0 VIR-BASE              
+   VIR-SIZE @ CMOVEL ;                  
+                                        
+: V!AUX ( write vir to aux mem )        
+   0 VIR-BASE 1 AUX-ADDR @              
+   VIR-SIZE @ CMOVEL ;                  
+                                        
+: <GET-VIR> ( read vir from disk )      
+   <FORGET-SYS>                         
+   @RWTS-PARAM 1 VIR-SECTS @ RWTS ;     
+                                        
+: <PUT-VIR> ( write vir to disk )       
+   @RWTS-PARAM 0 VIR-SECTS @ RWTS ;     
+                                        
+FORTH DEFINITIONS MAIN                  
+                               ( bobp ) 
+-------------------------------------------- SCREEN 058
+( GET-VIR                <12/21/85> 58) 
+APPENDIX                                
+VIRTUAL DEFINITIONS                     
+                                        
+\ These words assume that VP is set.    
+                                        
+: GET-VIR                               
+   NOOP                                 
+   SYS-FLG @ VIR-FLG @ = NOT            
+   IF <FORGET-SYS>  ?AUX                
+      IF V@AUX                          
+         VIR-BASE ?RESIDENT NOT         
+         IF <GET-VIR> V!AUX THEN        
+      ELSE <GET-VIR> THEN               
+   THEN  VIR-RES?                       
+   SYS-LINK1 FIRSTLFA @ !               
+   LASTLFA @ SYS-LINK2 !                
+   VIR-FLG @ SYS-FLG ! ;                
+                                        
+FORTH DEFINITIONS                       
+MAIN                                    
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 059
+( GET-A&E etc.           <12/21/85> 59) 
+APPENDIX                                
+FORTH DEFINITIONS                       
+                                        
+\ These words set VP.                   
+                                        
+                                        
+: GET-A&E  NOOP A&E GET-VIR ;           
+                                        
+: GET-UTIL NOOP UTIL GET-VIR ;          
+                                        
+: GET-FPA  NOOP                         
+   FPA VIR-FLG @ IF GET-VIR THEN ;      
+                                        
+: GET-LOADER NOOP LDR GET-VIR ;         
+                                        
+                                        
+: GET-MLOADER NOOP MLDR GET-VIR ;       
+                                        
+MAIN EXIT                               
+                                        
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 060
+( make virtual:  A&E     <12/21/85> 60) 
+MAIN DECIMAL                            
+FORTH DEFINITIONS                       
+                                        
+\ save system status                    
+  FORGET-SYS FREEZE                     
+                                        
+A&E     \ set virtual parameter pointer 
+                                        
+\ switch to virtual mem                 
+  VIR-BASE DP !                         
+\ fill with A's                         
+  VIR-BASE 8192 65 FILL                 
+\ compile check words                   
+  VIR-FLG @ VIR-TST @ , , 0 ,           
+\ dummy definition for lfa              
+  CREATE _ SMUDGE                       
+\ remember first LFA                    
+  LATEST PFA-LFA  FIRSTLFA !            
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 061
+( write virtual: A&E     <12/21/85> 61) 
+FORTH DEFINITIONS                       
+                                        
+  A&E                                   
+\ remember last LFA and DP              
+  LATEST PFA-LFA  LASTLFA !             
+  HERE SAVE-VDP !                       
+\ restore system status                 
+  ICEBOX @ VOC-LINK !                   
+  ICEBOX 2+ @ DP !                      
+  ICEBOX 4 + @ CONTEXT @ !              
+\ unhook then re-install normally       
+  FORGET-SYS                            
+                                        
+  A&E                                   
+  VIR-FLG @ SYS-FLG !                   
+  SYS-LINK1 FIRSTLFA @ !                
+  LASTLFA @ SYS-LINK2 !                 
+  <PUT-VIR>    \ write to disk          
+  V!AUX        \ copy to aux bank       
+  FORGET-SYS                            
+                                        
+CR CR ." A&E written" CR CR             
+                               ( bobp ) 
+-------------------------------------------- SCREEN 062
+( make virtual:  UTIL    <12/21/85> 62) 
+MAIN DECIMAL                            
+FORTH DEFINITIONS                       
+                                        
+\ save system status                    
+  FORGET-SYS FREEZE                     
+                                        
+UTIL    \ set virtual parameter pointer 
+                                        
+\ switch to virtual mem                 
+  VIR-BASE DP !                         
+\ fill with B's                         
+  VIR-BASE 8192 66 FILL                 
+\ compile check words                   
+  VIR-FLG @ VIR-TST @ , , 0 ,           
+\ dummy definition for lfa              
+  CREATE _ SMUDGE                       
+\ remember first LFA                    
+  LATEST PFA-LFA  FIRSTLFA !            
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 063
+( write virtual: UTIL    <12/21/85> 63) 
+FORTH DEFINITIONS                       
+                                        
+  UTIL                                  
+\ remember last LFA and DP              
+  LATEST PFA-LFA  LASTLFA !             
+  HERE SAVE-VDP !                       
+\ restore system status                 
+  ICEBOX @ VOC-LINK !                   
+  ICEBOX 2+ @ DP !                      
+  ICEBOX 4 + @ CONTEXT @ !              
+\ unhook then re-install normally       
+  FORGET-SYS                            
+                                        
+  UTIL                                  
+  VIR-FLG @ SYS-FLG !                   
+  SYS-LINK1 FIRSTLFA @ !                
+  LASTLFA @ SYS-LINK2 !                 
+  <PUT-VIR>    \ write to disk          
+  V!AUX        \ copy to aux bank       
+  FORGET-SYS                            
+                                        
+CR CR ." UTIL written" CR CR            
+                               ( bobp ) 
+-------------------------------------------- SCREEN 064
+( make virtual:  FPA     <12/21/85> 64) 
+MAIN DECIMAL                            
+FORTH DEFINITIONS                       
+                                        
+\ save system status                    
+  FORGET-SYS FREEZE                     
+                                        
+FPA     \ set virtual parameter pointer 
+                                        
+\ switch to virtual mem                 
+  VIR-BASE DP !                         
+\ fill with C's                         
+  VIR-BASE 8192 67 FILL                 
+\ compile check words                   
+  VIR-FLG @ VIR-TST @ , , 0 ,           
+\ dummy definition for lfa              
+  CREATE _ SMUDGE                       
+\ remember first LFA                    
+  LATEST PFA-LFA  FIRSTLFA !            
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 065
+( write virtual: FPA     <12/21/85> 65) 
+FORTH DEFINITIONS                       
+                                        
+  FPA                                   
+\ remember last LFA and DP              
+  LATEST PFA-LFA  LASTLFA !             
+  HERE SAVE-VDP !                       
+\ restore system status                 
+  ICEBOX @ VOC-LINK !                   
+  ICEBOX 2+ @ DP !                      
+  ICEBOX 4 + @ CONTEXT @ !              
+\ unhook then re-install normally       
+  FORGET-SYS                            
+                                        
+  FPA                                   
+  VIR-FLG @ SYS-FLG !                   
+  SYS-LINK1 FIRSTLFA @ !                
+  LASTLFA @ SYS-LINK2 !                 
+  <PUT-VIR>    \ write to disk          
+  V!AUX        \ copy to aux bank       
+  FORGET-SYS                            
+                                        
+CR CR ." FPA written" CR CR             
+                               ( bobp ) 
+-------------------------------------------- SCREEN 066
+( make virtual:  LOADER  <12/21/85> 66) 
+MAIN DECIMAL                            
+FORTH DEFINITIONS                       
+                                        
+\ save system status                    
+  FORGET-SYS FREEZE                     
+                                        
+LDR     \ set virtual parameter pointer 
+                                        
+\ switch to virtual mem                 
+  VIR-BASE DP !                         
+\ fill with D's                         
+  VIR-BASE 8192 68 FILL                 
+\ compile check words                   
+  VIR-FLG @ VIR-TST @ , , 0 ,           
+\ dummy definition for lfa              
+  CREATE _ SMUDGE                       
+\ remember first LFA                    
+  LATEST PFA-LFA  FIRSTLFA !            
+                                        
+\ make real LOADER vocabulary           
+  VOCABULARY LDR-VOC IMMEDIATE          
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 067
+( write virtual: LOADER  <12/21/85> 67) 
+FORTH DEFINITIONS                       
+                                        
+  LDR                                   
+\ remember last LFA and DP              
+  LATEST PFA-LFA  LASTLFA !             
+  HERE SAVE-VDP !                       
+\ restore system status                 
+  ICEBOX @ VOC-LINK !                   
+  ICEBOX 2+ @ DP !                      
+  ICEBOX 4 + @ CONTEXT @ !              
+\ unhook then re-install normally       
+  FORGET-SYS                            
+                                        
+  LDR                                   
+  VIR-FLG @ SYS-FLG !                   
+  SYS-LINK1 FIRSTLFA @ !                
+  LASTLFA @ SYS-LINK2 !                 
+  <PUT-VIR>    \ write to disk          
+  V!AUX        \ copy to aux bank       
+  FORGET-SYS                            
+                                        
+CR CR ." LOADER written" CR CR          
+                               ( bobp ) 
+-------------------------------------------- SCREEN 068
+( make virtual:  MLOADER <12/21/85> 68) 
+MAIN DECIMAL                            
+FORTH DEFINITIONS                       
+                                        
+\ save system status                    
+  FORGET-SYS FREEZE                     
+                                        
+MLDR    \ set virtual parameter pointer 
+                                        
+\ switch to virtual mem                 
+  VIR-BASE DP !                         
+\ fill with E's                         
+  VIR-BASE 8192 69 FILL                 
+\ compile check words                   
+  VIR-FLG @ VIR-TST @ , , 0 ,           
+\ dummy definition for lfa              
+  CREATE _ SMUDGE                       
+\ remember first LFA                    
+  LATEST PFA-LFA  FIRSTLFA !            
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 069
+( write virtual: MLOADER <12/21/85> 69) 
+FORTH DEFINITIONS                       
+                                        
+  MLDR                                  
+\ remember last LFA and DP              
+  LATEST PFA-LFA  LASTLFA !             
+  HERE SAVE-VDP !                       
+\ restore system status                 
+  ICEBOX @ VOC-LINK !                   
+  ICEBOX 2+ @ DP !                      
+  ICEBOX 4 + @ CONTEXT @ !              
+\ unhook then re-install normally       
+  FORGET-SYS                            
+                                        
+  MLDR                                  
+  VIR-FLG @ SYS-FLG !                   
+  SYS-LINK1 FIRSTLFA @ !                
+  LASTLFA @ SYS-LINK2 !                 
+  <PUT-VIR>    \ write to disk          
+  V!AUX        \ copy to aux bank       
+  FORGET-SYS                            
+                                        
+CR CR ." MLOADER written" CR CR         
+                               ( bobp ) 
+-------------------------------------------- SCREEN 070
+( <@APPENDIX>            <12/21/85> 70) 
+ONLY FORTH VIRTUAL ALSO                 
+  FORTH ALSO DEFINITIONS                
+                                        
+HEX MAIN                                
+                                        
+9000 CONSTANT APP-AUX                   
+                                        
+DVARIABLE APP-TEST                      
+   E000 @ F000 @ APP-TEST D!            
+                                        
+DECIMAL                                 
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 071
+( <@APPENDIX>            <12/21/85> 71) 
+MAIN                                    
+ONLY FORTH ALSO DEFINITIONS             
+HEX                                     
+\ should only be used after <!APPENDIX> 
+                                        
+: <@APPENDIX>                           
+   R2-W2                                
+   E000 @ F000 @ APP-TEST D@ D= NOT     
+   IF ?AUX                              
+      IF 1 APP-AUX 0 E000 2000 CMOVEL   
+   THEN THEN                            
+   E000 @ F000 @ APP-TEST D@ D= NOT     
+   ?AUX NOT OR                          
+   IF D000 6 0 8 2 1 20 RWTS            
+      APP-SECTS @                       
+      IF F000 6 0 SYS-SECTS @ 10 +      
+         SECS/TRK /MOD                  
+         1 APP-SECTS @ RWTS             
+   THEN THEN                            
+   E000 @ F000 @ APP-TEST D! ;          
+                                        
+DECIMAL                                 
+                               ( bobp ) 
+-------------------------------------------- SCREEN 072
+( <!APPENDIX>            <12/21/85> 72) 
+\ I suspect it will be too dangerous    
+\ to copy the appendix out to disk;     
+\ if you are using a ][ or a ][+ , you  
+\ will lose any changes you have made   
+\ to the appendix.                      
+                                        
+HEX APPENDIX                            
+                                        
+: <!APPENDIX>                           
+   R2-W2                                
+   E000 @ F000 @ APP-TEST D!            
+   ?AUX                                 
+   IF 0 E000 1 APP-AUX                  
+      2000 CMOVEL                       
+   THEN ;                               
+                                        
+DECIMAL MAIN                            
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 075
+( READ-VIRS              <12/21/85> 75) 
+APPENDIX                                
+ONLY FORTH VIRTUAL ALSO                 
+  FORTH ALSO DEFINITIONS                
+                                        
+: ?VR 46 EMIT VIR-BASE ?RESIDENT NOT ;  
+: NF ." not found " ;                   
+                                        
+: READ-VIRS                             
+   ?2E NOT IF EXIT THEN                 
+   CR ." Reading virtual images "       
+   A&E <GET-VIR> V!AUX                  
+   ?VR IF CR ." A&E " NF THEN           
+   UTIL <GET-VIR> V!AUX                 
+   ?VR IF CR ." UTIL " NF THEN          
+   FPA <GET-VIR> V!AUX                  
+   ?VR IF CR ." FPA " NF THEN           
+   LDR <GET-VIR> V!AUX                  
+   ?VR IF CR ." LOADER " NF THEN        
+   MLDR <GET-VIR> V!AUX                 
+   ?VR IF CR ." MLOADER " NF THEN       
+   <!APPENDIX> GET-A&E CR CR ;          
+                                        
+ONLY FORTH ALSO  MAIN          ( bobp ) 
+-------------------------------------------- SCREEN 076
+( <LOGO>                 < 1/20/87> 76) 
+APPENDIX                                
+                                        
+: <LOGO>                                
+   PAGE ." PAI Forth version 3.10 "     
+   [ MONTH @ DAY @ YEAR @ ]             
+   LITERAL LITERAL LITERAL              
+   0 .R 45 EMIT 0 .R 45 EMIT 0 .R       
+   ."  (fah) " CR ;                     
+                                        
+' <LOGO> CFA      ' LOGO !              
+' READ-VIRS CFA   ' START-SYS !         
+                                        
+MAIN                                    
+                                        
+EXIT                                    
+                                        
+   ." OpDB version 3.01A "              
+   [ MONTH @ DAY @ YEAR @ ]             
+   LITERAL LITERAL LITERAL              
+   0 .R 45 EMIT 0 .R 45 EMIT 0 .R       
+   ."  (fah) " CR ;                     
+                                        
+                               (  PAI ) 
+-------------------------------------------- SCREEN 077
+( A&E hooks              <12/21/85> 77) 
+APPENDIX  GET-A&E                       
+                                        
+: CODE                                  
+   GET-A&E [ ASSEMBLER ' CODE CFA ]     
+   LITERAL FORTH EXECUTE ; IMMEDIATE    
+                                        
+: ;CODE                                 
+   GET-A&E [ ASSEMBLER ' ;CODE CFA ]    
+   LITERAL FORTH EXECUTE ; IMMEDIATE    
+                                        
+: EDIT ( scr -- )                       
+   MAIN ?NUM GET-A&E                    
+   [ EDITOR ' EDIT CFA ]                
+   LITERAL EXECUTE ;                    
+                                        
+: SCRHDS GET-A&E                        
+   [ EDITOR ' SCRHDS CFA ]              
+   LITERAL EXECUTE ;                    
+                                        
+: ED EDIT ;                             
+: EL SCR @ EDIT ;                       
+                                        
+MAIN                           ( bobp ) 
+-------------------------------------------- SCREEN 078
+( UTIL hooks             <12/21/85> 78) 
+APPENDIX GET-UTIL                       
+                                        
+: COPYSCRNS  MAIN GET-UTIL              
+   [ ' COPYSCRNS CFA ]                  
+   LITERAL EXECUTE ;                    
+: ERASESCRNS  MAIN GET-UTIL             
+   [ ' ERASESCRNS CFA ]                 
+   LITERAL EXECUTE ;                    
+                                        
+: DUMP  GET-UTIL [ ' DUMP CFA ]         
+   LITERAL EXECUTE ;                    
+: INDEX  GET-UTIL [ ' INDEX CFA ]       
+   LITERAL EXECUTE ;                    
+: 4LST  GET-UTIL [ ' 4LST CFA ]         
+   LITERAL EXECUTE ;                    
+                                        
+: CASE  GET-UTIL [ ' CASE CFA ]         
+   LITERAL EXECUTE ; IMMEDIATE          
+: IT    GET-UTIL [ ' <IT> CFA ]         
+   LITERAL EXECUTE ; IMMEDIATE          
+                                        
+MAIN                                    
+                               ( bobp ) 
+-------------------------------------------- SCREEN 080
+( TEXT HG 1HG HGR CLS    <12/21/85> 80) 
+HEX MAIN                                
+                                        
+CODE TEXT   \ switch to text screen     
+      C051 LDA,                         
+      NEXT JMP, C;                      
+                                        
+CODE HG     \ switch to graphics screen 
+      C052 LDA, C050 LDA,               
+      C054 LDA, C057 LDA,               
+      NEXT JMP, C;                      
+                                        
+CODE 1HG    \ mixed graphics and text   
+      C053 LDA, C050 LDA,               
+      ' HG 6 + JMP, C;                  
+                                        
+: CLS FORGET-SYS                        
+      2000 2000 0 FILL ;                
+                                        
+: HGR CLS HG ;                          
+                                        
+DECIMAL                                 
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 081
+( TONE                   <12/21/85> 81) 
+MAIN                                    
+                                        
+CODE <TONE>  2 # LDA, SETUP JSR,        
+   N 3 + INC, N 1+ INC,                 
+   BEGIN, N 3 + LDA, N 4 + STA,         
+    N 2+ LDY, 49200 LDA,                
+      BEGIN, DEY, 0=                    
+         IF, N 4 + DEC,                 
+         THEN, 0=                       
+      UNTIL, N DEC, 0=                  
+      IF, N 1+ DEC,                     
+      THEN, 0=                          
+   UNTIL, NEXT JMP, C;                  
+                                        
+: TONE ( freq,hz duration,1/100sec -- ) 
+   68500. 4 ROLL U/MOD SWAP DROP        
+   SWAP 1278 3 PICK 3 + */ <TONE> ;     
+                                        
+EXIT                                    
+                                        
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 082
+( TO REVECTOR            <12/21/85> 82) 
+MAIN                                    
+                                        
+: <TO>   R> DUP 2+ >R @ ! ;             
+                                        
+APPENDIX                                
+                                        
+: TO                                    
+   ?FIND DROP  STATE @                  
+   IF COMPILE <TO>  ,                   
+   ELSE  !  THEN ;                      
+   IMMEDIATE                            
+                                        
+: REVECTOR                              
+   ?FIND DROP CFA                       
+   [COMPILE] LITERAL ;                  
+   IMMEDIATE                            
+                                        
+: INTO [COMPILE] TO ; IMMEDIATE         
+                                        
+MAIN EXIT                               
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 083
+( 1K -ROT WITHIN UWITHIN <12/21/85> 83) 
+MAIN                                    
+                                        
+1024 CONSTANT 1K                        
+                                        
+: ON  1 SWAP ! ;                        
+                                        
+: OFF 0 SWAP ! ;                        
+                                        
+: -ROT   ROT ROT ;                      
+                                        
+: WITHIN ( n lo hi -- flag )            
+   3 PICK MIN MAX = ;                   
+                                        
+: UWITHIN ( n ulo uhi -- flag )         
+   3 PICK U< >R U< R> OR NOT ;          
+                                        
+                                        
+EXIT                                    
+                                        
+8192 CONSTANT 8K                        
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 084
+( BUFFERS                <12/21/85> 84) 
+MAIN                                    
+( n --, {installs n or max avail.} )    
+                                        
+: BUFFERS                               
+   FLUSH [COMPILE] MAIN                 
+   LIMIT PAD 200 + -                    
+   0 1028 U/MOD SWAP DROP               
+   DUP 2 <                              
+   IF 2BEEP ." OUT OF MEMORY" QUIT THEN 
+   MIN 2 MAX ' #BUFF !                  
+\  CR #BUFF . ." BUFFERS INSTALLED" CR  
+   #BUFF 1028 * LIMIT SWAP -            
+   DUP ' FIRST !                        
+   DUP ' MEM-LIMIT !                    
+   DUP USE ! PREV !                     
+   EMPTY-BUFFERS ;                      
+                                        
+EXIT                                    
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 085
+( :$ .$ ;$ N$ N$.        <12/21/85> 85) 
+APPENDIX                                
+                                        
+: :$  VARIABLE HERE 2- ;                
+: .$  1 OVER +! 36 WORD C@ 1+ ALLOT ;   
+: ;$  DROP ;                            
+                                        
+MAIN                                    
+                                        
+( : FIRSTSUB$  2+ ;         )           
+( : NEXTSUB$  DUP C@ + 1+ ; )           
+                                        
+: N$  OVER OVER @ > 3 PICK 1 < OR       
+     IF DROP DROP 0                     
+     ELSE ( FIRSTSUB$ ) 2+ SWAP 1 -     
+        ?DUP IF 0                       
+           DO ( NEXTSUB$ ) DUP C@ + 1+  
+           LOOP                         
+        THEN 1                          
+     THEN ;                             
+                                        
+: N$. N$ IF COUNT TYPE THEN ;           
+EXIT                                    
+                               ( bobp ) 
+-------------------------------------------- SCREEN 086
+( XWORD NOTES            <12/21/85> 86) 
+                                        
+EXIT                                    
+                                        
+any word that is preceeded by an "X"    
+is a split head word you should use     
+X' to find the address of the word      
+in the main dictionary, using ' will    
+return the address of the head          
+                                        
+Do not use DOES with X: as it will      
+get confused and do the wrong thing     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 087
+( ?MAIN ?FIND ?APPN      <12/21/85> 87) 
+                                        
+APPENDIX                                
+                                        
+: ?MAIN                                 
+  OLD-DP @                              
+  ABORT" MAIN MEMORY ONLY" ;            
+                                        
+: ?APPN                                 
+  OLD-DP @ NOT                          
+  ABORT" APPENDIX ONLY" ;               
+                                        
+\ : ?FIND ( -- PFA FLAG)                
+\   -FIND NOT ABORT" NOT FOUND" ;       
+                                        
+  HEX                                   
+: APPENDIX? ( ADDR -- T/F)              
+  D000 U< NOT ;                         
+  DECIMAL                               
+                                        
+MAIN                                    
+                                        
+EXIT                                    
+                               ( bobp ) 
+-------------------------------------------- SCREEN 088
+( [MAIN] [APPN]          <12/21/85> 88) 
+                                        
+APPENDIX                                
+                                        
+: [MAIN] [COMPILE] MAIN ;               
+                                        
+: [APPN] [COMPILE] APPENDIX ;           
+                                        
+MAIN                                    
+                                        
+EXIT                                    
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 089
+( <XCREATE> X'           <12/21/85> 89) 
+APPENDIX                                
+                                        
+0 CONSTANT 'XCREATE                     
+                                        
+: <XCREATE>                             
+    ?MAIN [APPN]                        
+  CREATE IMMEDIATE                      
+    [MAIN] DP C@ 255 = ALLOT  HERE      
+    ' <VAR> ,                           
+    [APPN] ( MAIN-HERE ) ,              
+  DOES> [ HERE 3 -  ' 'XCREATE ! ]      
+    @ STATE @                           
+    IF ,                                
+    ELSE EXECUTE                        
+    THEN ;                              
+                                        
+: X' ?FIND DROP                         
+    DUP CFA @ 'XCREATE = NOT            
+    ABORT" Not an X word"               
+    @ 2+ [COMPILE] LITERAL              
+    ; IMMEDIATE                         
+MAIN                                    
+                               ( bobp ) 
+-------------------------------------------- SCREEN 090
+( XCREATE XVAR XCONST    <12/21/85> 90) 
+                                        
+APPENDIX                                
+                                        
+: XCREATE <XCREATE> [MAIN] ;            
+                                        
+: XVARIABLE                             
+   XCREATE 0 , ;                        
+                                        
+: XCONSTANT                             
+   ?NUM <XCREATE> [MAIN]                
+   -2 ALLOT ' <CONST> , , ;             
+                                        
+: XVAR   XVARIABLE ;                    
+: XCONST XCONSTANT ;                    
+                                        
+MAIN                                    
+                                        
+EXIT                                    
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 091
+( XCODE                  <12/21/85> 91) 
+                                        
+  GET-A&E                               
+                                        
+APPENDIX                                
+                                        
+: XCODE ?MAIN GET-A&E                   
+      <XCREATE> SMUDGE [MAIN]           
+      [COMPILE] ASSEMBLER               
+      ASSEMBLER MEM                     
+      !CSP HERE DUP 2- ! ;              
+                                        
+: XC; ?MAIN ?CSP                        
+      [APPN] SMUDGE [MAIN]              
+      CURRENT @ CONTEXT !               
+      ; IMMEDIATE                       
+                                        
+                                        
+MAIN EXIT                               
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 092
+( X: X;                  <12/21/85> 92) 
+                                        
+APPENDIX                                
+                                        
+: X:  ?MAIN                             
+      20 ( flag for X; )                
+      SP@ CSP ! CURRENT @ CONTEXT !     
+      <XCREATE> SMUDGE [MAIN]           
+      -2 ALLOT ' <:> ,                  
+      [COMPILE] ] ;                     
+                                        
+: X;  ?MAIN ?CSP                        
+      20 -                              
+      ABORT" NOT STARTED WITH X:"       
+      COMPILE EXIT                      
+      [APPN] SMUDGE [MAIN]              
+      [COMPILE] [                       
+      ; IMMEDIATE                       
+                                        
+MAIN                                    
+                                        
+EXIT                                    
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 093
+( <XFORGET>              <12/21/85> 93) 
+                                        
+APPENDIX                                
+                                        
+: <XFORGET>                             
+  OLD-DP @ NOT                          
+   \ remember where we were (T= main)   
+  >IN @ ?FIND DROP APPENDIX?            
+  IF [APPN] ELSE [MAIN] THEN            
+  >IN ! <FORGET>                        
+   \ now restore to original            
+  IF [MAIN] ELSE [APPN] THEN ;          
+                                        
+                                        
+' <XFORGET> CFA  ' FORGET !             
+                                        
+MAIN                                    
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 094
+( .SS .S  ASCII          <12/21/85> 94) 
+APPENDIX                                
+                                        
+: .SS                                   
+   DEPTH                                
+   IF SP@ 2- S0 2-                      
+      DO I @ 0 D. -2 +LOOP              
+   ELSE ." EMPTY STACK " THEN ;         
+                                        
+: .S CR .SS  CR ;                       
+                                        
+                                        
+\ compile ascii value of next char      
+                                        
+: ASCII BL WORD 1+ C@                   
+        [COMPILE] LITERAL ; IMMEDIATE   
+                                        
+                                        
+MAIN EXIT                               
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 095
+( E-B S-B ? X.           <12/21/85> 95) 
+                                        
+APPENDIX                                
+                                        
+: E-B EMPTY-BUFFERS ;                   
+                                        
+: S-B SAVE-BUFFERS ;                    
+                                        
+: ?  @ . ;                              
+                                        
+: X. BASE @ >R HEX U. R> BASE ! ;       
+                                        
+MAIN                                    
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 096
+( BITTBL &BIT            <12/21/85> 96) 
+MAIN                                    
+CREATE BITTBL                           
+    1 C,   2 C,   4 C,   8 C,           
+   16 C,  32 C,  64 C, 128 C,           
+                                        
+\ takes { adr offset } on stack         
+\ leaves new adr on stack; drops offset 
+\ sets .A to bit mask                   
+\ leaves .Y set to 0                    
+                                        
+XCODE &BIT                              
+      BOT LDA, N STA,                   
+      BOT 1+ LDA, N 1+ STA,  INX, INX,  
+      N LDA, # 7 AND, TAY,              
+      N 1+ LSR, N ROR,                  
+      N 1+ LSR, N ROR,                  
+      N 1+ LSR, N ROR,                  
+      CLC, BOT LDA, N ADC, BOT STA,     
+      BOT 1+ LDA, N 1+ ADC,             
+           BOT 1+ STA,                  
+      BITTBL ,Y LDA, # 0 LDY,           
+      RTS, XC;                          
+EXIT                           ( bobp ) 
+-------------------------------------------- SCREEN 097
+( @BIT !BIT              <12/21/85> 97) 
+MAIN                                    
+\ "Offset" can be any unsigned number.  
+\ Note backwards syntax for !BIT .      
+                                        
+CODE @BIT ( addr offset -- 0/1 )        
+   X' &BIT JSR,                         
+   0 X) AND,                            
+   0= NOT IF, INY, THEN,                
+   TYA, PHA, 0 # LDA, PUT JMP, C;       
+                                        
+CODE !BIT ( addr offset 0/1 -- )        
+   BOT LDA, BOT 1+ ORA,                 
+   PHP, ( save flag)                    
+   INX, INX,                            
+   X' &BIT JSR,                         
+   PLP, 0=                              
+      IF, # 255 EOR, 0 X) AND,          
+      ELSE, 0 X) ORA, THEN,             
+   0 X) STA, POP JMP, C;                
+                                        
+FORGET &BIT                             
+EXIT                                    
+                               ( bobp ) 
+-------------------------------------------- SCREEN 098
+( ?EXIT ?LEAVE           <12/21/85> 98) 
+                                        
+: ?EXIT  IF R> DROP THEN ;              
+                                        
+: ?LEAVE IF R> LEAVE >R THEN ;          
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 099
+( DECOMPILE              <12/21/85> 99) 
+APPENDIX                                
+                                        
+GET-FPA                                 
+                                        
+: DECOMPILE GET-FPA [ ' DECOMPILE       
+   CFA ] LITERAL EXECUTE ;              
+                                        
+MAIN                                    
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 100
+( <@APPENDIX>            <12/21/85>100) 
+ONLY FORTH VIRTUAL ALSO                 
+  FORTH ALSO DEFINITIONS  MAIN          
+                                        
+HEX                                     
+                                        
+NEXT-AUX @ CONSTANT APP-AUX             
+2000 NEXT-AUX +!                        
+                                        
+DVARIABLE APP-TEST                      
+   E000 @ F000 @ APP-TEST D!            
+                                        
+DECIMAL                                 
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 101
+( <@APPENDIX>            <12/21/85>101) 
+ONLY FORTH VIRTUAL ALSO                 
+  FORTH ALSO DEFINITIONS  MAIN          
+HEX                                     
+\ should only be used after <!APPENDIX> 
+                                        
+: <@APPENDIX>                           
+   R2-W2                                
+   E000 @ F000 @ APP-TEST D@ D= NOT     
+   IF ?AUX                              
+      IF 1 APP-AUX 0 E000 2000 BMOVE    
+      THEN                              
+      E000 @ F000 @ APP-TEST D@ D= NOT  
+      ?AUX NOT OR                       
+      IF D000 6 0 8 2 1 20 RWTS         
+         APP-SECTS @                    
+         IF F000 6 0 SYS-SECTS @ 10 +   
+            SECS/TRK /MOD               
+            1 APP-SECTS @ RWTS          
+   THEN THEN THEN                       
+   E000 @ F000 @ APP-TEST D! ;          
+                                        
+DECIMAL                                 
+                               ( bobp ) 
+-------------------------------------------- SCREEN 102
+( <!APPENDIX>            <12/21/85>102) 
+\ I suspect it will be too dangerous    
+\ to copy the appendix out to disk;     
+\ if you are using a ][ or a ][+ , you  
+\ will lose any changes you have made   
+\ to the appendix.                      
+HEX                                     
+                                        
+: <!APPENDIX>                           
+   R2-W2                                
+   E000 @ F000 @ APP-TEST D!            
+   ?AUX                                 
+   IF 0 E000 1 APP-AUX                  
+      2000 BMOVE                        
+   THEN ;                               
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 109
+R to disk: < 2/12/86>278)EEEEEEEEEEEEEEE
+EEEEEEEEEEE278EEEEEEEEEEEEEEEEEEEEEEEEEE
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+-------------------------------------------- SCREEN 117
+DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+-------------------------------------------- SCREEN 131
+BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
+BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
+BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
+BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
+BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
+BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
+BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
+BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
+BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
+BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
+BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
+BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
+BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
+BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
+BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
+BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
+BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
+BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
+BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
+BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
+BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
+BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
+BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
+BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB

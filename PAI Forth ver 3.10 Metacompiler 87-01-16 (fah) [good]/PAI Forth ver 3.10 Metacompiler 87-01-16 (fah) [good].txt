@@ -1,0 +1,1475 @@
+-------------------------------------------- SCREEN 038
+( <FIND> -FIND           <12/11/85> 39) 
+APPENDIX                                
+                                        
+: <FIND> ( wa flag -- pfa ??? flag )    
+   0 PRIOR !  >R 0      ( wa dummy )    
+   4 0 DO  DROP         ( wa )          
+      CONTEXT I 2* + @  ( wa voc )      
+      DUP                               
+      IF DUP PRIOR @    ( wa vo vo pr ) 
+         OVER PRIOR !                   
+         = IF DROP 0    ( wa 0 )        
+         ELSE           ( wa voc )      
+            OVER SWAP   ( wa wa voc )   
+            @ 2+ J <<FIND>              
+            DUP IF LEAVE THEN           
+      THEN THEN                         
+   LOOP  R> DROP                        
+   DUP IF 4 ROLL ELSE SWAP THEN DROP ;  
+                                        
+: -FIND BL WORD                         
+   CONTEXT @ 'NEW FORTH - <FIND> ;      
+                                        
+MAIN -->                                
+                               ( 13:33) 
+-------------------------------------------- SCREEN 039
+( <FIND> -FIND           <12/11/85> 39) 
+APPENDIX                                
+: <FIND> ( wa flag -- pfa ??? flag )    
+   0 PRIOR !  >R 0      ( wa dummy )    
+   4 0 DO  DROP         ( wa )          
+      CONTEXT I 2* + @  ( wa voc )      
+      DUP                               
+      IF DUP PRIOR @    ( wa vo vo pr ) 
+         OVER PRIOR !                   
+         = IF DROP 0    ( wa 0 )        
+         ELSE           ( wa voc )      
+            OVER SWAP   ( wa wa voc )   
+            J 0= IF DUP 'NEW FORTH -    
+            ELSE 1 THEN >R              
+            @ 2+ R> <<FIND>             
+            DUP IF LEAVE THEN           
+      THEN THEN                         
+   LOOP  R> DROP                        
+   DUP IF 4 ROLL ELSE SWAP THEN DROP ;  
+                                        
+: -FIND BL WORD                         
+   CONTEXT @ 'NEW FORTH - <FIND> ;      
+                                        
+MAIN -->                       ( 13:33) 
+-------------------------------------------- SCREEN 040
+( ASSEMBLER FOR 6502 BY: <12/11/85> 40) 
+( WM. F. RAGSDALE, FORTH DIMENSIONS   ) 
+( VOL. III, NO. 5, P. 143             ) 
+HEX                                     
+VOCABULARY ASSEMBLER IMMEDIATE          
+ASSEMBLER DEFINITIONS                   
+                                        
+: IS CONSTANT ;                         
+                                        
+ 800    IS COLD                         
+ 0F0    IS N       N 0A + IS XSAVE      
+ N 0B + IS IP      N 0E + IS W          
+                                        
+  VARIABLE INDEX  1E ALLOT              
+  VARIABLE MODE                         
+                                        
+DECIMAL -->                             
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 041
+( ASSEMBLER CONT         <12/11/85> 41) 
+HEX                                     
+: .A  0 MODE ! ;    : #  1 MODE ! ;     
+                                        
+: MEM  2 MODE ! ;                       
+                                        
+: ,X  3 MODE ! ;   : ,Y  4 MODE ! ;     
+                                        
+: X)  5 MODE ! ;   : )Y  6 MODE ! ;     
+                                        
+: )  F MODE ! ;   : BOT  0 ,X ;         
+                                        
+: SEC  2 ,X ;      : TOP  BOT ;         
+                                        
+: RP) 101 ,X ;                          
+                                        
+: UPMODE                                
+   IF MODE C@ 8 AND 0=                  
+    IF 8 MODE +!                        
+   THEN THEN                            
+  1 MODE C@ F AND ?DUP                  
+   IF 0 DO DUP + LOOP THEN              
+   OVER 1+ @ AND 0= ;                   
+DECIMAL -->                    ( bobp ) 
+-------------------------------------------- SCREEN 042
+( ASSEMBLER CONT         <12/11/85> 42) 
+HEX                                     
+                                        
+: CPU  CREATE C, DOES> C@ C, MEM ;      
+                                        
+00 CPU BRK,        18 CPU CLC,          
+D8 CPU CLD,        58 CPU CLI,          
+B8 CPU CLV,        CA CPU DEX,          
+88 CPU DEY,        E8 CPU INX,          
+C8 CPU INY,        EA CPU NOP,          
+48 CPU PHA,        08 CPU PHP,          
+68 CPU PLA,        28 CPU PLP,          
+40 CPU RTI,        60 CPU RTS,          
+38 CPU SEC,        F8 CPU SED,          
+78 CPU SEI,        AA CPU TAX,          
+A8 CPU TAY,        BA CPU TSX,          
+8A CPU TXA,        9A CPU TXS,          
+98 CPU TYA,                             
+                                        
+DECIMAL -->                             
+                                        
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 043
+( ASSEMBLER CONT         <12/11/85> 43) 
+HEX                                     
+                                        
+: M/CPU  CREATE C, , DOES>              
+   DUP 1+ C@ 80 AND                     
+    IF 10 MODE +! THEN                  
+   OVER -100 AND UPMODE UPMODE          
+    ABORT" INCORRECT ADDRESSING MODE"   
+   C@ MODE C@ INDEX + C@ + C,           
+   MODE C@ 7 AND                        
+    IF MODE C@ 0F AND 7 <               
+     IF C, ELSE , THEN                  
+    THEN MEM ;                          
+                                        
+1C6E 60 M/CPU ADC,   1C6E 20 M/CPU AND, 
+1C6E C0 M/CPU CMP,   1C6E 40 M/CPU EOR, 
+1C6E A0 M/CPU LDA,   1C6E 00 M/CPU ORA, 
+1C6E E0 M/CPU SBC,   1C6C 80 M/CPU STA, 
+0D0D 01 M/CPU ASL,   0C0C C1 M/CPU DEC, 
+0C0C E1 M/CPU INC,   0D0D 41 M/CPU LSR, 
+0D0D 21 M/CPU ROL,   0D0D 61 M/CPU ROR, 
+DECIMAL -->                             
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 044
+( ASSEMBLER CONT         <12/11/85> 44) 
+HEX                                     
+                                        
+0414 81 M/CPU STX,   0486 E0 M/CPU CPX, 
+0486 C0 M/CPU CPY,   1496 A2 M/CPU LDX, 
+0C8E A0 M/CPU LDY,   048C 80 M/CPU STY, 
+0480 14 M/CPU JSR,   8480 40 M/CPU JMP, 
+0484 20 M/CPU BIT,                      
+                                        
+: NOT  20 + ;   90 IS CS    50 IS OV    
+                                        
+  D0 IS 0=   10 IS 0<   90 IS >=        
+                                        
+DECIMAL -->                             
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 045
+( ASSEMBLER CONT         <12/11/85> 45) 
+HEX                                     
+                                        
+0909 INDEX !        1505 INDEX 2+ !     
+0115 INDEX 4 + !    8011 INDEX 6 + !    
+8009 INDEX 8 + !    1D0D INDEX A + !    
+8019 INDEX C + !    8080 INDEX E + !    
+0080 INDEX 10 + !   1404 INDEX 12 + !   
+8014 INDEX 14 + !   8080 INDEX 16 + !   
+8080 INDEX 18 + !   1C0C INDEX 1A + !   
+801C INDEX 1C + !   2C80 INDEX 1E + !   
+                                        
+: !CSP  SP@ CSP ! ;                     
+: #LO   0FF AND # ;                     
+: #HI   0 100 U/MOD SWAP DROP # ;       
+                                        
+FORTH DEFINITIONS  DECIMAL CR CR        
+                                        
+: !CSP  SP@ CSP ! ;                     
+: IS CONSTANT ;                         
+                                        
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 047
+( LONG OPERS             <12/11/85> 47) 
+HEX                                     
+                                        
+: <LONG> ( seg addr -- )                
+   DUP D000 U< NOT                      
+   IF SWAP 0= SWAP B000 - THEN ;        
+                                        
+: @L <LONG> @L ;                        
+: !L <LONG> @L ;                        
+                                        
+: RWTSL                                 
+   >R >R >R >R >R >R <LONG>             
+   R> R> R> R> R> R> RWTSL ;            
+                                        
+: CMOVEL                                
+   >R DSWAP <LONG> DSWAP <LONG> R>      
+   CMOVEL ;                             
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+-------------------------------------------- SCREEN 048
+( BOB'S DEFINITIONS      <12/11/85> 48) 
+                                        
+CREATE GBUFF 300 ALLOT                  
+                                        
+: MYBREAK SP! RP! R2-W2 <ABORT> ;       
+                                        
+: MYBOOT  MODE40 L40 <ABORT> ;          
+                                        
+: ? @ . ;                               
+                                        
+: E-B EMPTY-BUFFERS ;                   
+                                        
+                                        
+' MYBREAK CFA ' BRK-RETN !              
+' MYBOOT CFA  ' ABORT !                 
+                                        
+EXIT                                    
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( 13:33) 
+-------------------------------------------- SCREEN 049
+( BOB'S DEFINITIONS      <12/11/85> 49) 
+HEX                                     
+\ Used by graphics package.             
+\ Must be defined here because of       
+\ stupid design of metacompiler         
+\ which doesn't allow code words        
+\ to reference newly-defined constants. 
+                                        
+E4 CONSTANT GBASE     ( >Y address )    
+E6 CONSTANT GPATTERN  ( >pattern   )    
+E8 CONSTANT GFIG      ( >fig data  )    
+                                        
+: /LO 0FF AND ;                         
+: /HI 0 100 U/MOD SWAP DROP ;           
+                                        
+FORTH DEFINITIONS                       
+                                        
+: METACOMPILER ;                        
+                                        
+DECIMAL EXIT                            
+                                        
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 050
+( METACMPLR INSTRUCTIONS <12/11/85> 50) 
+FORTH DEFINITIONS FORGET-SYS            
+                                        
+FORGET METACOMPILER : METACOMPILER ;    
+                                        
+VARIABLE HDS? MODE40 PAGE ?LONG         
+                                        
+: COMPILE-NO-HDS 0 HDS? ! 51 LOAD ;     
+                                        
+: COMPILE-HDS 1 HDS? ! 51 LOAD ;        
+                                        
+COMPILE-HDS CR QUIT                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( 13:33) 
+-------------------------------------------- SCREEN 051
+( METACMPLR PARAMETERS   <12/ 5/85> 51) 
+HEX  1F ' WIDTH !                       
+FORTH DEFINITIONS FORGET-SYS            
+: CMPL-TYP                              
+   HDS? @ IF ." WITH-HEADS."            
+   ELSE ." NO-HEADS." THEN ;            
+                                        
+ 0800 CONSTANT BASE-ADDR    ?DOSL       
+   01 CONSTANT COMP-SEG                 
+ 0800 CONSTANT COMP-ADDR                
+                                        
+ COMP-ADDR BASE-ADDR - CONSTANT DELTA   
+     DVARIABLE NEW-SYS                  
+ COMP-SEG BASE-ADDR NEW-SYS D!          
+ 0 IS *TABLE*                           
+ 0 IS *<.">*          0 IS *<ABORT">*   
+ 0 IS *DODOES*        0 IS *DOES>*      
+ 0 IS *COLON*         0 IS *VOCAB*      
+ 0 IS *<;CODE>*       0 IS *CONSTANT*   
+ 0 IS *DCONSTANT*     0 IS *VARIABLE*   
+ 0 IS *DVARIABLE*     0 IS *CREATE*     
+ ' LIT CFA IS *LIT*                     
+ ' LIT CFA IS OF*LIT* 0 IS NF*LIT*      
+DECIMAL -->                    ( 13:33) 
+-------------------------------------------- SCREEN 052
+( METACOMPILER VARIABLES <12/11/85> 52) 
+                                        
+ VOCABULARY NEWFORTH IMMEDIATE          
+                                        
+: OF/NF                                 
+   [COMPILE] NEWFORTH DEFINITIONS       
+   [COMPILE] FORTH ;                    
+                                        
+  VARIABLE DPNEW     VARIABLE DPOLD     
+  VARIABLE MOVEFLG   VARIABLE O/N       
+  VARIABLE DPBUILD                      
+  VARIABLE WORDBUILD    2000 ALLOT      
+                                        
+ COMP-ADDR DPNEW !                      
+ WORDBUILD DPBUILD !                    
+                                        
+: !NEW COMP-SEG SWAP !L ;               
+: @NEW COMP-SEG SWAP @L ;               
+                                        
+-->                                     
+                                        
+                                        
+                                        
+                               ( 13:33) 
+-------------------------------------------- SCREEN 053
+( META: SETOLD SETNEW    <12/ 5/85> 53) 
+                                        
+  VARIABLE LAST                         
+                                        
+: SETOLD  O/N @                         
+   IF 0 O/N !                           
+      HERE DPBUILD !                    
+      DPOLD @ DP !                      
+      OF*LIT* [ ' *LIT* ] LITERAL !     
+   THEN ;                               
+                                        
+: SETNEW  O/N @ 0=                      
+   IF 1 O/N !                           
+      HERE DPOLD !                      
+      DPBUILD @ DP !                    
+      NF*LIT* [ ' *LIT* ] LITERAL !     
+   THEN ;                               
+                                        
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                               ( 13:33) 
+-------------------------------------------- SCREEN 054
+( META: MOVEWORD? STATUS?<12/ 5/85> 54) 
+: MOVEWORD?                             
+   MOVEFLG @                            
+   IF 0 MOVEFLG ! SETOLD GET:CS         
+      WORDBUILD COMP-SEG DPNEW @        
+      DPBUILD @ WORDBUILD - ?DUP        
+      IF DUP DPNEW +! 2000 OVER U<      
+ABORT" WORDBUILD SPACE EXCEEDED - HALT" 
+         CMOVEL WORDBUILD DPBUILD !     
+      ELSE DDROP DDROP                  
+   THEN THEN ;                          
+                                        
+: STATUS?                               
+ MOVEWORD? SETNEW SETOLD CR CR          
+ ." DPNEW = " DPNEW @ U. CR ." DPOLD = "
+  DPOLD @   U. CR ." BASE-ADDR = "      
+  BASE-ADDR U. CR ." COMP-SEG  = "      
+  COMP-SEG  U. CR ." COMP-ADDR = "      
+  COMP-ADDR U. CR CR DPNEW @  COMP-ADDR 
+   - 0 256 U/MOD SWAP DROP 1+           
+  ." SYSTEM SIZE IN SECTORS = " . CR ;  
+                                        
+-->                                     
+                               ( 13:33) 
+-------------------------------------------- SCREEN 055
+( APPENDIX variables     <12/11/85> 55) 
+\ APPENDIX saves current state; sets    
+\ to compile in appendix (on ram card)  
+\ MAIN restores metacompiling to        
+\ main dictionary.                      
+                                        
+HEX                                     
+D010 CONSTANT APP-START                 
+                                        
+\ APP-LAST kept at D000                 
+                                        
+VARIABLE OLD-DPNEW                      
+VARIABLE OLD-LAST                       
+VARIABLE APP-DPNEW                      
+VARIABLE APP-LAST                       
+                                        
+0 APP-LAST !                            
+0 OLD-DPNEW !                           
+APP-START APP-DPNEW !                   
+                                        
+DECIMAL -->                             
+                                        
+                                        
+                               ( 13:33) 
+-------------------------------------------- SCREEN 056
+( APPENDIX MAIN          <12/ 5/85> 56) 
+                                        
+: APPENDIX                              
+  OLD-DPNEW @ 0= \ don't allow twice    
+  IF MOVEWORD?                          
+     DPNEW @ OLD-DPNEW !                
+     LAST @ OLD-LAST !                  
+     APP-DPNEW @ DPNEW !                
+     APP-LAST @ ?DUP                    
+     IF LAST ! THEN                     
+  THEN ; IMMEDIATE                      
+                                        
+: MAIN                                  
+  OLD-DPNEW @    \ don't allow twice    
+  IF MOVEWORD?                          
+     DPNEW @ APP-DPNEW !                
+     LAST @ APP-LAST !                  
+     OLD-DPNEW @ DPNEW !                
+     OLD-LAST @ LAST !                  
+     0 OLD-DPNEW ! \ set flag           
+  THEN ; IMMEDIATE                      
+                                        
+-->                                     
+                               ( 13:33) 
+-------------------------------------------- SCREEN 057
+( META: NFFIND 'NF       <12/ 5/85> 57) 
+HEX                                     
+                                        
+ VARIABLE <IMMED> 38 ALLOT              
+ <IMMED> 2+ <IMMED> !                   
+                                        
+: /SMUDGE                               
+   <IMMED> @ <IMMED> 2+                 
+   DO I @ 20 TOGGLE 2 +LOOP ;           
+                                        
+: NFFIND                                
+   BL WORD [ ' NEWFORTH ]               
+   LITERAL @ 2+ 1 <<FIND> ;             
+                                        
+: 'NF                                   
+   /SMUDGE NFFIND DUP                   
+   IF SWAP DROP THEN                    
+   /SMUDGE 0=                           
+   IF HERE COUNT TYPE ."   NF?"         
+      QUIT                              
+   THEN ;                               
+                                        
+DECIMAL -->                             
+                               ( 13:33) 
+-------------------------------------------- SCREEN 058
+( META: BYTE:IN REPL:BY  <12/ 5/85> 58) 
+                                        
+: LFA:IN                                
+   'NF DUP CFA @ DELTA + 2+ SWAP        
+   DUP LFA - - ;                        
+                                        
+: NFA:IN                                
+   'NF DUP CFA @ DELTA + 2+ SWAP        
+   DUP NFA - - ;                        
+                                        
+: REPLACED:BY                           
+  'NF CFA @  SWAP !NEW ;                
+                                        
+: BYTE:IN                               
+   MOVEWORD?  'NF CFA @ DELTA + 2+ + ;  
+                                        
+: [FROM:NEWFORTH]                       
+   'NF CFA @ , ;  IMMEDIATE             
+                                        
+-->                                     
+                                        
+                                        
+                                        
+                               ( 13:33) 
+-------------------------------------------- SCREEN 059
+( META: CREATE-OLD HERERU<12/ 5/85> 59) 
+HEX                                     
+                                        
+: CREATE-OLD                            
+   SETOLD HERE 0 , BL WORD              
+   DUP C@ WIDTH MIN 1+ ALLOT 80 TOGGLE  
+   HERE 1- 80 TOGGLE                    
+   DP C@ 0FF =                          
+   IF DUP  DUP 1+  1 DP +!              
+      HERE OVER - BMOVE                 
+      1+                                
+   THEN                                 
+   [COMPILE] NEWFORTH DEFINITIONS       
+   CURRENT @ @ OVER !                   
+   CURRENT @ ! ;                        
+                                        
+: HERERUN                               
+   HERE WORDBUILD -                     
+   DPNEW @ + DELTA - ;                  
+                                        
+DECIMAL -->                             
+                                        
+                                        
+                               ( 13:33) 
+-------------------------------------------- SCREEN 060
+( META: CREATE-NEW       <12/ 5/85> 60) 
+HEX                                     
+: WITH-HDS                              
+   HERE LAST @ DELTA - , 0 LAST !       
+   BL WORD                              
+   DUP C@ WIDTH MIN 1+ ALLOT 80 TOGGLE  
+   HERE 1- 80 TOGGLE                    
+   HERERUN FF AND FF =                  
+   IF 1 LAST !  1 DP +!                 
+      DUP  DUP 1+  HERE OVER -  BMOVE   
+   THEN DROP DPNEW @ LAST +! ;          
+                                        
+: CREATE-NEW                            
+   MOVEWORD? 1 MOVEFLG !                
+   WORDBUILD DPBUILD ! SETNEW           
+   HDS? @ IF WITH-HDS THEN ;            
+                                        
+: HEADS-ON 1 HDS? ! ;                   
+: HEADS-OFF 0 HDS? ! ;                  
+                                        
+DECIMAL -->                             
+                                        
+                                        
+                               ( 13:33) 
+-------------------------------------------- SCREEN 061
+( META: assembler stuff  <12/ 5/85> 61) 
+HEX                                     
+ASSEMBLER DEFINITIONS                   
+                                        
+: ?RANGE                                
+   DUP ABS 7F >                         
+   ABORT" BRANCH TOO LARGE" ;           
+                                        
+: ADJUST                                
+   WORDBUILD - DPNEW @ + DELTA - ;      
+                                        
+: BEGIN,  HERE 1 ;                      
+                                        
+: UNTIL,                                
+   >R 1 ?PAIRS R> C, HERE 1+ -          
+    ?RANGE C, ;                         
+                                        
+: IF,  C, HERE 0 C, 2 ;                 
+                                        
+                                        
+DECIMAL -->                             
+                                        
+                                        
+                               ( 13:33) 
+-------------------------------------------- SCREEN 062
+( META: assembler stuff  <12/ 5/85> 62) 
+                                        
+: THEN,                                 
+   2 ?PAIRS HERE OVER C@                
+   IF ADJUST SWAP !                     
+   ELSE OVER 1+ - ?RANGE SWAP C!        
+   THEN ;                               
+                                        
+: ELSE,                                 
+   2 ?PAIRS HERE 1+ 1 JMP, SWAP         
+   HERE OVER 1+ - ?RANGE SWAP C! 2 ;    
+                                        
+: AGAIN,  1 ?PAIRS ADJUST JMP, ;        
+                                        
+: WHILE,  >R DUP 1 ?PAIRS R> IF, 2+ ;   
+                                        
+: REPEAT,                               
+   >R >R 1 ?PAIRS ADJUST                
+   JMP, R> R> 2- THEN, ;                
+                                        
+-->                                     
+                                        
+                                        
+                               ( 13:33) 
+-------------------------------------------- SCREEN 063
+( META: NF: NF; LITERAL  <12/ 5/85> 63) 
+HEX    FORTH DEFINITIONS                
+                                        
+: NF:                                   
+   !CSP CREATE-OLD SMUDGE               
+   [ ' QUIT CFA @ ] LITERAL ,           
+   [COMPILE] FORTH ]                    
+   LATEST 40 TOGGLE ; ( IMMEDIATE )     
+                                        
+: NF;                                   
+   ?CSP COMPILE EXIT SMUDGE             
+   [COMPILE] [ ; IMMEDIATE              
+                                        
+: LITERAL  STATE @                      
+   IF *LIT* , , THEN ; IMMEDIATE        
+                                        
+: DLITERAL  STATE @                     
+   IF SWAP                              
+      [COMPILE] LITERAL                 
+      [COMPILE] LITERAL                 
+   THEN ; IMMEDIATE                     
+                                        
+DECIMAL -->                             
+                               ( 13:33) 
+-------------------------------------------- SCREEN 064
+( META: INTERPRET QUIT   <12/17/85> 64) 
+                                        
+: INTERPRET                             
+   BEGIN  BL WORD                       
+      CONTEXT @ @ 2+ 1 <<FIND>          
+      IF STATE @ <                      
+         IF CFA O/N @ IF @ THEN ,       
+         ELSE CFA EXECUTE THEN          
+      ELSE                              
+         HERE NUMBER DPL @ 1+           
+         IF [COMPILE] DLITERAL          
+         ELSE DROP [COMPILE] LITERAL    
+      THEN THEN ?STACK                  
+   AGAIN  ;                             
+                                        
+: QUIT                                  
+   0 BLK ! [COMPILE] [                  
+   BEGIN  RP! CR QUERY INTERPRET        
+      STATE @ 0= IF ."  NK" THEN        
+   AGAIN ;                              
+                                        
+-->                                     
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 065
+( META: LOAD -->         <12/17/85> 65) 
+                                        
+VARIABLE ?STAT 1 ?STAT !                
+                                        
+: DP?                                   
+   ?STAT @                              
+   IF CR .                              
+      BASE @ >R HEX                     
+      DPNEW @ U.                        
+      APP-DPNEW @ U.                    
+      DEPTH IF CR ." STACK = " .S THEN  
+      R> BASE !                         
+   ELSE . THEN ;                        
+                                        
+: LOAD                                  
+   DUP >R DP? R>                        
+   BLK @ >R >IN @ >R 0 >IN ! BLK !      
+   INTERPRET R> >IN ! R> BLK ! ;        
+                                        
+: -->                                   
+   ?LOADING  0 >IN ! 1 BLK +!           
+   BLK @ DUP DP? SCR ! ; IMMEDIATE      
+                                        
+-->                            ( bobp ) 
+-------------------------------------------- SCREEN 066
+( META: ?SECTS ?SIZE     <12/ 5/85> 66) 
+                                        
+  VARIABLE NEW-SECTS                    
+  VARIABLE SEC#                         
+  VARIABLE TRK#                         
+                                        
+: ?SECTS                                
+   DPNEW @ COMP-ADDR -                  
+   0 256 U/MOD SWAP DROP 1+ ;           
+                                        
+: SAVE-LOW ;                            
+                                        
+: ?SIZE                                 
+   SYSTEM-SIZE 16 + SECS/TRK /MOD       
+   TRK# ! SEC# ! ;                      
+                                        
+                                        
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( 13:33) 
+-------------------------------------------- SCREEN 067
+( NVLIST                 <12/ 5/85> 67) 
+                                        
+: NVLIST                                
+   CR LAST @                            
+   BEGIN                                
+      COMP-SEG OVER 2+ 0 PAD 32 CMOVEL  
+      PAD C@ 31 AND OUT @ + 4 +         
+      C/L > IF CR THEN                  
+      PAD ID. 2 SPACES                  
+      COMP-SEG SWAP @L                  
+      DUP 0=  PAUSE ?TERMINAL  OR       
+   UNTIL DROP                           
+   CR ;                                 
+                                        
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( 13:33) 
+-------------------------------------------- SCREEN 068
+( NSYSTEM-SIZE           <12/ 5/85> 68) 
+HEX                                     
+                                        
+: NSYSTEM-SIZE                          
+   DPNEW @ DUP 4000 U<                  
+      IF DROP 4000 THEN                 
+   COMP-ADDR -                          
+   0 100 U/MOD SWAP DROP 1+ ;           
+                                        
+: APP->GR                               
+   COMP-SEG D000                        
+   COMP-SEG 2000                        
+   2000 CMOVEL ;                        
+                                        
+: GR->APP                               
+   COMP-SEG 2000                        
+   COMP-SEG D000                        
+   2000 CMOVEL ;                        
+                                        
+DECIMAL                                 
+-->                                     
+                                        
+                                        
+                               ( 13:33) 
+-------------------------------------------- SCREEN 069
+( GET-NEW                <12/ 5/85> 69) 
+                                        
+: GET-NEW                               
+   NEW-SECTS @                          
+   IF                                   
+      COMP-SEG COMP-ADDR 6 0            
+      SYSTEM-SIZE 16 + SECS/TRK /MOD    
+      1 NEW-SECTS @ RWTSL               
+      GR->APP QUIT                      
+   THEN ;                               
+                                        
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( 13:33) 
+-------------------------------------------- SCREEN 070
+( SAVE-NEW               <12/ 5/85> 70) 
+                                        
+: SAVE-NEW  CR CR                       
+   ." INIT'D & VIRTUAL DISK IN DRV A"   
+   (Y/N)?                               
+   IF MOVEWORD? SETNEW SETOLD           
+      [COMPILE] FORTH DEFINITIONS       
+      NSYSTEM-SIZE NEW-SECTS !          
+      SAVE-FORTH                        
+      APP->GR                           
+      COMP-SEG COMP-ADDR 6 0            
+      SYSTEM-SIZE 16 + SECS/TRK /MOD    
+      0 NEW-SECTS @ RWTSL               
+   THEN ;                               
+                                        
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( 13:33) 
+-------------------------------------------- SCREEN 071
+( SAVE-NFORTH            <12/16/85> 71) 
+HEX                                     
+: SAVE-NFORTH                           
+   [COMPILE] FORTH DEFINITIONS          
+   APP->GR                              
+   DOSWR DOSRD 10 CMOVE                 
+   COMP-ADDR B748 !                     
+   NSYSTEM-SIZE DUP B7E0 C!             
+   DUP COMP-ADDR                        
+      0 100 U/MOD SWAP DROP + B7E7 C!   
+   0F + 10 /MOD B715 C! B71A C!         
+   B600 6 0 0 0 0 0A RWTS               
+\  COMP-SEG COMP-ADDR 6 0 0 1 0         
+\  NSYSTEM-SIZE RWTSL ;                 
+   0 SEC# !  1 TRK# !                   
+   NSYSTEM-SIZE 0 DO                    
+     COMP-SEG I 100 * COMP-ADDR +       
+     0 GBUFF 100 CMOVEL GBUFF 6 0       
+     SEC# @ TRK# @ 0 1 RWTS 1 SEC# +!   
+     SEC# @ 10 = IF 1 TRK# +! 0 SEC# !  
+   THEN LOOP ;                          
+DECIMAL -->                             
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 072
+( META: 'NEW LABEL       <12/ 5/85> 72) 
+HEX                                     
+: IMMEDIATE                             
+   MOVEWORD?                            
+   COMP-SEG LAST @ 2+                   
+   OVER OVER @L 40 XOR  ROT ROT !L      
+   LATEST <IMMED> @ !                   
+   2 <IMMED> +! SMUDGE ;                
+                                        
+: CFANEW  CFA @ ;                       
+                                        
+: 'NEW                                  
+   'NF CFANEW 2+ [COMPILE] LITERAL ;    
+                                        
+: LABEL                                 
+   SETNEW HERERUN SETOLD  1 MOVEFLG !   
+   CURRENT @ >R                         
+   [COMPILE] ASSEMBLER DEFINITIONS      
+   CONSTANT                             
+   R> CURRENT ! SETNEW ;                
+                                        
+DECIMAL                                 
+-->                                     
+                               ( 13:33) 
+-------------------------------------------- SCREEN 073
+( META: CODE C; NFALLOT  <12/ 5/85> 73) 
+                                        
+: CODE                                  
+   >IN @ CREATE-NEW >IN !               
+   HERERUN CREATE-OLD , SMUDGE SETNEW   
+   HERERUN 2+ , [COMPILE] ASSEMBLER     
+   ASSEMBLER MEM !CSP ; FORTH           
+                                        
+: C;  ?CSP SMUDGE [COMPILE] FORTH ;     
+                                        
+: END-CODE  C; ;                        
+                                        
+: NFALLOT                               
+   MOVEWORD? 1 MOVEFLG !                
+   WORDBUILD DPBUILD !                  
+   SETNEW [COMPILE] FORTH               
+   HERE OVER 0 FILL DP +!               
+   MOVEWORD? SETNEW ;                   
+-->                                     
+                                        
+: BOOTL COPY-I/OL COPY-BSM              
+     NEW-SYS JUMPL ;                    
+                                        
+                               ( 13:33) 
+-------------------------------------------- SCREEN 074
+( META: CONSTANT VARIABLE<12/ 5/85> 74) 
+                                        
+: CONSTANT                              
+   >IN @ CREATE-NEW >IN !  HERERUN      
+   *CONSTANT* , SWAP ,                  
+   CREATE-OLD , SETNEW                  
+   [COMPILE] FORTH ;                    
+                                        
+: DCONSTANT                             
+   >IN @ CREATE-NEW >IN !  HERERUN      
+   *DCONSTANT* ,                        
+   ROT ROT , ,                          
+   CREATE-OLD , SETNEW                  
+   [COMPILE] FORTH ;                    
+                                        
+: VARIABLE                              
+   >IN @ CREATE-NEW >IN !  HERERUN      
+   *VARIABLE* , 0 ,                     
+   CREATE-OLD , SETNEW                  
+   [COMPILE] FORTH ;                    
+                                        
+-->                                     
+                                        
+                               ( 13:33) 
+-------------------------------------------- SCREEN 075
+( META: CREATE DVAR VOC  <12/ 5/85> 75) 
+HEX                                     
+: CREATE                                
+   >IN @ CREATE-NEW >IN !  HERERUN      
+   *CREATE* ,                           
+   CREATE-OLD , SETNEW                  
+   [COMPILE] FORTH ;                    
+                                        
+: DVARIABLE                             
+   >IN @ CREATE-NEW >IN !  HERERUN      
+   *DVARIABLE* , 0 , 0 ,                
+   CREATE-OLD , SETNEW                  
+   [COMPILE] FORTH ;                    
+                                        
+: VOCABULARY                            
+   >IN @ CREATE-NEW >IN !  HERERUN      
+   *VOCAB* ,                            
+      LAST @ DELTA - , A081 , 0 ,       
+   CREATE-OLD , SETNEW                  
+   [COMPILE] FORTH ;                    
+                                        
+DECIMAL -->                             
+                                        
+                               ( 13:33) 
+-------------------------------------------- SCREEN 076
+( META: :                <12/ 5/85> 76) 
+HEX                                     
+                                        
+: :  >IN @  CREATE-NEW >IN !  HERERUN   
+    *COLON* ,                           
+    CREATE-OLD , SMUDGE SETNEW ] !CSP ; 
+                                        
+NF: OF/NF                               
+    [COMPILE] NEWFORTH DEFINITIONS      
+    [COMPILE] FORTH NF;                 
+                                        
+  ' QUIT 2 - ' 'NF 24 + !               
+   0 'NF OF/NF LFA !                    
+                                        
+OF/NF DECIMAL FORTH DEFINITIONS         
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( 13:33) 
+-------------------------------------------- SCREEN 077
+( METACOMPILER <END>     <12/ 5/85> 77) 
+        PAGE COPYRIGHT                  
+." THE METACOMPILER IS SET TO BEGIN" CR 
+." METACOMPILING " CMPL-TYP CR CR       
+." QUIT RETN RETN WILL PRODUCE  NK," CR 
+." THE METACOMPILER OK TO VERIFY READY" 
+CR ." FOR COMPILING.  IF YOU DON'T GET T
+HE" CR ." NK, SOMETHING IS WRONG.. REFER
+ TO THE" CR ." MANUAL" CR CR ." YOU MUST
+ NOT ADD ANY NEW WORDS THAT" CR ." ARE N
+OT TO BE PART OF THE SYSTEM ABOUT" CR   
+." TO BE COMPILED." CR CR ." LOCATE THE 
+APPROPRIATE SOURCE SCREENS" CR ." DISK A
+ND PLACE IT IN DRIVE B AND TYPE" CR     
+." 1 ONB LOAD." CR CR                   
+." INSTRUCTIONS FOR THE STEPS AFTER" CR 
+." LOADING THE TARGET SYSTEM WILL BE"   
+CR ." DISPLAYED AT THE END OF THE LOAD C
+YCLE" CR QUIT                           
+                                        
+                                        
+                                        
+                                        
+                               ( 13:33) 
+-------------------------------------------- SCREEN 079
+( AUTO-LOAD OF VIRTUAL SY< 6/15/83> 79) 
+                                        
+( THIS SCREEN REQUIRES THAT THIS DISK ) 
+( BE IN DRIVE A AND A COPY OF THE     ) 
+( MVP-FORTH VIRTUAL SYSTEM DISK WITH  ) 
+( SOURCE FOR ASSEMBLER, EDITOR, AND   ) 
+( UTILITIES BE IN DRIVE B.            ) 
+                                        
+  80 LOAD                               
+  87 LOAD   35 ONB LOAD   43 ONB LOAD   
+  88 LOAD   35 ONB LOAD   42 ONB LOAD   
+  92 LOAD   92 ONB LOAD                 
+  93 LOAD                               
+                                        
+EXIT                                    
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( 13:27) 
+-------------------------------------------- SCREEN 080
+( VIRTUAL SYSTEMS        < 8/22/83> 80) 
+                                        
+FORTH DEFINITIONS                       
+APPENDIX                                
+                                        
+  53248 CONSTANT VIR-BASE ( D000 HEX )  
+      0 CONSTANT SYS-LINK1              
+  ' SYS-LINK1 DUP LFA SWAP !            
+      0 CONSTANT SYS-LINK2              
+  ' SYS-LINK2 DUP LFA SWAP !            
+        VARIABLE SYS-FLG                
+                                        
+                                        
+: FORGET-SYS  0 SYS-FLG ! SYS-LINK1     
+    SYS-LINK2 ! CURRENT @ CONTEXT !     
+    BEEP ;                              
+                                        
+  ' FORGET-SYS CFA ' SAVE-FORTH !       
+   ( REPLACES THE NOOP )                
+                                        
+-->                                     
+                                        
+                                        
+                               ( 13:33) 
+-------------------------------------------- SCREEN 081
+( VIRTUAL SYSTEMS        <12/ 5/85> 81) 
+APPENDIX                                
+ VOCABULARY VIRTUAL IMMEDIATE           
+ VIRTUAL DEFINITIONS                    
+ VARIABLE NEXT-SECTOR  SECS/TRK TRKS/HD 
+   * 1- NEXT-SECTOR !                   
+ 20083 CONSTANT VIR-TST                 
+( RECOMMEND: USE DATE AS TEST NUMBER  ) 
+( FOR VIR-TST UPDATES                 ) 
+                                        
+( PARAM-ADDR ---, ADDR HD DR SEC TRK )  
+: @RWTS-PARAM  DUP 9 + SWAP             
+      DO I @ 2 /LOOP ;                  
+: VIR-RES?  12 + @ VIR-TST = NOT        
+   IF CR                                
+    ." WRONG DISK -- NO VIRTUAL IMAGE"  
+    FORGET-SYS QUIT                     
+   THEN ;                               
+: MEMTST  FORGET-SYS BSM @ 2 = NOT      
+      IF COPY-MON R2-W2                 
+      THEN ;                            
+MEMTST                                  
+FORTH DEFINITIONS MAIN -->              
+                               ( 13:33) 
+-------------------------------------------- SCREEN 082
+( A&E-SYS <ASMBLR & EDITO< 6/15/83> 82) 
+APPENDIX                                
+   VIRTUAL DEFINITIONS                  
+                                        
+   SYS-LINK1 CONSTANT A&E-LASTLFA       
+   SYS-LINK2 CONSTANT A&E-FIRSTLFA      
+          33 CONSTANT A&E-SECTS         
+             VARIABLE A&E-RWTS 8 ALLOT  
+                                        
+                                        
+   FORTH DEFINITIONS                    
+                                        
+                                        
+: GET-A&E  VIRTUAL SYS-FLG @ 1 = NOT    
+     IF MEMTST A&E-RWTS @RWTS-PARAM     
+      1 A&E-SECTS RWTS 1 SYS-FLG !      
+      VIR-BASE VIR-RES? SYS-LINK1       
+      A&E-FIRSTLFA ! A&E-LASTLFA        
+      SYS-LINK2 !                       
+     THEN ;                             
+                                        
+FORTH                                   
+MAIN -->                                
+                               ( 13:27) 
+-------------------------------------------- SCREEN 083
+(                        < 8/22/83> 83) 
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( 13:33) 
+-------------------------------------------- SCREEN 084
+( UTIL-SYS               < 6/15/83> 84) 
+APPENDIX                                
+   VIRTUAL DEFINITIONS                  
+                                        
+   SYS-LINK1 CONSTANT UTIL-LASTLFA      
+   SYS-LINK2 CONSTANT UTIL-FIRSTLFA     
+          12 CONSTANT UTIL-SECTS        
+             VARIABLE UTIL-RWTS 8 ALLOT 
+                                        
+                                        
+   FORTH DEFINITIONS                    
+                                        
+                                        
+: GET-UTIL  VIRTUAL SYS-FLG @ 3 = NOT   
+     IF MEMTST UTIL-RWTS @RWTS-PARAM    
+      1 UTIL-SECTS RWTS 3 SYS-FLG !     
+      VIR-BASE VIR-RES? SYS-LINK1       
+      UTIL-FIRSTLFA ! UTIL-LASTLFA      
+      SYS-LINK2 !                       
+     THEN ;                             
+                                        
+MAIN   FORTH -->                        
+                                        
+                               ( 13:27) 
+-------------------------------------------- SCREEN 085
+( FPA-SYS                < 8/22/83> 85) 
+APPENDIX                                
+   VIRTUAL DEFINITIONS                  
+                                        
+   SYS-LINK1 CONSTANT FPA-LASTLFA       
+   SYS-LINK2 CONSTANT FPA-FIRSTLFA      
+          35 CONSTANT FPA-SECTS         
+             VARIABLE FPA-RWTS 8 ALLOT  
+   ( TRANSL&DECOMPL ONLY )              
+   0 FPA-RWTS ! ( IN CASE NOT TO BE   ) 
+       ( INSTALLED.  PREVENTS ATTEMPT ) 
+       ( TO READ DISK.                ) 
+                                        
+   FORTH DEFINITIONS                    
+: GET-FPA  VIRTUAL FPA-RWTS @ 0=        
+     IF HERE VIR-RES? THEN              
+   SYS-FLG @ 4 = NOT                    
+     IF MEMTST FPA-RWTS @RWTS-PARAM 1   
+      FPA-SECTS RWTS 4 SYS-FLG !        
+      VIR-BASE VIR-RES? SYS-LINK1       
+      FPA-FIRSTLFA ! FPA-LASTLFA        
+      SYS-LINK2 !                       
+     THEN ;                             
+MAIN FORTH -->                 ( 13:33) 
+-------------------------------------------- SCREEN 086
+( INSTRUCTIONS           < 6/15/83> 86) 
+CR CR                                   
+." NOW LEAVE THIS DISK IN DRIVE A AND"  
+CR ." PLACE A COPY OF THE SYSTEM DISTRIB
+UTION" CR ." DISK (MVP-FORTH VIRTUAL SYS
+TEM DISK)" CR ." IN DRIVE B." CR CR     
+                                        
+." THE SOURCE SCREENS FOR THE ASSEMBLER,
+" CR ." EDITOR, AND UTILITIES WILL BE LO
+ADED" CR ." FROM DRIVE B." CR CR        
+." NEXT, LOAD SCREEN 87 TO BEGIN ADDING"
+CR                                      
+   ." THE VIRTUAL IMAGE OF THE COMBINED"
+ CR ." ASSEMBLER AND EDITOR." CR CR     
+                                        
+EXIT                                    
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( 13:27) 
+-------------------------------------------- SCREEN 087
+( INSTALL A&E <1ST SCRN> < 6/15/83> 87) 
+                                        
+   DECIMAL FORGET-SYS                   
+   FREEZE  VIRTUAL VIR-BASE DP !        
+                                        
+   VIR-TST FORTH CONSTANT VIR-CHK       
+   VIRTUAL LATEST PFA-LFA               
+   ' A&E-FIRSTLFA ! FORTH CR CR         
+." NOW LOAD SCREEN 35 ONB" CR           
+." (ASSEMBLER SOURCE FROM DRIVE B)"  CR 
+." AND SCREEN 43 ONB FOR THE VIRTUAL" CR
+ ." VERSION." CR CR ." NEXT, LOAD SCREEN
+ 45 ONB TO ADD EDITOR" CR ." TO THE A&E 
+SUBSYSTEM."                             
+CR CR  ." WHEN FINISHED LOADING THE VIRT
+UAL" CR ." VERSION, LOAD SCREEN 88 TO CO
+MPLETE" CR ." ADDING THE A&E SUBSYSTEM."
+   CR CR   EXIT                         
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( 13:27) 
+-------------------------------------------- SCREEN 088
+( INSTALL A&E            < 6/15/83> 88) 
+                                        
+   VIRTUAL                              
+                                        
+   LATEST PFA-LFA ' A&E-LASTLFA !       
+   ( SAVE LFA OF LAST WORD IN A&E)      
+                                        
+   FORTH                                
+                                        
+   ICEBOX @ VOC-LINK !                  
+( REMOVE ANY ADDED VOC FROM VOC-LINKAGE)
+                                        
+   ICEBOX 2+ @ DP !                     
+   ( RESTORE PRIOR DP )                 
+                                        
+   ICEBOX 4 + @ CONTEXT @ ! DEFINITIONS 
+   ( RESTORE PRIOR LATESTLFA )          
+                                        
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                               ( 13:27) 
+-------------------------------------------- SCREEN 089
+( INSTALL A&E            < 6/15/83> 89) 
+                                        
+APPENDIX                                
+   FORGET-SYS VIRTUAL 3 SYS-FLG !       
+                                        
+   SYS-LINK1  A&E-FIRSTLFA ! A&E-LASTLFA
+   SYS-LINK2 !                          
+                                        
+   FORTH                                
+: CODE GET-A&E ASSEMBLER [ ' CODE CFA ] 
+    LITERAL FORTH EXECUTE ; IMMEDIATE   
+                                        
+                                        
+: ;CODE GET-A&E ASSEMBLER [ ' ;CODE CFA 
+    ] LITERAL FORTH EXECUTE ;           
+    IMMEDIATE                           
+                                        
+MAIN                                    
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                               ( 13:27) 
+-------------------------------------------- SCREEN 090
+( INSTALL A&E            < 6/15/83> 90) 
+APPENDIX                                
+( EDITERR AS WELL AS N EDIT WILL CALL ) 
+( UP EDIT )                             
+                                        
+: EDITERR  GET-A&E  [ ' EDITERR CFA ]   
+    LITERAL EXECUTE ;                   
+                                        
+                                        
+: EDIT GET-A&E  EDITOR [ ' EDIT CFA ]   
+    LITERAL EXECUTE FORTH ;             
+                                        
+: SCRHDS PAGE GET-A&E  [ EDITOR         
+ ' SCRHDS CFA ] LITERAL FORTH           
+ EXECUTE ;                              
+MAIN                                    
+                                        
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( 13:27) 
+-------------------------------------------- SCREEN 091
+( INSTALL A&E    <CONCLD>< 6/15/83> 91) 
+                                        
+   VIRTUAL                              
+   A&E-RWTS VIR-BASE OVER ! ( ADDR    ) 
+   6 OVER 2+ !               ( SLOT 6 ) 
+   NEXT-SECTOR @ A&E-SECTS - DUP        
+   NEXT-SECTOR !     ( UPDATE NEXT-SEC) 
+   1+ SECS/TRK /MOD 0 4 PICK 4 + !      
+                           ( DRV 0   )  
+   3 PICK 8 + ! OVER 6 + ! ( TRK&SEC )  
+   @RWTS-PARAM 0 A&E-SECTS RWTS         
+   ( SAVE A&E TO DISK )                 
+   FORGET-SYS CR CR                     
+." NOW LOAD SCREEN 35 ONB AND 42 ONB TO"
+ CR ." PLACE THE NON-VIRTUAL ASSEMBLER I
+NTO" CR ." LOWER MEMORY PREPARATORY TO L
+OADING" CR ." THE UTILITIES." CR CR     
+." WHEN THE ASSEMBLER IS LOADED, LOAD"  
+CR ." SCREEN 92." CR CR                 
+                                        
+EXIT                                    
+                                        
+                                        
+                                        
+-------------------------------------------- SCREEN 092
+( INSTALL UTIL<1ST SCRN> < 6/15/83> 92) 
+                                        
+   DECIMAL FORGET-SYS                   
+                                        
+   FREEZE  VIRTUAL VIR-BASE DP !        
+                                        
+   VIR-TST FORTH CONSTANT VIR-CHK       
+   VIRTUAL                              
+                                        
+   LATEST PFA-LFA ' UTIL-FIRSTLFA !     
+   FORTH CR CR                          
+                                        
+." NOW LOAD SCREEN 92 ONB TO ADD VIRTUAL
+" CR ." UTILITIES." CR CR               
+                                        
+." WHEN FINISHED, LOAD SCREEN 93 TO"    
+CR ." COMPLETE THE PROCESS." CR CR      
+                                        
+EXIT                                    
+                                        
+                                        
+                                        
+                                        
+                               ( 13:27) 
+-------------------------------------------- SCREEN 093
+( INSTALL UTILITIES      < 6/15/83> 93) 
+                                        
+   VIRTUAL                              
+                                        
+   LATEST PFA-LFA ' UTIL-LASTLFA !      
+   ( SAVE LFA OF LAST WORD IN UTIL)     
+                                        
+   FORTH                                
+                                        
+   ICEBOX @ VOC-LINK !                  
+   ( REMOVE ANY ADDEC VOC FROM VOC-LINK)
+                                        
+   ICEBOX 2+ @ DP !                     
+   ( RESTORE PRIOR DP )                 
+                                        
+   ICEBOX 4 + @ CONTEXT @ ! DEFINITIONS 
+   ( RESTORE PRIOR LATESTLFA )          
+                                        
+-->                                     
+                                        
+                                        
+                                        
+                                        
+                               ( 13:27) 
+-------------------------------------------- SCREEN 094
+( INSTALL UTILITIES      < 6/15/83> 94) 
+   FORGET-SYS VIRTUAL 3 SYS-FLG !       
+   SYS-LINK1  UTIL-FIRSTLFA !           
+   UTIL-LASTLFA SYS-LINK2 ! FORTH       
+   FORGET ASSEMBLER                     
+   ( THE TEMPORARY ONE IN LOWER MEMORY) 
+   ( DO ANY VIRTUAL CALLING OF UTIL   ) 
+   ( WORDS HERE.                      ) 
+APPENDIX                                
+: INITDISK GET-UTIL [ ' INITDISK CFA ]  
+    LITERAL EXECUTE ;                   
+: COPYDISK GET-UTIL [ ' COPYDISK CFA ]  
+    LITERAL EXECUTE ;                   
+: COPYNEW  GET-UTIL [ ' COPYNEW CFA  ]  
+    LITERAL EXECUTE ;                   
+: DUMP GET-UTIL [ ' DUMP CFA ] LITERAL  
+    EXECUTE ;                           
+: COPYSCRNS GET-UTIL [ ' COPYSCRNS CFA ]
+    LITERAL EXECUTE ;                   
+: ERASESCRNS GET-UTIL [ ' ERASESCRNS CFA
+    ] LITERAL EXECUTE ;                 
+: COPY-VIRTUAL GET-UTIL [ ' COPY-VIRTUAL
+    CFA ] LITERAL EXECUTE ;             
+MAIN -->                                
+-------------------------------------------- SCREEN 095
+( INSTALL UTILITIES <CONC< 6/15/83> 95) 
+                                        
+   VIRTUAL UTIL-RWTS VIR-BASE OVER !    
+   ( ADDR          )                    
+   6 OVER 2+ ! ( SLOT 6 ALWAYS        ) 
+   NEXT-SECTOR @ UTIL-SECTS - DUP       
+   NEXT-SECTOR ! ( UPDATE NXT-SEC)      
+   1+ SECS/TRK /MOD 0 4 PICK 4 + !      
+         ( DRV 0       )  3 PICK 8 + !  
+   OVER 6 + ! ( TRK & SEC)              
+   @RWTS-PARAM 0 UTIL-SECTS RWTS        
+  FORGET-SYS CR CR ." IF YOU INTEND TO A
+DD THE FPA NOW, LOAD" CR ." SCREEN 96; O
+THERWISE, PLACE A SYSTEM" CR ." DISTRIBU
+TION DISK WITH SOURCE SCREENS" CR ." IN 
+DRIVE B AND DO 103 ONB LOAD." CR CR     
+." FINALLY, PLACE AN INITIALIZED DISK IN
+" CR ." DRIVE B AND TYPE COPY-VIRTUAL." 
+ CR ." THEN MOVE THAT DISK TO DRIVE A AN
+D DO" CR ." SAVE-FORTH TO SAVE THE NEWLY
+ COMPILED" CR ." SYSTEM."  CR CR        
+                                        
+EXIT                                    
+                               ( 13:27) 
+-------------------------------------------- SCREEN 099
+( -FIND FIND ?FIND ' ['] <12/16/85>228) 
+APPENDIX                                
+                                        
+: -FIND BL WORD                         
+        CONTEXT @ 'NEW FORTH - <FIND> ; 
+                                        
+: FIND  -FIND IF DROP CFA ELSE 0 THEN ; 
+                                        
+: ?FIND -FIND NOT ABORT" NOT FOUND" ;   
+                                        
+: '     ?FIND DROP [COMPILE] LITERAL ;  
+        IMMEDIATE                       
+                                        
+: [']   ?COMP [COMPILE] ' ; IMMEDIATE   
+                                        
+MAIN -->                                
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 100
+( VLIST                  <12/16/85>100) 
+APPENDIX                                
+                                        
+: VLIST                                 
+   C/L OUT !                            
+   [COMPILE] '  DUP 'X =                
+   IF DROP CONTEXT @ @ ELSE LFA THEN    
+   BEGIN                                
+      DUP 2+                            
+      C/L OUT @ -                       
+         OVER C@ 31 AND 4 + <           
+         IF CR THEN                     
+      ID. SPACE SPACE                   
+      @ DUP 0=                          
+         PAUSE ?TERMINAL OR             
+   UNTIL DROP ;                         
+                                        
+MAIN -->                                
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( bobp ) 
+-------------------------------------------- SCREEN 110
+( ALSO ONLY              <12/11/85>110) 
+VOCABULARY ONLY  ONLY DEFINITIONS       
+                                        
+: ALSO                                  
+   CONTEXT DUP 2+ 6 BMOVE ;             
+                                        
+HERE                                    
+32 C, ' <DODOES> ,                      
+]  CONTEXT 8 0 FILL                     
+   DUP CONTEXT ! CONTEXT 8 + !          
+   ALSO <EXIT>                          
+[ ' ONLY CFA !                          
+                                        
+: X R> DROP ; 41088 ' X NFA ! IMMEDIATE 
+                                        
+: FORTH [COMPILE] FORTH ;               
+: ONLY ONLY ;                           
+: DEFINITIONS DEFINITIONS ;             
+: FORGET FORGET ;                       
+: ONLY ONLY ;                           
+: VLIST VLIST ;                         
+                                        
+                                        
+                               ( 13:33) 

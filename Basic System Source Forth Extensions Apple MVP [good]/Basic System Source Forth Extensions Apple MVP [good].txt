@@ -1,0 +1,2125 @@
+-------------------------------------------- SCREEN 000
+\ LOADBLOCK 2            < 8/13/86>140  
+                                        
+\ Load this block after loading block   
+\ 141                                   
+                                        
+[FORTH]                                 
+  145 LOAD  \ new defaults              
+  142 LOAD  \ logo word                 
+  146 LOAD  \ kludges                   
+[FORTH]                                 
+\ -1 SAVE-VDP +! PUT-LOADER             
+WRITE-LOADER                            
+MARK-FORGET                             
+UNPATCH 3 BUFFERS                       
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+-------------------------------------------- SCREEN 001
+\ LOADBLOCK              <10/ 5/86>141  
+PAGE                                    
+." Loading BIOLOGY extensions" CR CR CR 
+PATCH                                   
+  144 LOAD  \ DISK AREA DEFS            
+  277 LOAD  \ BRODYFONT                 
+  150 182 THRU                          
+\ 183 184 THRU \ reaction timer         
+  185 200 THRU \                        
+\ 240 259 THRU \ Chem formula           
+\ 260     LOAD \ test above             
+\ 270 276 THRU \ EXPLODE                
+                                        
+[FORTH]                                 
+                                        
+140 LOAD EXIT                           
+                                        
+CR CR                                   
+." Load any additional code now." CR    
+." Then load screen 140 to finish" CR   
+." the system." CR CR                   
+                                        
+EXIT                                    
+                                        
+-------------------------------------------- SCREEN 002
+( BLOGO                  < 3/ 9/87>142) 
+                                        
+[FORTH]                                 
+APPENDIX                                
+: BLOGO                                 
+  <OPDB-LOGO>                           
+  ." Basic System V1.10 "               
+  .M/D/Y                                
+  ." (fah)" CR                          
+;                                       
+                                        
+MAIN                                    
+' BLOGO CFA ' LOGO !                    
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+-------------------------------------------- SCREEN 003
+\ MAKE AUTO BOOT         < 5/13/86>143  
+                                        
+                                        
+                                        
+: Q                                     
+  256 @ 1234 = IF <ABORT> THEN          
+  EXEC CLS <RUN> ABORT ;                
+                                        
+3 BUFFERS                               
+' Q CFA ' START-SYS !                   
+' Q CFA ' ABORT !                       
+' Q CFA ' BRK-RETN !                    
+' EXIT CFA ' LOGO !                     
+' EXIT CFA ' FORGET-SYS !               
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               \ FAH    
+-------------------------------------------- SCREEN 004
+\ DISK AREA DEFINITIONS  < 8/13/86>144  
+                                        
+                                        
+47 VSTART 140 VEND \ 95 BLOCKS AVAIL    
+                                        
+64 REVSIZE PICS                         
+2  REVSIZE MSG-PTRS                     
+10 REVSIZE MSG-TEXT                     
+17 REVSIZE OPDB                         
+                                        
+VLEFT?                                  
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+-------------------------------------------- SCREEN 005
+\ NEW DEFAULTS           < 5/13/86>145  
+\ values set here (unless changed later)
+\ will be the system defaults           
+                                        
+  EXEC                                  
+  1 TO 1stVar# ( allow change to P/L )  
+  12 P/L !                              
+  BL M-CHAR ! 9 M-BLINK !               
+  0 M-ON ! 0 M-OFF !                    
+  1 DX' ! 1 DY' ! 1 DX ! 1 DY !         
+  15 LMARG !  13 TMARG !                
+  3 SUBAMT !                            
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               \ FAH    
+-------------------------------------------- SCREEN 006
+(                        < 6/26/86>146) 
+                                        
+[FORTH]                                 
+: MLIST                                 
+  ' EXIT CFA EXEC ' PROCESS-MSG !       
+  MLIST ;                               
+                                        
+: MPRINT                                
+  ' EXIT CFA EXEC ' PROCESS-MSG !       
+  MPRINT ;                              
+                                        
+: RUN                                   
+  EXEC ' FILTER CFA ' PROCESS-MSG !     
+  RUN ;                                 
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 010
+\ PREDEFINED VARIABLES   < 5/13/86>150  
+                                        
+[FORTH]                                 
+\ temporary variables                   
+LOADER PREVAR INT TINT                  
+LOADER PREVAR CHAR TCHAR                
+LOADER PREVAR LOGIC FLAG                
+\ system vars                           
+                                        
+\ location of areas on screen           
+LOADER PREVAR INT TX \ main text area   
+LOADER PREVAR INT TY                    
+LOADER PREVAR INT PX \ prompt area      
+LOADER PREVAR INT PY                    
+LOADER PREVAR INT CX \ command area     
+LOADER PREVAR INT CY                    
+                                        
+                                        
+\ sub/super-script amount               
+LOADER PREVAR INT SUBAMT                
+                                        
+                                        
+                                        
+                                        
+-------------------------------------------- SCREEN 011
+\ PREDEFINED VARIABLES   < 5/13/86>151  
+[FORTH]                                 
+                                        
+                                        
+\ update pointers for loader            
+LOADER VAR# @ EXEC TO 1stUserVar#       
+EXEC VP @ TO UserVP                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+-------------------------------------------- SCREEN 012
+\ PREDEFINED VARIABLES   < 5/13/86>152  
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               \ FAH    
+-------------------------------------------- SCREEN 013
+\ 0MODE 1MODE 2MODE 3MODE< 5/13/86>153  
+                                        
+: ISMODE                                
+  CREATE C,                             
+  DOES> C@ SETMODE ;                    
+                                        
+0 ISMODE 0MODE                          
+1 ISMODE 1MODE                          
+2 ISMODE 2MODE                          
+3 ISMODE 3MODE                          
+4 ISMODE 4MODE                          
+5 ISMODE 5MODE                          
+                                        
+EXIT                                    
+                                        
+                                        
+: INXY                                  
+  [COMPILE] INGXY                       
+; IMMEDIATE                             
+                                        
+                                        
+                                        
+                                        
+                               \ FAH    
+-------------------------------------------- SCREEN 014
+\ KEY:                   < 5/13/86>154  
+                                        
+[FORTH]                                 
+                                        
+: KEY:                                  
+  STATE @ ABORT" NO NESTING"            
+  [KEYWORDS]                            
+  [COMPILE] : ; IMMEDIATE               
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               \ FAH    
+-------------------------------------------- SCREEN 015
+\ GY/N                   < 5/13/86>155  
+                                        
+[EXEC]                                  
+                                        
+\ wait for Y or N while flashing cursor 
+                                        
+: GY/N ( -- T/F; T if Y pressed)        
+  BEGIN GKEY TOUC DUP ASCII Y =         
+   OVER ASCII N = OR NOT                
+  WHILE DROP REPEAT                     
+  ASCII Y = ;                           
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               \ FAH    
+-------------------------------------------- SCREEN 016
+\ MOVE                   < 5/13/86>156  
+                                        
+\ Allows you to move cursor without     
+\ updating LASTX or LASTY               
+EXCODE: \ X Y --                        
+  CURY ! CURX ! CLEANUP                 
+EX;                                     
+                                        
+\ USE: MOVE X Y                         
+KEY: MOVE                               
+  LOADER INSCR?                         
+  TYPES INT LOADER GET-EXPR             
+  TYPES INT LOADER GET-EXPR             
+  !EXCODE ;                             
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               \ FAH    
+-------------------------------------------- SCREEN 017
+\ NL                     < 5/13/86>157  
+                                        
+\ sames as: AT LASTX , LASTY + P/L      
+EXCODE: \ -- ;                          
+  LASTX @ CURX ! LASTY @ P/L @          
+  + DUP LASTY ! CURY ! EX;              
+                                        
+\ use: NL                               
+KEY: NL                                 
+  LOADER INSCR? !EXCODE ;               
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               \ FAH    
+-------------------------------------------- SCREEN 018
+\ NL-IND                 < 5/13/86>158  
+                                        
+\ same as: AT LASTX , LASTY + 10        
+\          LET CURX := CURX + 15        
+EXCODE: \ -- ;                          
+  LASTX @ 15 + CURX !                   
+  LASTY @ 10 + DUP LASTY ! CURY ! EX;   
+                                        
+\ USE: NL-IND                           
+KEY: NL-IND                             
+  LOADER INSCR? !EXCODE ;               
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               \ FAH    
+-------------------------------------------- SCREEN 019
+\ #B G.DATE .DATE G.     <10/ 4/86>159  
+                                        
+[FORTH]                                 
+: G. ( N -- )                           
+  0 <# #S #> GTYPE ;                    
+                                        
+EXIT -----                              
+                                        
+: #B \ blank if all done                
+  DDUP OR 0=                            
+  IF BL HOLD ELSE # THEN ;              
+                                        
+: DATE>$ ( M D Y -- ADR CNT )           
+  0 <# # # 47 HOLD DDROP                
+     0 # # 47 HOLD DDROP 0 # #B #> ;    
+                                        
+: G.DATE ( M D Y -- ) DATE>$ GTYPE ;    
+: .DATE ( M D Y -- ) DATE>$ TYPE ;      
+                                        
+                                        
+                                        
+                                        
+                                        
+                               \ FAH    
+-------------------------------------------- SCREEN 020
+\ SET-RANGE              < 5/13/86>160  
+                                        
+[EXEC]                                  
+-1 CONSTANT MAX-GETN  ( UNSIGNED VAL )  
+ 0 CONSTANT MIN-GETN                    
+                                        
+EXCODE: ( LO HI -- )                    
+  TO MAX-GETN                           
+  TO MIN-GETN                           
+EX;                                     
+                                        
+                                        
+[KEYWORDS]                              
+\ USE: SET-RANGE lo , hi                
+: SET-RANGE                             
+  LOADER INSCR?                         
+  TYPES INT LOADER GET-EXPR             
+  TYPES INT LOADER GET-EXPR             
+  !EXCODE ;                             
+                                        
+                                        
+                                        
+                                        
+                               \ FAH    
+-------------------------------------------- SCREEN 021
+\ INPUT                  < 5/13/86>161  
+\ will only input INT CAR or STR        
+\ ARG: var# C,                          
+EXCODE: ( -- )                          
+  @1ARG DUP @VTYPE                      
+  DUP TYPES INT = SWAP CAR = OR         
+  IF EXEC >R MIN-GETN MAX-GETN          
+     PAD 7 GETN R> @VADDR !             
+  ELSE                                  
+   DUP @VTYPE TYPES STR = NOT EXEC      
+   RUN-ERR" Wrong type in INPUT"        
+   @VADDR DUP 1+ SWAP C@ ( MAX )        
+   GINPUT THEN                          
+   0 TO MIN-GETN -1 TO MAX-GETN         
+  CLEANUP EX;                           
+                                        
+\ USE: INPUT var                        
+KEY: INPUT                              
+  LOADER INSCR?                         
+  GET-VAR-NUM DUP EXEC 1stVar# <        
+  ABORT" Can't change this variable"    
+  LOADER !EXCODE C,OPDB ;               
+                                        
+                               \ FAH    
+-------------------------------------------- SCREEN 022
+\ REPCHAR REP            < 6/ 3/86>162  
+[EXEC]                                  
+ASCII @ XCONST REPCHAR                  
+\ REPCHAR followed char below will      
+\ be replace by item indicated          
+XCREATE REP                             
+  ASCII R C, 4 C, ( RIGHT ARROW )       
+  ASCII L C, 5 C, ( LEFT ARROW )        
+  ASCII U C, 2 C, ( UP ARROW )          
+  ASCII D C, 3 C, ( DOWN ARROW )        
+  ASCII 0 C, 20 C, ( sub 1 )            
+  ASCII 1 C, 21 C, ( sub 2 )            
+  ASCII 2 C, 22 C, ( sub 3 )            
+  ASCII 3 C, 23 C, ( sub 4 )            
+  ASCII 4 C, 24 C, ( sub 5 )            
+  ASCII 5 C, 25 C, ( sub 6 )            
+  ASCII 6 C, 26 C, ( sub 7 )            
+  ASCII 7 C, 27 C, ( sub 8 )            
+  ASCII 8 C, 28 C, ( sub 9 )            
+  ASCII 9 C, 29 C, ( sub 10 )           
+  0 , ( END OF TABLE)                   
+                                        
+                                        
+                               \ FAH    
+-------------------------------------------- SCREEN 023
+( FILTER PRIMS/VARS      < 5/13/86>163) 
+[EXEC]                                  
+XCREATE GARBAGE                         
+XVAR SCNT                               
+XVAR ^DST                               
+XVAR -CASE-                             
+XVAR CHANGED?                           
+                                        
+X: !DST ( B -- )                        
+  ^DST @ DUP C@ + 1+ C!                 
+  1 ^DST @ +C! X;                       
+                                        
+X: @SRC ( -- B )                        
+  MSG-BUF SCNT @ + 1+ C@                
+  1 SCNT +! X;                          
+                                        
+X: ^SRC ( -- ADR )                      
+  MSG-BUF SCNT @ + 1+ X;                
+                                        
+X: DONE? ( -- T/F )                     
+  SCNT @ MSG-BUF C@ < NOT X;            
+                                        
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 024
+\ REPTRAN                < 5/13/86>164  
+                                        
+[EXEC]                                  
+                                        
+X: REPTRAN ( C -- C' )                  
+  REP                                   
+  BEGIN                                 
+   DUP C@ 3 PICK OVER UC= NOT           
+   SWAP 0= NOT AND                      
+  WHILE 2+ REPEAT                       
+  DUP C@                                
+  IF 1 CHANGED? !                       
+    SWAP DROP 1+ C@                     
+  ELSE DROP                             
+  THEN X;                               
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               \ FAH    
+-------------------------------------------- SCREEN 025
+\ FILTER                 < 5/15/86>165  
+[EXEC]                                  
+: FILTER                                
+  0 PAD ! PAD ^DST !                    
+  0 SCNT ! 0 CHANGED? !                 
+  BEGIN DONE? NOT                       
+  WHILE @SRC                            
+   DUP REPCHAR =                        
+   IF DROP @SRC REPTRAN THEN            
+   !DST                                 
+  REPEAT                                
+  CHANGED? @ ( COPY STRING BACK? )      
+  IF ^DST @ DUP C@ 1+                   
+    MSG-BUF SWAP CMOVE                  
+  THEN ;                                
+                                        
+FORGET GARBAGE                          
+REVECTOR FILTER INTO PROCESS-MSG        
+CR ." FILTER installed" CR              
+                                        
+                                        
+                                        
+                                        
+                               \ FAH    
+-------------------------------------------- SCREEN 026
+\ <GEMIT>                < 5/16/86>166  
+                                        
+\ for chars 20-29:                      
+\   - lower subamt                      
+\   - print number (n+28)               
+\   - raise subamt                      
+                                        
+: <GEMIT> \ C -- ;                      
+  DUP 20 29 WITHIN                      
+  IF   SUBAMT @ GY +!                   
+       28 + <GEMIT>                     
+       SUBAMT @ NEGATE GY +!            
+  ELSE <GEMIT>                          
+  THEN ;                                
+                                        
+                                        
+' <GEMIT> CFA ' GEMIT !                 
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               \ FAH    
+-------------------------------------------- SCREEN 027
+\ Y/N?                   < 5/13/86>167  
+                                        
+\ spaces over and waits for Y/N         
+\ Prints response                       
+EXCODE: ( -- )                          
+  EAT-KEYS 78 ( N )                     
+  GSPACE GY/N DUP FLAG C!               
+  11 * + GEMIT  EX;                     
+                                        
+                                        
+KEY: Y/N?                               
+  LOADER INSCR? !EXCODE ;               
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               \ FAH    
+-------------------------------------------- SCREEN 028
+\ WAIT                   < 5/13/86>168  
+                                        
+                                        
+IS-EXCODE WAIT                          
+                                        
+KEY: WAIT                               
+  LOADER INSCR?                         
+  TYPES INT LOADER GET-EXPR             
+  !EXCODE ;                             
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               \ FAH    
+-------------------------------------------- SCREEN 029
+\ <HILIT>                <10/ 4/86>169  
+                                        
+[EXEC]                                  
+: <HILIT> ( w n ; hilit item n with )   
+  GXY@ >R >R GETMODE >R                 
+  >R      ( bar that is w wide )        
+  0 SETMODE                             
+  ( W ) 10 ( height )                   
+  R@ 0 ^MITEMS @  ( xlocation ) 5 -     
+  R> 2 ^MITEMS @  ( ylocation )         
+  BAR                                   
+  R> SETMODE R> R> GXYTAB ;             
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               \ FAH    
+-------------------------------------------- SCREEN 030
+\ HILIT 1HILIT           < 5/13/86>170  
+                                        
+EXCODE: ( W -- ; when running menu )    
+  M-ITEM# @ <HILIT>                     
+  CLEANUP EX;                           
+                                        
+KEY: HILIT                              
+  LOADER INSCR?                         
+  TYPES INT LOADER GET-EXPR             
+  !EXCODE ;                             
+                                        
+EXCODE: ( W -- ; During creation only ) 
+  #MITEMS @ <HILIT>                     
+  CLEANUP EX;                           
+                                        
+KEY: 1HILIT                             
+  LOADER INSCR?                         
+  TYPES INT LOADER GET-EXPR             
+  !EXCODE ;                             
+                                        
+                                        
+                                        
+                                        
+                               \ FAH    
+-------------------------------------------- SCREEN 031
+\ BDKEY                  < 5/13/86>171  
+[FORTH]                                 
+\ this is my back door.                 
+\ Press control-f with both             
+\ apple keys down                       
+\ only used when waiting for keys       
+\ in the disk error words               
+                                        
+: BDKEY \ -- KEY                        
+  KEY                                   
+  DUP 6 = 49249 C@ 127 > AND            
+  49250 C@ 127 > AND                    
+  IF DROP TEXT KEY DROP PAGE            
+    ." HI FRED" CR CR <ABORT> THEN ;    
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               \ FAH    
+-------------------------------------------- SCREEN 032
+\ INSDISK                < 5/13/86>172  
+[FORTH]                                 
+' <DISKERR> CFA CONSTANT ^DISKERR       
+                                        
+27213 CONSTANT DID \ Disk ID            
+                                        
+\ insert disk with DID                  
+: INSDISK \ --                          
+  REVECTOR NOOP INTO DISKERR            
+  BEGIN EMPTY-BUFFERS 3 BLOCK @         
+    DID = DISK-ERROR @ 0= AND NOT       
+  WHILE PAGE TEXT 7 10 XYTAB            
+    ." PLEASE INSERT THE PROGRAM"       
+    10 12 XYTAB                         
+    ." DISK IN DRIVE 1, THEN"           
+    14 14 XYTAB                         
+    ." PRESS SPACE"                     
+    BEGIN BDKEY BL = UNTIL              
+  REPEAT                                
+  ^DISKERR TO DISKERR                   
+;                                       
+                                        
+                                        
+                               \ FAH    
+-------------------------------------------- SCREEN 033
+\ MYRESET                < 5/13/86>173  
+[FORTH]                                 
+                                        
+VARIABLE BRK-SCR                        
+\ holds the OpDB address of the         
+\ screen to run when reset is pressed   
+                                        
+: MYRESET                               
+  MODE40 INSDISK CLS HG                 
+  5 SETMODE DX' @ DX !                  
+  0 34 C! ( reset text margin )         
+  BRK-SCR @ EXEC DEP !                  
+  BEGIN READ-SCR NOT                    
+  WHILE SCR-BUF RUN-CODE REPEAT         
+  RUN-ERR" Brk screen exited"           
+;                                       
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               \ FAH    
+-------------------------------------------- SCREEN 034
+\ BRK-SCREEN             < 5/13/86>174  
+\ use: BRK-SCREEN name                  
+\ vectors in MYRESET into BRK-RETN      
+\ when crtl-RESET is pressed            
+\ control will transfer to this screen  
+                                        
+\ args: ADR ,                           
+EXCODE: \ -- ;                          
+  REVECTOR MYRESET INTO BRK-RETN        
+  @2ARG BRK-SCR ! EX;                   
+                                        
+( use: BRK-SCREEN name )                
+KEY: BRK-SCREEN ( -- ; )                
+  LOADER INSCR?                         
+  !EXCODE <INTER> ;                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               \ FAH    
+-------------------------------------------- SCREEN 035
+\ >RLAST RETRY           < 5/13/86>175  
+[FORTH]                                 
+CREATE RLAST 14 ALLOT                   
+                                        
+: >RLAST \ copys to 7 args to RLAST     
+  SP@ RLAST 14 CMOVE ;                  
+                                        
+\ retrys last argument saved by         
+\ >RLAST returns error status           
+\                                       
+\ /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\  
+\ \ DOES NOT GO TO DISKERR if error  /  
+\  \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/   
+                                        
+HEX                                     
+: RETRY \ -- Err ; retry last           
+  0 0C                                  
+  DO RLAST I + @ -2 +LOOP               
+  RLAST @ 6 PICK 10 * B7E9 C!           
+  <RWTS> DUP DISK-ERROR ! ;             
+                                        
+DECIMAL                                 
+                                        
+                               \ FAH    
+-------------------------------------------- SCREEN 036
+\ RWTS PATCH             < 5/13/86>176  
+[FORTH]                                 
+                                        
+\ saves calling arguments so it can     
+\ be retried if error                   
+                                        
+\ ' [RWTS] CFA ' RWTS ! enables         
+\ ' DEPTH CFA ' RWTS ! disables         
+                                        
+: [RWTS] ( <7 ARGS> -- <7 ARGS> DEPTH ) 
+  >RLAST DEPTH ;                        
+                                        
+                                        
+' [RWTS] CFA ' RWTS !                   
+CR CR ." RWTS PATCHED" CR CR            
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               \ FAH    
+-------------------------------------------- SCREEN 037
+\ .DERR                  < 5/13/86>177  
+[FORTH]                                 
+\ if space pressed, return              
+\ else execute BRK-RETN                 
+: .DERR ( -- ; print message )          
+  PAGE TEXT CR 1500 50 TONE             
+  7 7  XYTAB                            
+  ." A DISK ERROR HAS OCCURRED"         
+  7 8 XYTAB OUT @ 0 DO 45 EMIT LOOP     
+  9 11 XYTAB                            
+  ." CHECK DISK AND DRIVE"              
+  7 13 XYTAB                            
+  ." THEN PRESS SPACE TO RETRY"         
+  5 15 XYTAB                            
+  ." OR ESC TO RETURN TO MAIN MENU"     
+  BEGIN BDKEY DUP BL = OVER 27 = OR NOT 
+  WHILE DROP REPEAT                     
+  27 =                                  
+  IF HG BRK-RETN <ABORT> THEN           
+  PAGE ;                                
+                                        
+                                        
+                                        
+                               \ FAH    
+-------------------------------------------- SCREEN 038
+\ DISK-OPPS              < 5/13/86>178  
+\ handles disk errors                   
+\ does not destroy HI-RES screen        
+\ Will leave in text mode               
+\ if csw does not point to ROM          
+[FORTH]                                 
+  XVAR OLDCSW                           
+: DISK-OOPS                             
+  54 @ OLDCSW !  \ output routine       
+  BEGIN .DERR    \ tell user            
+        INSDISK  \ right disk?          
+        RETRY 0= \ until succesful      
+  UNTIL                                 
+  PAGE           \ clear text screen    
+  OLDCSW @ DUP 65008 =                  
+  \ 65008=adr of screen output routine  
+  IF HG THEN     \ if not printing      
+  54 ! ;         \ restore COUT routine 
+                                        
+REVECTOR DISK-OOPS INTO DISKERR CR CR   
+REVECTOR DISK-OOPS TO ^DISKERR CR CR    
+." DISKERR REVECTORED INTO DISK-OPPS"   
+CR CR                                   
+                               \ FAH    
+-------------------------------------------- SCREEN 039
+\ PAREA                  < 5/13/86>179  
+                                        
+\ move cursor to prompt area (PX,PY)    
+                                        
+EXCODE: \ -- ;                          
+  PX @ PY @                             
+  DDUP LASTY ! LASTX !                  
+  CURY ! CURX ! EX;                     
+                                        
+KEY: PAREA                              
+  LOADER INSCR? !EXCODE ;               
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               \ FAH    
+-------------------------------------------- SCREEN 040
+\ TAREA                  < 5/13/86>180  
+                                        
+\ move cursor to text area (TX,TY)      
+                                        
+EXCODE: \ -- ;                          
+  TX @ TY @                             
+  DDUP LASTY ! LASTX !                  
+  CURY ! CURX ! EX;                     
+                                        
+KEY: TAREA                              
+  LOADER INSCR? !EXCODE ;               
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+-------------------------------------------- SCREEN 041
+\ CAREA                  < 5/13/86>181  
+                                        
+\ move cursor to text area (CX,CY)      
+                                        
+EXCODE: \ -- ;                          
+  CX @ CY @                             
+  DDUP LASTY ! LASTX !                  
+  CURY ! CURX ! EX;                     
+                                        
+KEY: CAREA                              
+  LOADER INSCR? !EXCODE ;               
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               \ FAH    
+-------------------------------------------- SCREEN 042
+\ RANDOM                 < 6/12/86>182  
+                                        
+[FORTH]                                 
+                                        
+VARIABLE SEED 0 SEED !                  
+                                        
+: RANDOM ( N -- I; 0<=I<N )             
+   SEED @ U* SWAP DROP                  
+   SEED @ 27517 U* 2311 0 D+            
+   DROP SEED ! ;                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               \ FAH    
+-------------------------------------------- SCREEN 043
+\ RTIME                  < 6/12/86>183  
+\ wait a random amount of time          
+\ make a tone TINT is the number of     
+\ milisecs it took the user to react    
+[EXEC] VARIABLE RT                      
+EXCODE: \ -- ;                          
+  0 RT ! 9 RANDOM 9 + WAIT              
+  BEGIN 3 WAIT ?TERMINAL NOT UNTIL      
+  3000 5 TONE ?TERMINAL DROP            
+  BEGIN 1 RT +!                         
+   1 DROP 1 DROP \ time killers         
+   QTERM RT @ 9999 > OR                 
+  UNTIL                                 
+  ?TERMINAL DROP 4000 5 TONE            
+  RT @ TINT !                           
+  CLEANUP EX;                           
+                                        
+KEY: RTIME                              
+  LOADER INSCR? !EXCODE ;               
+                                        
+                                        
+                                        
+                                        
+                                        
+-------------------------------------------- SCREEN 044
+\ PR-CYCLES              < 6/12/86>184  
+\ print RT (reaction time)              
+                                        
+EXCODE: \ --                            
+  RT @ 999 >                            
+  IF RT @ 1000 / G. 44 GEMIT            
+   RT @ 1000 MOD DUP 100 <              
+   IF 48 GEMIT THEN DUP 10 <            
+   IF 48 GEMIT THEN                     
+  THEN                                  
+  RT @ 1000 MOD G.                      
+  G." ,000,000"                         
+  CLEANUP EX;                           
+                                        
+                                        
+KEY: PR-CYCLES                          
+  LOADER INSCR? !EXCODE ;               
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+-------------------------------------------- SCREEN 045
+\ MARK PRIMS             < 6/27/86>185  
+                                        
+[EXEC]                                  
+50 CONSTANT #MARKS                      
+                                        
+CREATE MARKS                            
+  1 ALLOT \ current count               
+  #MARKS 2* ALLOT \ location            
+                                        
+\ address of the current mark item      
+: ^MARK \ -- ADR ;                      
+   MARKS 1+                             
+   MARKS C@ 2* + ;                      
+                                        
+\ T= last mark is this screen           
+: TMARK? ( -- )                         
+   ^MARK 2- @ LAST-DEP @ = ;            
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               \ FAH    
+-------------------------------------------- SCREEN 046
+\ MARK-INIT MARK         < 6/26/86>186  
+                                        
+\ clear the table                       
+EXCODE:                                 
+  MARKS [ #MARKS 2* 1+ ] LITERAL 0 FILL 
+EX;                                     
+                                        
+KEY: MARK-INIT                          
+  LOADER INSCR? !EXCODE ;               
+                                        
+                                        
+\ marks this screen as a branch point   
+EXCODE:                                 
+  LAST-DEP @ ^MARK !                    
+  MARKS C@ 1+ DUP #MARKS < NOT          
+  RUN-ERR" No more MARK's"              
+  MARKS C!                              
+EX;                                     
+                                        
+KEY: MARK                               
+  LOADER INSCR? !EXCODE ;               
+                                        
+                                        
+                               \ FAH    
+-------------------------------------------- SCREEN 047
+\ .MARKS                 < 7/11/86>187  
+[EXEC]                                  
+: .MARKS \ T -- ; T=both F=only forwrd  
+  5 SETMODE                             
+  IF INGXY 70 0 4 GEMIT                 
+   8 GX +! G." Forward" GX @ 5 + .      
+   0 SETMODE 13 8 68 1 BAR              
+   5 SETMODE INGXY 150 0 5 GEMIT        
+   8 GX +! G." Back"                    
+   0 SETMODE 13 8 148 1 BAR             
+  ELSE INGXY 100 0 4 GEMIT              
+   8 GX +! G." Forward"                 
+   0 SETMODE 13 8 98 1 BAR              
+  THEN ;                                
+                                        
+: CLR-MARKS                             
+  2 SETMODE                             
+  280 10 0 0 BAR                        
+  5 SETMODE ;                           
+                                        
+                                        
+                                        
+                                        
+                               \ FAH    
+-------------------------------------------- SCREEN 048
+\ DOMARK                 < 7/11/86>188  
+[EXEC] 0 CONSTANT LAR?                  
+                                        
+\ wait for <- or -> key                 
+\ if <- just exit                       
+\ if -> exit the screen immed.          
+EXCODE: \ -- ;                          
+  MARKS C@ DUP 0= NOT                   
+  IF 1 = TMARK? AND NOT THEN            
+  DUP .MARKS TO LAR?                    
+  BEGIN KEY DUP RTAR?                   
+   OVER LFAR? LAR? AND OR NOT           
+  WHILE DROP REPEAT                     
+  CLR-MARKS                             
+  RTAR? \ go to next screen             
+  IF 1 TO EXIT-SCR? THEN EX;            
+                                        
+KEY: DOMARK                             
+  LOADER INSCR? !EXCODE ;               
+                                        
+                                        
+                                        
+                                        
+                                        
+-------------------------------------------- SCREEN 049
+\ GOMARK                 < 7/11/86>189  
+                                        
+                                        
+EXCODE: \ -- ;                          
+  MARKS C@                              
+  IF TMARK? \ top = this?               
+   IF -1 MARKS +C! THEN                 
+   -1 MARKS +C!                         
+   ^MARK @ DEP ! READ-SCR               
+  THEN                                  
+  EX;                                   
+                                        
+                                        
+                                        
+KEY: GOMARK                             
+  LOADER INSCR? !EXCODE ;               
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               \ FAH    
+-------------------------------------------- SCREEN 050
+\ BAR-OFFS BAR-LEN       <10/ 4/86>190  
+                                        
+[EXEC]                                  
+CREATE BAR-LENS                         
+   MAX-#MITEMS ALLOT                    
+VARIABLE BOFFS                          
+                                        
+EXCODE: ( N -- ) BOFFS ! EX;            
+                                        
+KEY: BAR-OFFS                           
+  LOADER INSCR?                         
+  TYPES INT LOADER GET-EXPR             
+  !EXCODE ;                             
+                                        
+EXCODE: ( N -- )                        
+  #MITEMS @ BAR-LENS + C! EX;           
+                                        
+KEY: BAR-LEN                            
+  LOADER INSCR?                         
+  TYPES INT LOADER GET-EXPR             
+  !EXCODE ;                             
+                                        
+                                        
+                               \ FAH    
+-------------------------------------------- SCREEN 051
+\ MC3                    <10/ 4/86>191  
+                                        
+[EXEC]                                  
+\ VARIABLE LMCP \ last menu cursor pos  
+VARIABLE AKEYS \ true is up/dn          
+                                        
+: MC3 ( -- hilight current item)        
+  M-ITEM# @ DUP BAR-LENS + C@           
+  SWAP <HILIT>                          
+;                                       
+                                        
+: UPKEY? ( c -- t/f )                   
+  AKEYS @ IF UPAR? ELSE LFAR? THEN ;    
+                                        
+: DNKEY?                                
+  AKEYS @ IF DNAR? ELSE RTAR? THEN ;    
+                                        
+EXIT                                    
+: MC3 ( N -- ; move to M-ITEM n )       
+  LMCP @ <MC3>                          
+  ( n ) DUP LMCP ! <MC3> ;              
+                                        
+                                        
+                                        
+-------------------------------------------- SCREEN 052
+\ DO-MENU3               <10/ 5/86>192  
+                                        
+\ args: flag C, if true use up/dn)      
+EXCODE: ( N -- ; if n true allow ESC )  
+ @1ARG AKEYS ! EP @ NEXT-EP !           
+ LAST-DEP @ NEXT-EP 2+ !                
+ BEGIN M-ITEM# @ 4 ^MITEMS @ GO-CODE    
+  MC3 KEY MC3 MENU-KEY? ?DUP            
+  IF SWAP DROP                          
+   ^MKEYS 1+ @ GO-CODE                  
+  ELSE DUP >R UPKEY?                    
+   IF -1 M-ITEM# +! THEN                
+   R@ DNKEY?                            
+   IF 1 M-ITEM# +! THEN                 
+   M-ITEM# @ 1- #MITEMS @ +             
+   #MITEMS @ MOD 1+ M-ITEM# !           
+   R> 13 =                              
+   IF M-ITEM# @ 6 ^MITEMS @ GO-CODE     
+   THEN                                 
+  THEN                                  
+ AGAIN                                  
+EX;                                     
+                                        
+                               \ FAH    
+-------------------------------------------- SCREEN 053
+\ DO-MENU3 DO-MENU4      <10/ 4/86>193  
+                                        
+\ uses left/right arrows                
+KEY: DO-MENU3                           
+  LOADER END-MENU                       
+  !EXCODE                               
+  0 C,OPDB ;                            
+                                        
+\ uses up/down arrows                   
+KEY: DO-MENU4                           
+  LOADER END-MENU                       
+  !EXCODE                               
+  1 C,OPDB ;                            
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               \ FAH    
+-------------------------------------------- SCREEN 060
+\ LAST SCREEN IN LOAD    < 5/13/86>200  
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               \ FAH    
+-------------------------------------------- SCREEN 100
+\ CHEMICAL PRINTER NOTES < 5/14/86>240  
+EXIT _________________________________  
+                                        
+The idea behind these functions is to   
+provide an easy way to express the      
+chemical formulas that results in a     
+very clean polished formula             
+                                        
+The plan is to implement the formula    
+printer by passing strings that         
+describe the nature of the molecule     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               \ FAH    
+-------------------------------------------- SCREEN 101
+\ CHEMICAL PRINTER RULES < 5/14/86>241  
+EXIT _________________________________  
+                                        
+To print a element at the current       
+location simply inclose it in sigle     
+quotes (like 'HC')                      
+                                        
+Within an string the following          
+characters have special meaning:        
+                                        
+> will raise for superscripts and end   
+  a subscript.                          
+< will drop for subscripts and end      
+  a superscript.                        
+NOTE - you only have to end sub/super-  
+       scripts if you have to print     
+       more things after it             
+                                        
+^ Causes the next letter to be centered 
+  on the current location. If ^ is      
+  not present it is alligned on the     
+  first character                       
+                                        
+                               \ FAH    
+-------------------------------------------- SCREEN 102
+\ CHEMICAL PRINTER RULES < 5/14/86>242  
+EXIT _________________________________  
+All movement is relative to the current 
+location and is specified as x and y    
+displacements and specified as follows  
+                                        
+Cxy Where C is the type of movement     
+desired and xy is the amount of x and   
+y displacement                          
+                                        
+The following C's are defined           
+                                        
+D connect with double bond              
+S connect with single bond              
+H connect with high energy bound        
+  (ONLY WORK WHEN y is 0 ie straight)   
+T connect with a tapered bond           
+  that starts 1 pix and wides op wide   
+R reverse taper wide to small           
+W connect with a wide bond              
+                                        
+xy are specified with letters           
+A=1 Z=26 a=-1 z=-26 space=0             
+                               \ FAH    
+-------------------------------------------- SCREEN 103
+\ CHEMICAL PRINTER RULES < 5/14/86>243  
+EXIT _________________________________  
+                                        
+The following special operations are    
+also defined:                           
+                                        
+Xno Save current x location plus offset 
+    o to table location n               
+Yno Save current y location plus offset 
+    o to table location n               
+    - The above are used to label       
+      portions of the molecule          
++   Save current location               
+-   Restore last saved location         
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               \ FAH    
+-------------------------------------------- SCREEN 104
+\ CONSTANTS VARIABLES    < 5/15/86>244  
+[EXEC]                                  
+\ leave first head so we have something 
+\ to forget                             
+7 CONSTANT CW \ character width         
+8 XCONSTANT CH \ character heigth       
+4 XCONSTANT CC \ vertical center offset 
+                                        
+                                        
+\ pointer to current character          
+0 CONSTANT ^STR                         
+\ number of characters left in string   
+XVARIABLE CLEFT                         
+                                        
+\ holds current location                
+XVARIABLE MX                            
+XVARIABLE MY                            
+                                        
+                                        
+\ amount subscripts raised              
+5 XCONSTANT SSAMT                       
+                                        
+                                        
+                                        
+-------------------------------------------- SCREEN 105
+\ @CH LOOKCH             < 5/15/86>245  
+[EXEC]                                  
+                                        
+\ read current character and inc ptr    
+X: @CH \ -- C/0; returns zero if end    
+  CLEFT @ 0>                            
+  IF ^STR C@ 1 ' ^STR +! -1 CLEFT +!    
+  ELSE 0 THEN X;                        
+                                        
+\ read current character don't inc      
+X: LOOKCH \ -- C/0; returns zero if end 
+  CLEFT @ 0>                            
+  IF ^STR C@ ELSE 0 THEN X;             
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               \ FAH    
+-------------------------------------------- SCREEN 106
+\ ELSPC? ELPOS           < 5/15/86>246  
+[EXEC]                                  
+X: ELSPC? \ C -- T/F; T if < > or ^     
+  DUP 60 = OVER 62 = OR SWAP 94 = OR X; 
+                                        
+XVARIABLE ELLEN \ len in pixs           
+XVARIABLE CPOS \ center location        
+X: ELWID CWIDTH 2 /MOD + 1- X;          
+\ entered pointing to char after '      
+\ sets up text cursor to print the      
+\ element restores pointer              
+X: ELPOS ( -- )                         
+  ^STR >R CLEFT @ >R 0 ELLEN !          
+  LOOKCH ELSPC? NOT                     
+  IF LOOKCH ELWID CPOS ! THEN           
+  BEGIN LOOKCH DUP 39 = SWAP 0= OR NOT  
+  WHILE @CH DUP ELSPC?                  
+   IF 94 = \ new centering pos?         
+    IF LOOKCH ELWID ELLEN @ +           
+     CPOS ! THEN                        
+   ELSE CWIDTH CDELX + ELLEN +! THEN    
+  REPEAT                                
+  R> CLEFT ! R> TO ^STR X;              
+                               \ FAH    
+-------------------------------------------- SCREEN 107
+\ PRSTR DO'              < 5/15/86>247  
+[EXEC]                                  
+X: PRSTR \ -- print string              
+  BEGIN LOOKCH DUP 39 = SWAP 0= OR NOT  
+  WHILE @CH DUP ELSPC?                  
+   IF DUP 60 =                          
+    IF SSAMT GY +! THEN 62 =            
+    IF SSAMT NEGATE GY +! THEN          
+   ELSE GETMODE 4 SETMODE               
+     SWAP GEMIT SETMODE                 
+   THEN                                 
+  REPEAT                                
+  @CH DROP X; \ terminating '           
+                                        
+\ code for interpretting '              
+\ call with character pointing to       
+\ first char after ' increments         
+\ pointer to point to first char        
+\ after closing '                       
+X: 'DO ( -- )                           
+  ELPOS MX @ CPOS @ - MY @ CC - GXYTAB  
+  PRSTR X;                              
+                                        
+                               \ FAH    
+-------------------------------------------- SCREEN 108
+\ MOVE DRAW PRIMS        < 5/15/86>248  
+[EXEC]                                  
+XVARIABLE MEX \ ending x value          
+XVARIABLE MEY \ ending y value          
+XVARIABLE MSX \ rise                    
+XVARIABLE MSY \ run                     
+\ given a character return its value    
+\ A to Z = 1 to 26 a to z = -1 to -26   
+\ space = 0                             
+X: GETVAL \ C -- V; aborts if error     
+  DUP BL = IF DROP 0 EXIT THEN          
+  DUP ASCII A ASCII Z WITHIN            
+  IF ASCII A - 1+ EXIT THEN             
+  DUP ASCII a ASCII z WITHIN            
+  IF ASCII a - 1+ NEGATE EXIT THEN      
+  1 ABORT" Bad offset" X;               
+                                        
+X: SETEND \ enter pointing to offsets   
+  @CH GETVAL DUP MSX ! MX @ + MEX !     
+  @CH GETVAL DUP MSY ! MY @ + MEY ! X;  
+                                        
+X: COPYEND \ set new point to last end  
+  MEX @ MX ! MEY @ MY ! X;              
+                               \ FAH    
+-------------------------------------------- SCREEN 109
+\ SDO MDO @MXY @MEXY     < 5/15/86>249  
+[EXEC]                                  
+                                        
+X: @MXY \ -- X Y ;                      
+  MX @ MY @ X;                          
+                                        
+X: @MEXY \ -- X Y ;                     
+  MEX @ MEY @ X;                        
+                                        
+\ draw a single bound                   
+X: SDO ( -- )                           
+  SETEND                                
+  @MXY @MEXY LINE                       
+  COPYEND X;                            
+                                        
+                                        
+\ just moves                            
+X: MDO                                  
+  SETEND COPYEND X;                     
+                                        
+                                        
+                                        
+                                        
+                                        
+-------------------------------------------- SCREEN 110
+\ NSIGN MEL MER          < 5/15/86>250  
+[EXEC]                                  
+X: NSIGN \ V -- -1/0/1;                 
+  DUP                                   
+  IF 0> 2* 1- THEN X;                   
+                                        
+\ deal w/ this shit apple computer      
+X: SCASE \ N -- M                       
+  MSX @                                 
+  IF MSY @ ABS MSX @ ABS / 1 >          
+  ELSE 1 THEN                           
+  IF 2* THEN X;                         
+                                        
+\ Return Point to the left              
+X: MEL \ X Y -- X' Y'                   
+  >R MSY @ NSIGN SCASE +                
+  R> MSX @ NSIGN NEGATE + X;            
+                                        
+\ Return point to the right             
+X: MER \ X Y -- X' Y'                   
+  >R MSY @ NSIGN SCASE NEGATE +         
+  R> MSX @ NSIGN + X;                   
+                                        
+                               \ FAH    
+-------------------------------------------- SCREEN 111
+\ DOD TDO RDO            < 5/15/86>251  
+[EXEC]                                  
+\ draw a double bond                    
+X: DOD ( -- ) SETEND                    
+  @MXY MEL @MEXY MEL LINE               
+  @MXY MER @MEXY MER LINE               
+  COPYEND X;                            
+                                        
+\ draw a taper bond                     
+X: TDO ( -- ) SETEND                    
+  @MXY @MEXY MEL LINE                   
+  @MXY @MEXY LINE                       
+  @MXY @MEXY MER LINE                   
+  COPYEND X;                            
+                                        
+\ draw a reverse taper bond             
+X: RDO ( -- ) SETEND                    
+  @MXY MEL @MEXY LINE                   
+  @MXY @MEXY LINE                       
+  @MXY MER @MEXY LINE                   
+  COPYEND X;                            
+                                        
+                                        
+                               \ FAH    
+-------------------------------------------- SCREEN 112
+\ WDO CDO                < 5/15/86>252  
+[EXEC]                                  
+\ draw a wide bond                      
+X: WDO ( -- ) SETEND                    
+  @MXY MEL @MEXY MEL LINE               
+  @MXY @MEXY LINE                       
+  @MXY MER @MEXY MER LINE               
+  COPYEND X;                            
+                                        
+\ set color for bounds/braces           
+X: CDO ( -- )                           
+  @CH GETVAL HCOLOR X;                  
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               \ FAH    
+-------------------------------------------- SCREEN 113
+\ 0DO +DO -DO            < 5/15/86>253  
+[EXEC]                                  
+\ set MX MY to current cursor position  
+\ clear up any other viables            
+                                        
+X: 0DO                                  
+  GY @ MY ! GX @ MX ! X;                
+                                        
+                                        
+XVARIABLE OPOS 2 ALLOT                  
+                                        
+X: +DO                                  
+  @MXY OPOS D! X;                       
+                                        
+X: -DO                                  
+  OPOS D@ MY ! MX ! X;                  
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               \ FAH    
+-------------------------------------------- SCREEN 114
+\ XDO YDO GDO            < 5/16/86>254  
+                                        
+XCREATE MXYPOS 40 ALLOT                 
+: ^MXYPOS \ N -- ADR;                   
+  DUP ASCII 0 ASCII 9 WITHIN NOT        
+  ABORT" Bad index"                     
+  ASCII 0 - 4 * MXYPOS + ;              
+                                        
+\ Xno - Saves MX plus offset o to n     
+X: XDO ( -- )                           
+  @CH ^MXYPOS >R                        
+  MX @ @CH GETVAL + R> ! X;             
+                                        
+X: YDO ( -- )                           
+  @CH ^MXYPOS >R                        
+  MY @ @CH GETVAL + R> 2+ ! X;          
+                                        
+X: GDO ( -- )                           
+  @CH ^MXYPOS D@ MX ! MY ! X;           
+                                        
+                                        
+                                        
+                                        
+                               \ FAH    
+-------------------------------------------- SCREEN 115
+\ BDO                    < 5/15/86>255  
+                                        
+XCREATE BC                              
+  0 C, 1 C, 1 C, 1 C, 0 C, 1 C,         
+  1 C, 1 C, 1 C, 0 C, 1 C, 1 C,         
+  1 C, 0 C,                             
+                                        
+0 CONSTANT XR \ reverse x values        
+0 CONSTANT YR \ reverse y values        
+                                        
+X: @XI ( N -- V )                       
+   XR IF 6 SWAP - THEN 2* BC + C@ X;    
+                                        
+X: @YI ( N -- V )                       
+   XR IF 6 SWAP - THEN                  
+   2* BC + 1+ C@ YR IF NEGATE THEN X;   
+                                        
+\ do a corner XR YR decide orienatation 
+X: BRC \ X Y -- X' Y';                  
+  DDUP DOT 7 0                          
+  DO SWAP I @XI + SWAP I @YI +          
+    DDUP DOT LOOP X;                    
+                                        
+                               \ FAH    
+-------------------------------------------- SCREEN 116
+\ BRACE BDO              < 5/15/86>256  
+\ set YR to value before call           
+: BRACE \ LEN --                        
+  GETMODE >R 1MODE 20 - 4 / >R          
+  0 TO XR                               
+  @CURSOR BRC R@ 0                      
+  DO >R 2+ R> DDUP DOT LOOP             
+  1 TO XR BRC                           
+  YR NOT TO YR 0 TO XR BRC              
+  R> 0 DO >R 2+ R> DDUP DOT LOOP        
+  1 TO XR BRC DDROP                     
+  YR NOT TO YR R> SETMODE ;             
+                                        
+X: BDO \ -- ;                           
+  @CH ASCII 1 = TO YR                   
+  @CH ^MXYPOS >R                        
+  R@ @ R@ 2+ @ !CURSOR                  
+  @CH ^MXYPOS @ R> @ - DUP BRACE        
+  @CH ASCII ' = NOT                     
+  ABORT" ' expected'"                   
+  ELPOS 2/ ELLEN @ 2/ - GX +!           
+  YR IF -20 ELSE 10 THEN GY +!          
+  PRSTR X;                              
+                               \ FAH    
+-------------------------------------------- SCREEN 117
+\ DOCOMD                 < 5/16/86>257  
+XCREATE <DOCOMD>                        
+  ASCII 0 C, ] 0DO [ ASCII ' C, ] 'DO [ 
+  ASCII S C, ] SDO [ ASCII M C, ] MDO [ 
+  ASCII D C, ] DOD [ ASCII T C, ] TDO [ 
+  ASCII R C, ] RDO [ ASCII W C, ] WDO [ 
+  ASCII X C, ] XDO [ ASCII Y C, ] YDO [ 
+  ASCII + C, ] +DO [ ASCII - C, ] -DO [ 
+  ASCII B C, ] BDO [ ASCII G C, ] GDO [ 
+  0       C, 0 ,                        
+                                        
+\ execute code for char or error        
+X: DOCOMD ( C -- )                      
+  >R <DOCOMD>                           
+  BEGIN DUP C@ ?DUP                     
+  WHILE R@ =                            
+   IF R> DROP 1+ @ 2+ >R EXIT           
+   THEN                                 
+   3 +                                  
+  REPEAT                                
+  1 ABORT" BAD COMMAND"                 
+X;                                      
+                                        
+                               \ FAH    
+-------------------------------------------- SCREEN 118
+\ DOFORM                 < 5/15/86>258  
+                                        
+: DOFORM \ ADR -- ;                     
+  COUNT CLEFT ! TO ^STR                 
+  BEGIN LOOKCH                          
+  WHILE @CH DOCOMD                      
+  REPEAT ;                              
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               \ FAH    
+-------------------------------------------- SCREEN 119
+\ CFORM                  < 5/15/86>259  
+                                        
+\ use: CFORM mes, num                   
+\ will num messages starting with       
+\ mes from the current groupt and       
+\ will feed it to DOFROM                
+EXCODE: \ mes num --                    
+  0                                     
+  DO DUP >R @GMSG                       
+    MSG-BUF DOFORM                      
+    R> 1+                               
+  LOOP DROP CLEANUP EX;                 
+                                        
+KEY: CFORM                              
+  LOADER INSCR?                         
+  TYPES INT LOADER GET-EXPR             
+  TYPES INT LOADER GET-EXPR             
+  !EXCODE ;                             
+                                        
+[FORTH]                                 
+FORGET CH \ REMOVE HEADS                
+                                        
+                                        
+                               \ FAH    
+-------------------------------------------- SCREEN 120
+\ TEST WORDS             < 5/15/86>260  
+[FORTH]                                 
+\ test word, given adr of :$ words      
+\ will run them all through DOFORM      
+                                        
+: DRAWMOL \ adr -- ;                    
+  >R 1                                  
+  BEGIN DUP R@ N$                       
+  WHILE EXEC DOFORM 1+                  
+  REPEAT R> DDROP ;                     
+: A 261 265 THRU ;                      
+: GLUCOSE ;                             
+A                                       
+EXIT                                    
+                                        
+: DRAWINIT                              
+  HGR 1HG 0 20 XYTAB                    
+  10 70 !CURSOR 3 HCOLOR                
+  20 MX ! 70 MY ! ;                     
+                                        
+                                        
+-->                                     
+                                        
+                                        
+-------------------------------------------- SCREEN 121
+\ GLUCOSE                < 5/16/86>261  
+FORGET GLUCOSE                          
+:$ GLUCOSE                              
+   .$ 0'H<3>^C'$         \              
+   .$ MEBSIBMEB'C'$      \              
+   .$ MEbDDbMDb'C'+$     \ C DUR C      
+   .$ M eS eM e'H^C'$    \              
+   .$ MEbDDbMDb'CH'MNB'2'$ \ CH2        
+   .$ -MEBSDBMDB'C'+$    \ C SDR C      
+   .$ MaESbDMaE'N'$      \ C SDL N      
+   .$ Mf Sf Me 'C'$      \ N SL  C      
+   .$ MaeSbd$            \              
+                                        
+   .$ -MEbDGbMDb'C'+$    \ C DUR C      
+   .$ M h'H'$            \              
+   .$ -MEBSGBMDB'C'$     \ C SDR C      
+   .$ MEbSDbMDb'C'+$     \ C DUR C      
+   .$ M eS eX2 Y2 M e'R' $              
+   .$ -MEBDDBMDB'C'+$    \ C DDR C      
+   .$ MEbSIbMEb'C<2>H<5'$ \             
+   .$ -MaESbDMaE'C'+$    \ C DDL C      
+   .$ Me Sf Mf 'N'$      \ C SL  N      
+   .$ MafDbc$            \              
+                                        
+-------------------------------------------- SCREEN 122
+\                        < 5/14/86>262  
+                                        
+  .$ -MEBDDBMDB'CH'$    \ C DDR CH      
+   .$ MeBSdBMdB'C'$      \ C DDL C      
+   .$ MAEDBDMAE'C'+$     \ C DDR C      
+   .$ MEBSIBMEB'CH<3'$   \              
+  .$ -MeBScBMeB'C'$     \ C SDL C       
+   .$ MebDcbMeb'C'$      \ C DUL C      
+   .$ MAeSCdMAe'N'+$     \ C SUR N      
+   .$ MF SF $                           
+                                        
+  .$ -MfbSdbMnb'Mg'+$                   
+   .$ MNbSDb$                           
+  .$ -MgbSdb$                           
+  .$ -MgBSdBMfB'N'$                     
+   .$ Mf Df Me 'C'+$                    
+   .$ MebSdbMeb'C^H'$                   
+   .$ MFbDDb$                           
+  .$ -MaESbDMaE'CH'+$                   
+   .$ MeBSiBMeB'H<3>^C'$   \            
+  .$ -MCDSDBMEB'C'+$     \ C SDL C      
+   .$ MAH'H'$                           
+   .$ MdeSdJMcD'CH<2'$                  
+                                        
+-------------------------------------------- SCREEN 123
+\                        < 5/15/86>263  
+                                        
+   .$ Me Si M A'CH<^2'$                 
+   .$ MrDSdBMdC'C'$                     
+   .$ Me Dc Me 'O'$                     
+   .$ MRBSDBMDC'O'$                     
+   .$ MaES F$ \ len of tail off O       
+                                        
+  .$ -MDaSDbMCd'C'+$                    
+   .$ MaeSbd$                           
+  .$ -MFBDJBMEA'C'+$                    
+   .$ MEbSDb$                           
+\  .$ MEbSDbMDb'C'+$     \ C DUR C      
+                                        
+  .$ -MBESBDMAE'H^C'+$                  
+   .$ MD SE MF 'C'$                     
+   .$ MBeSBdMdH$                        
+   .$ MBEDBDMBE'O'$                     
+  .$ -MbESbDMbE'C'+$                    
+   .$ Me Dd Me 'O'$                     
+  .$ -MBESBDMBE'O'$                     
+   .$ ME SD ME 'CH>3'$                  
+                                        
+;$                                      
+-------------------------------------------- SCREEN 124
+\ PHYTOL                 < 5/16/86>264  
+                                        
+:$ PHYTOL                               
+   .$ 0S TM E'H<2>^C$                   
+   .$ MEcSDbMEc'C'+$                    
+   .$ M eS dM e'H'X0dY0f$               
+  .$ -MECDDBMEC'C'+$                    
+   .$ M ES DM E'CH<3'-$                 
+   .$ MEcSDbMEc'C'+$                    
+   .$ M i'H'MHB'2'$                     
+  .$ -MECSDBMEC'C'+$                    
+   .$ M I'H'MHB'2'-$                    
+   .$ MEcSDbMEc'CH<3'+X1V$              
+   .$ B101'Phytol'$ ;$                  
+:$ CLORO                                
+\ two chloropyls                        
+   .$ G2S cM e'CH<3'$ \ A               
+   .$ G2S cM e'C'+$ \ B                 
+   .$ M eD dM e'O'$                     
+  .$ -MD SE ME 'H'$                     
+;$                                      
+                                        
+                                        
+                                        
+-------------------------------------------- SCREEN 125
+\ SHOW                   < 5/16/86>265  
+\ FORGET LOT                            
+: LOT ( X Y -- ) GXYTAB                 
+G." This is a line of text gmlyyyy" ;   
+                                        
+3 CONSTANT ATPC                         
+                                        
+: SHOW                                  
+  HGR 1 HCOLOR                          
+  2 139 0 11 BAR  2 139 278 11 BAR      
+  280 1 0 11 BAR  280 1 0 150 BAR       
+  40 44 !CURSOR ATPC HCOLOR             
+  GLUCOSE DRAWMOL                       
+\ 34 138 !CURSOR                        
+\ PHYTOL DRAWMOL                        
+\ 15 0 LOT 15 182 LOT                   
+\ 15 162 LOT 15 172 LOT                 
+\ 15 152 LOT                            
+  BEGIN KEY BL = UNTIL TEXT ;           
+                                        
+CR CR                                   
+." USE: SHOW clear and draw" CR CR      
+                                        
+SHOW EL                                 
+-------------------------------------------- SCREEN 129
+\ EI2                    < 5/16/86>269  
+                                        
+: EI3 \ -                               
+  GETMODE >R -10 EP !                   
+  #STEPS 1                              
+  DO 1MODE I IND <BLOW> EP @ 0>         
+   IF EP @ IND <BLOW> THEN              
+   2MODE I IND <BLOW> EP @ 0>           
+   IF EP @ IND <BLOW> THEN              
+   1 EP +!                              
+  LOOP                                  
+  BEGIN EP @ #STEPS <                   
+  WHILE 1MODE EP @ IND DUP <BLOW>       
+    2MODE DUP <BLOW> <BLOW>             
+    1 EP +! REPEAT                      
+  R> SETMODE ;                          
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+-------------------------------------------- SCREEN 130
+\ BX BY {BLW}            < 5/15/86>270  
+VARIABLE BX \ center for explosion      
+VARIABLE BY                             
+\ .A = x coord lsb .Y=msb               
+XCODE {BLW} \ XO YO -- XO YO            
+  N 2+ STA, N 3 + STY, \ save for later 
+  ' $ENDPT JSR, LEFT.D7 STA,            
+  LMASKS ,Y LDA, LEFT.MSK STA,          
+                                        
+  N 2 + LDA, N 3 + LDY, \ its later     
+  CLC, # 1  ADC, CS IF, INY, THEN,      
+  ' $ENDPT  JSR, RIGHT.D7 STA,          
+  RMASKS ,Y LDA, RIGHT.MSK STA,         
+                                        
+  XSAVE LDX,                            
+  BY LDA, CLC, BOT ADC, TAX,            
+  ' $YADDR JSR, ' $HLINEB JSR,          
+                                        
+  XSAVE LDX,                            
+  BY LDA, SEC, BOT SBC, TAX,            
+  ' $YADDR JSR, ' $HLINEB JSR,          
+                                        
+  RTS, XC;                              
+                               \ FAH    
+-------------------------------------------- SCREEN 131
+\ {BLOW}                 < 5/16/86>271  
+\ draws four points at                  
+\ (BX-XO,BY-YO), (BX+XO,BY-YO),         
+\ (BX-XO,BY+YO),& (BX+XO,BY+YO)         
+                                        
+XCODE {BLOW} \ XO YO -- XO YO ;         
+  \ set left endpoint                   
+  XSAVE STX,                            
+  SEC, BX LDA, SEC SBC, PHA,            
+  BX 1+ LDA, SEC 1+ SBC,                
+  TAY, PLA, X' {BLW} JSR,               
+                                        
+  XSAVE LDX,                            
+  CLC, BX LDA, SEC ADC, PHA,            
+  BX 1+ LDA, SEC 1+ ADC,                
+  TAY, PLA, X' {BLW} JSR,               
+                                        
+  XSAVE LDX,                            
+  RTS,      XC;                         
+                                        
+                                        
+                                        
+                                        
+                               \ FAH    
+-------------------------------------------- SCREEN 132
+\ XO YO #STEPS EP {>>5}  < 5/15/86>272  
+                                        
+XCREATE XO \ y offsets from center      
+  0 C, 27 C, 24 C, 24 C,                
+  16 C, 9 C, 4 C,                       
+XCREATE YO                              
+  0 C, 6 C, 12 C, 18 C,                 
+  25 C, 28 C, 32 C,                     
+                                        
+32 XCONSTANT #STEPS                     
+XVARIABLE EP                            
+                                        
+\ shift bot right five bits             
+XCODE {>>5} ( X -- X/32 )               
+  CLC, BOT 1+ ROR, BOT ROR,             
+  CLC, BOT 1+ ROR, BOT ROR,             
+  CLC, BOT 1+ ROR, BOT ROR,             
+  CLC, BOT 1+ ROR, BOT ROR,             
+  CLC, BOT 1+ ROR, BOT ROR,             
+  RTS,                                  
+XC;                                     
+                                        
+                                        
+                               \ FAH    
+-------------------------------------------- SCREEN 133
+\ {B*}                   < 5/15/86>273  
+                                        
+\ Mult N by N1+ Place result at BOT     
+XCODE {B*} \ ?? -- [N]*[N+1]            
+  8 # LDA, N 1- STA,                    
+  0 # LDA, BOT STA, BOT 1+ STA,         
+  BEGIN,                                
+   .A ASL,                              
+   BOT 1+ ROL,                          
+   N 1+ ASL,                            
+   CS IF, CLC, N ADC,                   
+    CS IF, BOT 1+ INC, THEN,            
+   THEN,                                
+   N 1- DEC,                            
+  0= UNTIL,                             
+  BOT STA,                              
+  RTS,                                  
+XC;                                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                               \ FAH    
+-------------------------------------------- SCREEN 134
+\ <BLOW>                 < 5/15/86>274  
+                                        
+XVARIABLE BV                            
+\ draws ray i at len l                  
+XCODE <BLOW> \ l -- ;                   
+  6 # LDA, BV STA, ( i )                
+  BOT LDA, BV 1+ STA, ( l )             
+  BEGIN,                                
+   BV 1+ LDA, N 1+ STA, ( l )           
+   BV LDY, ( i )                        
+   XO ,Y LDA, N STA,                    
+   X' {B*} JSR, X' {>>5} JSR,           
+   DEX, DEX,                            
+   BV 1+ LDA, N 1+ STA, ( l )           
+   BV LDY, ( i )                        
+   YO ,Y LDA, N STA,                    
+   X' {B*} JSR, X' {>>5} JSR,           
+   X' {BLOW} JSR,                       
+   INX, INX,                            
+   BV DEC,                              
+  0= UNTIL,                             
+  POP JMP, XC;                          
+                                        
+                               \ FAH    
+-------------------------------------------- SCREEN 135
+\ E/I IND EI1 EI2        < 5/15/86>275  
+1 CONSTANT E/I                          
+X: IND \ I -- I'                        
+  E/I NOT IF #STEPS SWAP - THEN X;      
+: EI1 \ -                               
+  GETMODE >R -15 EP !                   
+  #STEPS 1                              
+  DO 1MODE I IND <BLOW> EP @ 0>         
+   IF 2MODE EP @ IND <BLOW>             
+   ELSE I IND <BLOW> THEN               
+   1 EP +!                              
+  LOOP                                  
+  BEGIN EP @ #STEPS <                   
+  WHILE EP @ IND DUP <BLOW> <BLOW>      
+   1 EP +! REPEAT                       
+  R> SETMODE ;                          
+                                        
+: EI2 \ --                              
+  GETMODE >R 1MODE #STEPS 1             
+  DO I IND <BLOW> LOOP                  
+  2MODE #STEPS 1                        
+  DO I IND <BLOW> LOOP                  
+  R> SETMODE ;                          
+                               \ FAH    
